@@ -1,0 +1,2552 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PCB Temperature Field Configurator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root {
+      --panel: rgba(248, 250, 252, 0.96);
+      --line: #cbd5e1;
+      --text: #172033;
+      --muted: #5b6677;
+      --button: #0f766e;
+      --button-dark: #115e59;
+      --danger: #b42318;
+      --field: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #eef2f5;
+    }
+
+    #scene {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 392px;
+      right: auto;
+      width: calc(100vw - 392px);
+      height: 100vh;
+      display: block;
+      touch-action: none;
+      transition: left 180ms ease, width 180ms ease;
+    }
+
+    body.panel-collapsed #scene {
+      left: 74px;
+      width: calc(100vw - 74px);
+    }
+
+    body.results-ready #scene {
+      width: calc(100vw - 392px - 312px);
+    }
+
+    body.panel-collapsed.results-ready #scene {
+      width: calc(100vw - 74px - 312px);
+    }
+
+    body.results-page #scene,
+    body.panel-collapsed.results-page #scene,
+    body.panel-collapsed.results-ready.results-page #scene {
+      left: 16px;
+      width: calc(100vw - 424px);
+    }
+
+    .toolbar {
+      position: fixed;
+      left: 392px;
+      top: 16px;
+      right: 16px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+      transition: left 180ms ease;
+    }
+
+    body.panel-collapsed .toolbar {
+      left: 74px;
+    }
+
+    body.results-page .toolbar {
+      left: 16px;
+      right: 392px;
+    }
+
+    .panel {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      bottom: 16px;
+      width: 360px;
+      z-index: 6;
+      overflow: auto;
+      padding: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.14);
+      transition: transform 180ms ease;
+    }
+
+    .panel.collapsed {
+      transform: translateX(-384px);
+    }
+
+    .panel-tab {
+      position: fixed;
+      left: 16px;
+      top: 88px;
+      z-index: 7;
+      width: 42px;
+      height: 96px;
+      padding: 0;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      letter-spacing: 0;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+      display: none;
+    }
+
+    .panel-tab.visible {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panel-toggle {
+      float: right;
+      width: 34px;
+      height: 32px;
+      padding: 0;
+      margin-left: 8px;
+    }
+
+    h1 {
+      font-size: 18px;
+      line-height: 1.2;
+      margin: 0 0 12px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 18px 0 8px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 8px;
+      color: var(--text);
+      background: var(--field);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+    }
+
+    button {
+      min-height: 36px;
+      padding: 8px 10px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: #fff;
+      background: var(--button);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: var(--button-dark);
+    }
+
+    button.secondary {
+      color: var(--text);
+      border-color: var(--line);
+      background: #ffffff;
+    }
+
+    button.secondary:hover {
+      background: #e9eef4;
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 36px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .grid3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .summary {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+      background: #f1f5f9;
+      border: 1px solid #dbe3ec;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .summary strong {
+      font-weight: 650;
+    }
+
+    .section-card {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid #d8e0ea;
+      border-radius: 6px;
+    }
+
+    .section-card h2 {
+      margin-top: 0;
+    }
+
+    .toggle-button.active {
+      color: #ffffff;
+      background: #475569;
+      border-color: #334155;
+    }
+
+    .xray-swatch {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .xray-swatch.active {
+      display: inline-flex;
+    }
+
+    .xray-swatch-chip {
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(15, 23, 42, 0.25);
+      border-radius: 3px;
+      background: #79815e;
+    }
+
+    .list {
+      display: grid;
+      gap: 6px;
+      max-height: 170px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .list button {
+      width: 100%;
+      color: var(--text);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      text-align: left;
+      white-space: normal;
+    }
+
+    .list button.active {
+      border-color: #0f766e;
+      background: #d8f3ee;
+    }
+
+    .legend {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 5;
+      width: 280px;
+      padding: 10px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+    }
+
+    body.results-page .legend {
+      right: 392px;
+    }
+
+    .results-panel {
+      position: fixed;
+      right: 16px;
+      top: 130px;
+      z-index: 5;
+      display: none;
+      width: 280px;
+      max-height: calc(100vh - 146px);
+      overflow: auto;
+      padding: 10px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+    }
+
+    body.results-page .results-panel {
+      top: 16px;
+      bottom: 16px;
+      width: 360px;
+      max-height: none;
+    }
+
+    body.results-page .panel,
+    body.results-page .panel-tab {
+      display: none !important;
+    }
+
+    body.results-ready .results-panel {
+      display: block;
+    }
+
+    .results-panel h2 {
+      margin-top: 0;
+    }
+
+    .result-state {
+      padding: 9px 10px;
+      color: #064e3b;
+      background: #d1fae5;
+      border: 1px solid #6ee7b7;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .result-view-list {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .result-view-list button {
+      width: 100%;
+      color: var(--text);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      text-align: left;
+      white-space: normal;
+    }
+
+    .result-view-list button.active,
+    .results-panel button.active {
+      color: #ffffff;
+      background: #0f766e;
+      border-color: #0f766e;
+    }
+
+    .result-log,
+    .component-summary {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .component-summary .summary {
+      background: #ffffff;
+    }
+
+    .bar {
+      height: 14px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #2451c6, #1ca7a8, #56b45d, #f2c14e, #d6422b);
+      margin: 6px 0;
+    }
+
+    .tooltip {
+      position: fixed;
+      z-index: 9;
+      pointer-events: none;
+      min-width: 168px;
+      padding: 8px 9px;
+      color: #ffffff;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.4;
+      transform: translate(12px, 12px);
+      display: none;
+    }
+
+    .status {
+      min-width: 210px;
+      color: var(--muted);
+      font-size: 13px;
+      padding-left: 4px;
+    }
+
+    .solver-progress {
+      position: fixed;
+      left: 392px;
+      right: 16px;
+      top: 78px;
+      z-index: 5;
+      display: none;
+      padding: 9px 10px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+    }
+
+    body.panel-collapsed .solver-progress {
+      left: 74px;
+    }
+
+    body.results-ready .solver-progress {
+      right: 312px;
+    }
+
+    .solver-progress.active {
+      display: block;
+    }
+
+    .progress-track {
+      height: 9px;
+      overflow: hidden;
+      background: #dbe3ec;
+      border-radius: 999px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #0f766e, #22c55e);
+      border-radius: inherit;
+      transition: width 220ms ease;
+    }
+
+    .progress-text {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .mode-banner {
+      display: none;
+      margin-top: 8px;
+      padding: 9px 10px;
+      color: #134e4a;
+      background: #ccfbf1;
+      border: 1px solid #5eead4;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .mode-banner.active {
+      display: block;
+    }
+
+    .primary-wide {
+      width: 100%;
+      min-height: 44px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.42);
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      width: min(560px, calc(100vw - 32px));
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      padding: 18px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+    }
+
+    .modal h2 {
+      margin-top: 0;
+      font-size: 16px;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text);
+    }
+
+    .modal p {
+      margin: 8px 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    @media (max-width: 880px) {
+      .toolbar {
+        left: 16px;
+        right: 16px;
+        flex-wrap: wrap;
+      }
+
+      .solver-progress,
+      body.panel-collapsed .solver-progress {
+        left: 16px;
+        right: 16px;
+        top: 118px;
+      }
+
+      .panel {
+        left: 16px;
+        width: calc(100vw - 32px);
+        top: auto;
+        max-height: 46vh;
+      }
+
+      .panel.collapsed {
+        transform: translateY(calc(100% + 24px));
+      }
+
+      .legend {
+        display: none;
+      }
+
+      #scene,
+      body.panel-collapsed #scene,
+      body.results-ready #scene,
+      body.panel-collapsed.results-ready #scene,
+      body.results-page #scene,
+      body.panel-collapsed.results-page #scene,
+      body.panel-collapsed.results-ready.results-page #scene {
+        left: 0;
+        right: 0;
+        width: 100vw;
+      }
+
+      .results-panel {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <button id="panelTab" class="panel-tab">Setup</button>
+
+  <div class="toolbar">
+    <button id="viewTop" class="icon-button secondary" title="Top view">T</button>
+    <button id="viewBottom" class="icon-button secondary" title="Bottom view">B</button>
+    <button id="viewIso" class="icon-button secondary" title="Isometric view">I</button>
+    <button id="viewLayer" class="secondary">Layer</button>
+    <select id="layerViewSelect" title="Copper layer temperature view"></select>
+    <button id="xrayToggle" class="secondary toggle-button">X-Ray</button>
+    <span id="xraySwatch" class="xray-swatch" title="Stable blended x-ray color used for copper through PCB">
+      <span id="xraySwatchChip" class="xray-swatch-chip"></span>
+      <span id="xraySwatchText">Cu through PCB</span>
+    </span>
+    <button id="runSimulation">Run Simulation</button>
+    <button id="downloadCsv" class="secondary">CSV</button>
+    <button id="downloadPng" class="secondary">PNG</button>
+    <button id="downloadHtml" class="secondary">HTML</button>
+    <span id="status" class="status">Configure geometry, then run.</span>
+  </div>
+
+  <div id="solverProgress" class="solver-progress">
+    <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+    <div id="progressText" class="progress-text">Idle.</div>
+  </div>
+
+  <aside id="resultsPanel" class="results-panel">
+    <h2>Results</h2>
+    <div id="resultState" class="result-state">Simulation complete.</div>
+    <div class="row" style="margin-top: 8px;">
+      <button id="resultIso" class="secondary">3D Result</button>
+      <button id="resultTop" class="secondary">Top</button>
+      <button id="resultBottom" class="secondary">Bottom</button>
+    </div>
+    <div id="resultLayerButtons" class="result-view-list"></div>
+    <h2>Run Log</h2>
+    <div id="resultRunLog" class="summary result-log">No simulation run yet.</div>
+    <h2>Component Summary</h2>
+    <div id="componentSummary" class="component-summary"></div>
+    <button id="backToSetup" class="secondary primary-wide">Edit Setup</button>
+  </aside>
+
+  <aside id="setupPanel" class="panel">
+    <h1>PCB Thermal Setup <button id="collapsePanel" class="icon-button secondary panel-toggle" title="Collapse setup panel">‹</button></h1>
+
+    <div class="section-card">
+      <h2>Board</h2>
+      <div class="grid2">
+        <div>
+          <label for="marginInput">Auto margin (mm)</label>
+          <input id="marginInput" type="number" step="0.5" min="0" value="8">
+        </div>
+        <div>
+          <label for="thicknessInput">Thickness (mm)</label>
+          <input id="thicknessInput" type="number" step="0.1" min="0.2" value="1.6">
+        </div>
+      </div>
+      <div id="boardSummary" class="summary" style="margin-top: 8px;"></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Components</h2>
+      <div class="stack">
+      <div>
+        <label for="componentName">Name</label>
+        <input id="componentName" value="Component">
+      </div>
+      <div class="grid2">
+        <div><label for="componentX">X (mm)</label><input id="componentX" type="number" step="0.5" value="10"></div>
+        <div><label for="componentY">Y (mm)</label><input id="componentY" type="number" step="0.5" value="8"></div>
+      </div>
+      <div class="grid3">
+        <div><label for="componentL">L (mm)</label><input id="componentL" type="number" step="0.5" min="0.5" value="8"></div>
+        <div><label for="componentW">W (mm)</label><input id="componentW" type="number" step="0.5" min="0.5" value="6"></div>
+        <div><label for="componentH">H (mm)</label><input id="componentH" type="number" step="0.1" min="0.1" value="1.2"></div>
+      </div>
+      <div class="grid2">
+        <div><label for="componentPower">Power (W)</label><input id="componentPower" type="number" step="0.1" min="0" value="1.2"></div>
+        <div><label for="componentRth">Rth (K/W)</label><input id="componentRth" type="number" step="0.1" min="0.1" value="25"></div>
+      </div>
+      <button id="addComponent">Add Component</button>
+      <button id="removeComponent" class="danger hidden">Remove Selected Component</button>
+      </div>
+      <div id="componentList" class="list" style="margin-top: 8px;"></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Copper Layers</h2>
+      <div id="placementBanner" class="mode-banner"></div>
+      <div class="grid3">
+      <div><label for="layerName">Name</label><input id="layerName" value="Cu"></div>
+      <div><label for="layerZ">Z (mm)</label><input id="layerZ" type="number" step="0.05" min="0" value="1.565"></div>
+      <div><label for="layerThickness">T (mm)</label><input id="layerThickness" type="number" step="0.005" min="0.005" value="0.035"></div>
+      </div>
+      <div class="row" style="margin-top: 8px;">
+      <button id="addLayer">Place Layer</button>
+      <button id="applyLayer" class="secondary hidden">Apply Layer</button>
+      <button id="cancelLayer" class="danger hidden">Cancel</button>
+      <button id="removeLayer" class="danger hidden">Remove Selected</button>
+      </div>
+      <div id="layerList" class="list" style="margin-top: 8px;"></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Thermal Vias</h2>
+      <div class="grid3">
+      <div><label for="viaX">X (mm)</label><input id="viaX" type="number" step="0.5" value="14"></div>
+      <div><label for="viaY">Y (mm)</label><input id="viaY" type="number" step="0.5" value="12"></div>
+      <div><label for="viaDiameter">Dia (mm)</label><input id="viaDiameter" type="number" step="0.05" min="0.1" value="0.35"></div>
+      </div>
+      <div class="row" style="margin-top: 8px;">
+      <button id="addVia">Place Via</button>
+      <button id="applyVia" class="secondary hidden">Apply Via</button>
+      <button id="cancelVia" class="danger hidden">Cancel</button>
+      <button id="removeVia" class="danger hidden">Remove Selected</button>
+      </div>
+      <div id="viaList" class="list" style="margin-top: 8px;"></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Selected</h2>
+      <div id="selectionSummary" class="summary">Nothing selected.</div>
+    <div class="grid3" style="margin-top: 8px;">
+      <div><label for="selectedX">X</label><input id="selectedX" type="number" step="0.25"></div>
+      <div><label for="selectedY">Y</label><input id="selectedY" type="number" step="0.25"></div>
+      <div><label for="selectedRot">Rot</label><input id="selectedRot" type="number" step="1"></div>
+    </div>
+    <div class="grid3" style="margin-top: 8px;">
+      <div><label for="selectedL">L/Dia</label><input id="selectedL" type="number" step="0.25"></div>
+      <div><label for="selectedW">W</label><input id="selectedW" type="number" step="0.25"></div>
+      <div><label for="selectedH">H</label><input id="selectedH" type="number" step="0.1"></div>
+    </div>
+    <div class="row" style="margin-top: 8px;">
+      <button id="applySelected">Apply</button>
+    </div>
+    </div>
+
+    <div class="section-card">
+      <h2>Solver Handoff</h2>
+      <div class="row">
+        <button id="downloadConfig" class="secondary">Config JSON</button>
+        <button id="copyConfig" class="secondary">Copy JSON</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="legend">
+    <div class="row" style="justify-content: space-between;">
+      <strong>Temperature</strong>
+      <span id="legendRange">300.0 K - 340.0 K</span>
+    </div>
+    <div class="bar"></div>
+    <div id="hoverReadout" class="summary">Hover a temperature tile after running simulation.</div>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <div id="simulationModal" class="modal-backdrop">
+    <div class="modal">
+      <h2>Run Solver</h2>
+      <div id="simulationGridSummary" class="summary"></div>
+      <p>
+        The backend now assembles the steady-state finite-difference equations into a sparse matrix and solves
+        <strong>A T = b</strong> directly. The legacy SOR omega value is kept here only for comparison or future
+        fallback iterative runs; the sparse direct solve does not use omega.
+      </p>
+      <div class="grid2">
+        <div>
+          <label for="ambientInput">Ambient temperature (degC)</label>
+          <input id="ambientInput" type="number" step="1" value="25">
+        </div>
+        <div>
+          <label for="omegaInput">Legacy SOR omega</label>
+          <input id="omegaInput" type="number" step="0.05" min="0.05" max="1.95" value="1.2">
+        </div>
+      </div>
+      <div class="grid2" style="margin-top: 8px;">
+        <div>
+          <label for="toleranceInput">Residual tolerance</label>
+          <input id="toleranceInput" type="number" step="0.0001" min="0.000001" value="0.001">
+        </div>
+      </div>
+      <div class="grid3" style="margin-top: 8px;">
+        <div><label for="dxInput">dx (mm)</label><input id="dxInput" type="number" step="0.25" min="0.25" value="2"></div>
+        <div><label for="dyInput">dy (mm)</label><input id="dyInput" type="number" step="0.25" min="0.25" value="2"></div>
+        <div><label for="dzInput">dz (mm)</label><input id="dzInput" type="number" step="0.05" min="0.05" value="0.4"></div>
+      </div>
+      <p>
+        dx, dy, and dz define the 3D voxel size. Smaller values resolve copper layers and component heat spreading
+        better, but increase the sparse matrix size and solve time. dz is especially important for thin copper layers.
+      </p>
+      <div class="row" style="justify-content: flex-end; margin-top: 12px;">
+        <button id="cancelSimulation" class="secondary">Cancel</button>
+        <button id="confirmSimulation">Run Solver</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      marginMm: 8,
+      pcbThicknessMm: 1.6,
+      components: [
+        { id: "C1", name: "Buck regulator", x: 10, y: 8, z: 1.6, l: 8, w: 8, h: 1.2, power: 1.8, rth: 22, rotation: 0 },
+        { id: "C2", name: "Power resistor", x: 30, y: 22, z: 1.6, l: 6, w: 3, h: 0.9, power: 0.75, rth: 55, rotation: 0 }
+      ],
+      layers: [
+        { id: "L1", name: "Bottom copper", z: 0.0175, thickness: 0.035, conductivity: 385 },
+        { id: "L2", name: "Top copper", z: 1.5825, thickness: 0.035, conductivity: 385 }
+      ],
+      vias: [
+        { id: "V1", x: 13, y: 11, diameter: 0.35, conductivity: 385 },
+        { id: "V2", x: 15, y: 11, diameter: 0.35, conductivity: 385 },
+        { id: "V3", x: 13, y: 13, diameter: 0.35, conductivity: 385 },
+        { id: "V4", x: 15, y: 13, diameter: 0.35, conductivity: 385 }
+      ],
+      selected: null,
+      selectedLayerId: "L2",
+      viewMode: "top",
+      placementMode: null,
+      pendingLayer: null,
+      pendingVia: null,
+      placementLocked: false,
+      xrayMode: false,
+      activeResultLayerId: null,
+      resultPage: false,
+      ambientTemperatureC: 25,
+      lastRunLog: null,
+      result: null
+    };
+
+    if (typeof savedSnapshot !== "undefined") {
+      state.marginMm = savedSnapshot.marginMm ?? state.marginMm;
+      state.pcbThicknessMm = savedSnapshot.pcbThicknessMm ?? state.pcbThicknessMm;
+      state.components = savedSnapshot.components ?? state.components;
+      state.layers = savedSnapshot.layers ?? state.layers;
+      state.vias = savedSnapshot.vias ?? state.vias;
+      state.xrayMode = savedSnapshot.xrayMode ?? state.xrayMode;
+      state.activeResultLayerId = savedSnapshot.activeResultLayerId ?? state.activeResultLayerId;
+      state.resultPage = savedSnapshot.resultPage ?? state.resultPage;
+      state.ambientTemperatureC = savedSnapshot.ambientTemperatureC ?? state.ambientTemperatureC;
+      state.lastRunLog = savedSnapshot.lastRunLog ?? state.lastRunLog;
+      state.result = savedSnapshot.result ?? state.result;
+      state.selectedLayerId = state.layers[0]?.id || state.selectedLayerId;
+    }
+
+    const canvas = document.getElementById("scene");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xeef2f5);
+
+    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 3000);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.screenSpacePanning = true;
+
+    const root = new THREE.Group();
+    scene.add(root);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    keyLight.position.set(80, 120, 80);
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xc9e6ff, 0.4);
+    fillLight.position.set(-80, -50, 90);
+    scene.add(fillLight);
+
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const layerPlacementPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const viaPlacementPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const dragPoint = new THREE.Vector3();
+    const dragOffset = new THREE.Vector3();
+    let dragRecord = null;
+    let hoverTile = null;
+
+    const groups = {
+      board: new THREE.Group(),
+      layers: new THREE.Group(),
+      components: new THREE.Group(),
+      vias: new THREE.Group(),
+      temperatures: new THREE.Group(),
+      placement: new THREE.Group()
+    };
+    Object.values(groups).forEach(group => root.add(group));
+
+    const refs = {
+      boardSummary: document.getElementById("boardSummary"),
+      selectionSummary: document.getElementById("selectionSummary"),
+      componentList: document.getElementById("componentList"),
+      layerList: document.getElementById("layerList"),
+      viaList: document.getElementById("viaList"),
+      layerViewSelect: document.getElementById("layerViewSelect"),
+      xrayToggle: document.getElementById("xrayToggle"),
+      xraySwatch: document.getElementById("xraySwatch"),
+      xraySwatchChip: document.getElementById("xraySwatchChip"),
+      xraySwatchText: document.getElementById("xraySwatchText"),
+      status: document.getElementById("status"),
+      tooltip: document.getElementById("tooltip"),
+      hoverReadout: document.getElementById("hoverReadout"),
+      legendRange: document.getElementById("legendRange"),
+      placementBanner: document.getElementById("placementBanner"),
+      solverProgress: document.getElementById("solverProgress"),
+      progressFill: document.getElementById("progressFill"),
+      progressText: document.getElementById("progressText"),
+      resultState: document.getElementById("resultState"),
+      resultLayerButtons: document.getElementById("resultLayerButtons"),
+      resultRunLog: document.getElementById("resultRunLog"),
+      componentSummary: document.getElementById("componentSummary"),
+      simulationModal: document.getElementById("simulationModal"),
+      simulationGridSummary: document.getElementById("simulationGridSummary"),
+      ambientInput: document.getElementById("ambientInput"),
+      omegaInput: document.getElementById("omegaInput"),
+      toleranceInput: document.getElementById("toleranceInput"),
+      setupPanel: document.getElementById("setupPanel"),
+      panelTab: document.getElementById("panelTab"),
+      applyLayer: document.getElementById("applyLayer"),
+      cancelLayer: document.getElementById("cancelLayer"),
+      removeLayer: document.getElementById("removeLayer"),
+      applyVia: document.getElementById("applyVia"),
+      cancelVia: document.getElementById("cancelVia"),
+      removeVia: document.getElementById("removeVia"),
+      removeComponent: document.getElementById("removeComponent"),
+      applySelected: document.getElementById("applySelected")
+    };
+
+    function readNumber(id, fallback) {
+      const value = Number(document.getElementById(id).value);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function writeNumber(id, value) {
+      document.getElementById(id).value = Number(value).toFixed(3).replace(/\.?0+$/, "");
+    }
+
+    function gridSettings() {
+      return {
+        dx: Math.max(0.25, readNumber("dxInput", 2)),
+        dy: Math.max(0.25, readNumber("dyInput", 2)),
+        dz: Math.max(0.05, readNumber("dzInput", 0.4))
+      };
+    }
+
+    function recommendedGridSettings() {
+      const b = boardBounds();
+      const componentMin = state.components.length
+        ? Math.min(...state.components.map(c => Math.max(0.5, Math.min(c.l, c.w))))
+        : Math.min(b.length, b.width);
+      const viaMin = state.vias.length
+        ? Math.min(...state.vias.map(v => Math.max(0.1, v.diameter)))
+        : componentMin;
+      const lateralFeature = Math.min(componentMin, viaMin * 4, Math.min(b.length, b.width) / 18);
+      const dx = Math.max(0.5, Math.min(2.0, lateralFeature / 2));
+      const dy = dx;
+      const minLayerT = state.layers.length
+        ? Math.min(...state.layers.map(layer => Math.max(0.01, layer.thickness)))
+        : state.pcbThicknessMm / 4;
+      const dz = Math.max(0.05, Math.min(0.4, state.pcbThicknessMm / 5, Math.max(0.05, minLayerT * 2)));
+      return {
+        dx,
+        dy,
+        dz,
+        lateralFeature,
+        componentMin,
+        viaMin,
+        minLayerT
+      };
+    }
+
+    function recommendedSorOmega(nx, ny, nz) {
+      const span = Math.max(nx, ny, nz, 2);
+      return Math.max(1.05, Math.min(1.9, 2 / (1 + Math.sin(Math.PI / span))));
+    }
+
+    function blendedHex(baseHex, overlayHex, overlayAlpha) {
+      const base = new THREE.Color(baseHex);
+      const overlay = new THREE.Color(overlayHex);
+      return base.lerp(overlay, overlayAlpha).getHex();
+    }
+
+    function hexLabel(hex) {
+      return `#${hex.toString(16).padStart(6, "0").toUpperCase()}`;
+    }
+
+    function solverKelvinToDisplayC(valueK, ambientC = state.ambientTemperatureC) {
+      return valueK - 273.15;
+    }
+
+    function transformViewValuesToDisplayC(values, ambientC) {
+      return values.map(column => column.map(value => solverKelvinToDisplayC(value, ambientC)));
+    }
+
+    function transformComponentReportsToDisplayC(reports, ambientC) {
+      return (reports || []).map(report => ({
+        ...report,
+        board_average_temperature_c: solverKelvinToDisplayC(report.board_average_temperature_k, ambientC),
+        board_max_temperature_c: solverKelvinToDisplayC(report.board_max_temperature_k, ambientC),
+        estimated_junction_temperature_c: solverKelvinToDisplayC(report.estimated_junction_temperature_k, ambientC),
+        junction_rise_c: Number.isFinite(Number(report.junction_rise_k)) ? Number(report.junction_rise_k) : null
+      }));
+    }
+
+    function boardBounds() {
+      if (!state.components.length) {
+        const m = state.marginMm;
+        return { minX: -m, maxX: m, minY: -m, maxY: m, length: 2 * m, width: 2 * m, originX: -m, originY: -m };
+      }
+      const minX = Math.min(...state.components.map(c => c.x)) - state.marginMm;
+      const maxX = Math.max(...state.components.map(c => c.x + c.l)) + state.marginMm;
+      const minY = Math.min(...state.components.map(c => c.y)) - state.marginMm;
+      const maxY = Math.max(...state.components.map(c => c.y + c.w)) + state.marginMm;
+      return { minX, maxX, minY, maxY, length: maxX - minX, width: maxY - minY, originX: minX, originY: minY };
+    }
+
+    function clearGroup(group) {
+      while (group.children.length) {
+        const child = group.children.pop();
+        child.traverse(object => {
+          if (object.geometry) object.geometry.dispose();
+          if (object.material) object.material.dispose();
+        });
+      }
+    }
+
+    function colorForTemperature(temp, minTemp, maxTemp) {
+      const t = Math.max(0, Math.min(1, (temp - minTemp) / Math.max(0.001, maxTemp - minTemp)));
+      const stops = [
+        [0.00, new THREE.Color(0x2451c6)],
+        [0.28, new THREE.Color(0x1ca7a8)],
+        [0.52, new THREE.Color(0x56b45d)],
+        [0.76, new THREE.Color(0xf2c14e)],
+        [1.00, new THREE.Color(0xd6422b)]
+      ];
+      for (let i = 1; i < stops.length; i++) {
+        if (t <= stops[i][0]) {
+          const [p0, c0] = stops[i - 1];
+          const [p1, c1] = stops[i];
+          return c0.clone().lerp(c1, (t - p0) / (p1 - p0));
+        }
+      }
+      return stops[stops.length - 1][1].clone();
+    }
+
+    function makeLabelTexture(text) {
+      const textureCanvas = document.createElement("canvas");
+      textureCanvas.width = 256;
+      textureCanvas.height = 64;
+      const ctx = textureCanvas.getContext("2d");
+      ctx.fillStyle = "rgba(15, 23, 42, 0.82)";
+      ctx.fillRect(0, 0, textureCanvas.width, textureCanvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "24px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, 128, 32);
+      const texture = new THREE.CanvasTexture(textureCanvas);
+      texture.needsUpdate = true;
+      return texture;
+    }
+
+    function addLabel(parent, text, z) {
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeLabelTexture(text), transparent: true }));
+      sprite.position.set(0, 0, z);
+      sprite.scale.set(12, 3, 1);
+      parent.add(sprite);
+    }
+
+    function syncInputs() {
+      state.marginMm = Math.max(0, readNumber("marginInput", state.marginMm));
+      state.pcbThicknessMm = Math.max(0.2, readNumber("thicknessInput", state.pcbThicknessMm));
+      const grid = gridSettings();
+      writeNumber("dxInput", grid.dx);
+      writeNumber("dyInput", grid.dy);
+      writeNumber("dzInput", grid.dz);
+      state.components.forEach(component => {
+        component.z = state.pcbThicknessMm;
+      });
+      state.layers.forEach(layer => {
+        layer.z = Math.max(0, Math.min(state.pcbThicknessMm, layer.z));
+      });
+    }
+
+    function renderBoard() {
+      clearGroup(groups.board);
+      const b = boardBounds();
+      const resultMode = Boolean(state.result);
+      const boardMaterial = resultMode && !state.xrayMode
+        ? new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.02, depthWrite: false })
+        : state.xrayMode
+        ? new THREE.MeshStandardMaterial({
+            color: 0x5f8a72,
+            transparent: true,
+            opacity: 0.32,
+            depthWrite: false,
+            roughness: 0.72
+          })
+        : new THREE.MeshStandardMaterial({ color: 0x28735a, roughness: 0.72 });
+      const board = new THREE.Mesh(
+        new THREE.BoxGeometry(b.length, b.width, state.pcbThicknessMm),
+        boardMaterial
+      );
+      board.position.set((b.minX + b.maxX) / 2, (b.minY + b.maxY) / 2, state.pcbThicknessMm / 2);
+      board.userData = { kind: "board" };
+      groups.board.add(board);
+
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(board.geometry),
+        new THREE.LineBasicMaterial({ color: resultMode ? 0x334155 : 0x0f362f, transparent: true, opacity: resultMode ? 0.42 : 0.75 })
+      );
+      edges.position.copy(board.position);
+      groups.board.add(edges);
+
+      const grid = new THREE.GridHelper(Math.max(b.length, b.width), 16, 0x8da399, 0xc0cbc8);
+      grid.rotation.x = Math.PI / 2;
+      grid.position.set(board.position.x, board.position.y, 0.02);
+      grid.visible = !state.xrayMode && !resultMode;
+      groups.board.add(grid);
+    }
+
+    function renderLayers() {
+      clearGroup(groups.layers);
+      if (state.result && !state.xrayMode) return;
+      const b = boardBounds();
+      state.layers.forEach(layer => {
+        const thickness = Math.max(0.01, layer.thickness);
+        const zStart = layer.z - thickness / 2;
+        const zEnd = layer.z + thickness / 2;
+        const isTop = zEnd >= state.pcbThicknessMm - 0.005;
+        const isBottom = zStart <= 0.005;
+        const layerColor = state.xrayMode ? blendedHex(0x28735a, 0xc47c22, 0.52) : 0xc47c22;
+        const material = new THREE.MeshStandardMaterial({
+          color: layerColor,
+          transparent: state.xrayMode,
+          opacity: state.xrayMode ? 0.78 : 1.0,
+          depthWrite: !state.xrayMode,
+          roughness: 0.36,
+          metalness: 0.18
+        });
+
+        if (isTop || isBottom || state.xrayMode) {
+          const surface = new THREE.Mesh(
+            new THREE.BoxGeometry(b.length, b.width, thickness),
+            material
+          );
+          const surfaceZ = state.xrayMode
+            ? layer.z
+            : (isTop ? state.pcbThicknessMm + thickness / 2 + 0.006 : -thickness / 2 - 0.006);
+          surface.position.set((b.minX + b.maxX) / 2, (b.minY + b.maxY) / 2, surfaceZ);
+          surface.userData = { kind: "layer", id: layer.id };
+          surface.renderOrder = state.xrayMode ? 2 : (isTop ? 4 : 0);
+          groups.layers.add(surface);
+        } else {
+          const stripDepth = 0.16;
+          const cx = (b.minX + b.maxX) / 2;
+          const cy = (b.minY + b.maxY) / 2;
+          const strips = [
+            [b.length, stripDepth, cx, b.minY - stripDepth / 2],
+            [b.length, stripDepth, cx, b.maxY + stripDepth / 2],
+            [stripDepth, b.width, b.minX - stripDepth / 2, cy],
+            [stripDepth, b.width, b.maxX + stripDepth / 2, cy]
+          ];
+          strips.forEach(([sx, sy, px, py]) => {
+            const strip = new THREE.Mesh(
+              new THREE.BoxGeometry(sx, sy, thickness),
+              material.clone()
+            );
+            strip.position.set(px, py, layer.z);
+            strip.userData = { kind: "layer", id: layer.id };
+            strip.renderOrder = 2;
+            groups.layers.add(strip);
+          });
+        }
+      });
+    }
+
+    function renderComponents() {
+      clearGroup(groups.components);
+      if (state.activeResultLayerId) return;
+      state.components.forEach(component => {
+        const displayTemp = componentDisplayTemperature(component);
+        const baseColor = displayTemp == null
+          ? new THREE.Color(0x475569)
+          : colorForTemperature(displayTemp, state.result.minTemp, state.result.maxTemp);
+        const mesh = new THREE.Mesh(
+          new THREE.BoxGeometry(component.l, component.w, component.h),
+          new THREE.MeshStandardMaterial({
+            color: state.selected === component.id && !state.result ? 0x3b82f6 : baseColor,
+            transparent: state.xrayMode && !state.result,
+            opacity: state.xrayMode && !state.result ? 0.58 : 1.0,
+            depthWrite: !state.xrayMode,
+            roughness: 0.55
+          })
+        );
+        mesh.position.set(component.x + component.l / 2, component.y + component.w / 2, component.z + component.h / 2);
+        mesh.rotation.z = THREE.MathUtils.degToRad(component.rotation || 0);
+        mesh.userData = { kind: "component", id: component.id };
+        mesh.renderOrder = state.xrayMode ? 3 : 1;
+        groups.components.add(mesh);
+        renderComponentTemperatureTiles(component, mesh);
+        addLabel(mesh, component.name, component.h / 2 + 1.8);
+      });
+    }
+
+    function componentDisplayTemperature(component) {
+      if (!state.result) return null;
+      const slice = state.result.views.top;
+      if (!slice) return null;
+      const samples = [];
+      const nx = 4;
+      const ny = 4;
+      for (let ix = 0; ix < nx; ix++) {
+        for (let iy = 0; iy < ny; iy++) {
+          const x = component.x + ((ix + 0.5) / nx) * component.l;
+          const y = component.y + ((iy + 0.5) / ny) * component.w;
+          samples.push(sampleSliceTemperature(slice, x, y));
+        }
+      }
+      return samples.reduce((sum, value) => sum + value, 0) / samples.length;
+    }
+
+    function sampleSliceTemperature(slice, x, y) {
+      const b = boardBounds();
+      const ix = Math.max(0, Math.min(slice.nx - 1, Math.floor(((x - b.minX) / b.length) * slice.nx)));
+      const iy = Math.max(0, Math.min(slice.ny - 1, Math.floor(((y - b.minY) / b.width) * slice.ny)));
+      return slice.values[ix][iy];
+    }
+
+    function renderComponentTemperatureTiles(component, parentMesh) {
+      if (!state.result || !state.result.views.top) return;
+      const nx = Math.max(2, Math.min(6, Math.ceil(component.l / 2)));
+      const ny = Math.max(2, Math.min(6, Math.ceil(component.w / 2)));
+      const tileL = component.l / nx;
+      const tileW = component.w / ny;
+      for (let ix = 0; ix < nx; ix++) {
+        for (let iy = 0; iy < ny; iy++) {
+          const localX = -component.l / 2 + (ix + 0.5) * tileL;
+          const localY = -component.w / 2 + (iy + 0.5) * tileW;
+          const worldX = component.x + (ix + 0.5) * tileL;
+          const worldY = component.y + (iy + 0.5) * tileW;
+          const temp = sampleSliceTemperature(state.result.views.top, worldX, worldY);
+          const tile = new THREE.Mesh(
+            new THREE.PlaneGeometry(tileL * 0.96, tileW * 0.96),
+            new THREE.MeshBasicMaterial({
+              color: colorForTemperature(temp, state.result.minTemp, state.result.maxTemp),
+              transparent: true,
+              opacity: 0.94,
+              side: THREE.DoubleSide
+            })
+          );
+          tile.position.set(localX, localY, component.h / 2 + 0.035);
+          tile.userData = {
+            kind: "temperature",
+            x: worldX,
+            y: worldY,
+            z: component.z + component.h,
+            temp,
+            view: `${component.name} top`
+          };
+          parentMesh.add(tile);
+        }
+      }
+    }
+
+    function renderVias() {
+      clearGroup(groups.vias);
+      if (state.result && !state.xrayMode) return;
+      state.vias.forEach(via => {
+        const viaColor = state.xrayMode ? blendedHex(0x28735a, 0x996a35, 0.65) : (state.selected === via.id ? 0x3b82f6 : 0x996a35);
+        const mesh = new THREE.Mesh(
+          new THREE.CylinderGeometry(via.diameter / 2, via.diameter / 2, state.pcbThicknessMm + 0.08, 24),
+          new THREE.MeshStandardMaterial({
+            color: viaColor,
+            transparent: state.xrayMode,
+            opacity: state.xrayMode ? 0.92 : 1.0,
+            depthWrite: !state.xrayMode,
+            metalness: 0.25,
+            roughness: 0.42
+          })
+        );
+        mesh.rotation.x = Math.PI / 2;
+        mesh.position.set(via.x, via.y, state.pcbThicknessMm / 2);
+        mesh.userData = { kind: "via", id: via.id };
+        mesh.renderOrder = state.xrayMode ? 5 : 1;
+        groups.vias.add(mesh);
+      });
+    }
+
+    function renderPlacementPreview() {
+      clearGroup(groups.placement);
+      refs.placementBanner.className = state.placementMode ? "mode-banner active" : "mode-banner";
+      if (!state.placementMode) {
+        refs.placementBanner.textContent = "";
+        return;
+      }
+
+      const b = boardBounds();
+      if (state.placementMode === "layer") {
+        const layer = state.pendingLayer || draftLayer();
+        const zStart = Math.max(0, layer.z - layer.thickness / 2);
+        const zEnd = Math.min(state.pcbThicknessMm, layer.z + layer.thickness / 2);
+        refs.placementBanner.textContent = state.placementLocked
+          ? `Layer selected at z=${layer.z.toFixed(3)} mm. Move to Apply Layer to commit, or Cancel to discard.`
+          : `Layer placement: ZX stack view locked. Hover to preview, click to lock z=${layer.z.toFixed(3)} mm.`;
+
+        const slab = new THREE.Mesh(
+          new THREE.BoxGeometry(b.length, b.width, Math.max(0.01, layer.thickness)),
+          new THREE.MeshBasicMaterial({
+            color: state.placementLocked ? 0x10b981 : 0xf59e0b,
+            transparent: true,
+            opacity: state.placementLocked ? 0.7 : 0.52,
+            depthWrite: false
+          })
+        );
+        slab.position.set((b.minX + b.maxX) / 2, (b.minY + b.maxY) / 2, layer.z);
+        slab.userData = { kind: "placement-layer" };
+        groups.placement.add(slab);
+
+        state.components.forEach(component => {
+          const cStart = component.z;
+          const cEnd = component.z + component.h;
+          const overlapStart = Math.max(cStart, zStart);
+          const overlapEnd = Math.min(cEnd, zEnd);
+          if (overlapEnd <= overlapStart) return;
+          const cut = new THREE.Mesh(
+            new THREE.BoxGeometry(component.l, component.w + 0.08, overlapEnd - overlapStart),
+            new THREE.MeshBasicMaterial({ color: 0xffc857, transparent: true, opacity: 0.86, depthWrite: false })
+          );
+          cut.position.set(component.x + component.l / 2, component.y + component.w / 2, (overlapStart + overlapEnd) / 2);
+          cut.rotation.z = THREE.MathUtils.degToRad(component.rotation || 0);
+          cut.userData = { kind: "placement-layer-cut", component: component.name };
+          groups.placement.add(cut);
+        });
+
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0f766e });
+        const axisGeo = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(b.minX, b.minY - 2, 0),
+          new THREE.Vector3(b.minX, b.minY - 2, state.pcbThicknessMm)
+        ]);
+        groups.placement.add(new THREE.Line(axisGeo, lineMaterial));
+      }
+
+      if (state.placementMode === "via") {
+        const via = state.pendingVia || draftVia();
+        refs.placementBanner.textContent = `Via placement: XY top view locked. Hover/click on the PCB to choose x=${via.x.toFixed(2)} mm, y=${via.y.toFixed(2)} mm. Apply commits, Cancel discards.`;
+        refs.placementBanner.textContent = state.placementLocked
+          ? `Via selected at x=${via.x.toFixed(2)} mm, y=${via.y.toFixed(2)} mm. Move to Apply Via to commit, or Cancel to discard.`
+          : `Via placement: XY top view locked. Hover to preview, click to lock x=${via.x.toFixed(2)} mm, y=${via.y.toFixed(2)} mm.`;
+        const marker = new THREE.Mesh(
+          new THREE.CylinderGeometry(via.diameter / 2, via.diameter / 2, state.pcbThicknessMm + 0.16, 32),
+          new THREE.MeshBasicMaterial({
+            color: state.placementLocked ? 0x10b981 : 0x3b82f6,
+            transparent: true,
+            opacity: 0.72,
+            depthWrite: false
+          })
+        );
+        marker.rotation.x = Math.PI / 2;
+        marker.position.set(via.x, via.y, state.pcbThicknessMm / 2);
+        marker.userData = { kind: "placement-via" };
+        groups.placement.add(marker);
+
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(via.diameter / 2, via.diameter / 2 + 0.35, 40),
+          new THREE.MeshBasicMaterial({ color: state.placementLocked ? 0x064e3b : 0x0f766e, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
+        );
+        ring.position.set(via.x, via.y, state.pcbThicknessMm + 0.12);
+        ring.userData = { kind: "placement-via-ring" };
+        groups.placement.add(ring);
+      }
+    }
+
+    function renderTemperatureSlice() {
+      clearGroup(groups.temperatures);
+      if (!state.result) return;
+
+      const slice = currentSlice();
+      const b = boardBounds();
+      const dx = b.length / slice.nx;
+      const dy = b.width / slice.ny;
+      const z = slice.z;
+      const tileGeometry = new THREE.PlaneGeometry(dx * 0.96, dy * 0.96);
+      for (let ix = 0; ix < slice.nx; ix++) {
+        for (let iy = 0; iy < slice.ny; iy++) {
+          const temp = slice.values[ix][iy];
+          const mesh = new THREE.Mesh(
+            tileGeometry,
+            new THREE.MeshBasicMaterial({
+              color: colorForTemperature(temp, state.result.minTemp, state.result.maxTemp),
+              transparent: true,
+              opacity: 0.88,
+              side: THREE.DoubleSide
+            })
+          );
+          mesh.position.set(b.minX + (ix + 0.5) * dx, b.minY + (iy + 0.5) * dy, z);
+          mesh.userData = {
+            kind: "temperature",
+            x: mesh.position.x,
+            y: mesh.position.y,
+            z,
+            temp,
+            ix,
+            iy,
+            view: slice.name
+          };
+          groups.temperatures.add(mesh);
+        }
+      }
+      if (state.activeResultLayerId) {
+        renderViaSliceMarkers(z);
+      }
+    }
+
+    function renderViaSliceMarkers(z) {
+      state.vias.forEach(via => {
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(via.diameter / 2, Math.max(via.diameter / 2 + 0.18, via.diameter * 0.95), 36),
+          new THREE.MeshBasicMaterial({
+            color: 0x0f172a,
+            transparent: true,
+            opacity: 0.82,
+            side: THREE.DoubleSide,
+            depthWrite: false
+          })
+        );
+        ring.position.set(via.x, via.y, z + 0.035);
+        ring.userData = {
+          kind: "temperature",
+          x: via.x,
+          y: via.y,
+          z,
+          temp: sampleSliceTemperature(currentSlice(), via.x, via.y),
+          view: "Thermal via marker"
+        };
+        groups.temperatures.add(ring);
+      });
+    }
+
+    function updateLists() {
+      refs.componentList.innerHTML = "";
+      state.components.forEach(component => {
+        const item = document.createElement("button");
+        item.textContent = `${component.name}  x=${component.x.toFixed(2)} y=${component.y.toFixed(2)}  ${component.l.toFixed(2)} x ${component.w.toFixed(2)} x ${component.h.toFixed(2)} mm`;
+        item.className = state.selected === component.id ? "active" : "";
+        item.onclick = () => {
+          state.selected = component.id;
+          refresh();
+        };
+        refs.componentList.appendChild(item);
+      });
+
+      refs.layerList.innerHTML = "";
+      refs.layerViewSelect.innerHTML = "";
+      state.layers.forEach(layer => {
+        const item = document.createElement("button");
+        item.textContent = `${layer.name}  z=${layer.z.toFixed(3)} mm  t=${layer.thickness.toFixed(3)} mm`;
+        item.className = state.selectedLayerId === layer.id ? "active" : "";
+        item.onclick = () => {
+          state.selectedLayerId = layer.id;
+          state.viewMode = "layer";
+          refresh();
+        };
+        refs.layerList.appendChild(item);
+
+        const option = document.createElement("option");
+        option.value = layer.id;
+        option.textContent = `${layer.name} (${layer.z.toFixed(3)} mm)`;
+        option.selected = state.selectedLayerId === layer.id;
+        refs.layerViewSelect.appendChild(option);
+      });
+
+      refs.viaList.innerHTML = "";
+      state.vias.forEach(via => {
+        const item = document.createElement("button");
+        item.textContent = `${via.id}  x=${via.x.toFixed(2)} y=${via.y.toFixed(2)} dia=${via.diameter.toFixed(2)} mm`;
+        item.className = state.selected === via.id ? "active" : "";
+        item.onclick = () => {
+          state.selected = via.id;
+          refresh();
+        };
+        refs.viaList.appendChild(item);
+      });
+    }
+
+    function updateResultPanel() {
+      document.body.classList.toggle("results-ready", Boolean(state.result));
+      document.body.classList.toggle("results-page", Boolean(state.resultPage && state.result));
+      refs.resultLayerButtons.innerHTML = "";
+      if (!state.result) {
+        refs.resultState.textContent = "Run simulation to generate temperature results.";
+        refs.resultRunLog.textContent = "No simulation run yet.";
+        refs.componentSummary.innerHTML = "";
+        return;
+      }
+      const solver = state.result.solver || {};
+      refs.resultState.textContent = solver.converged === false
+        ? `Simulation finished with residual warning. Range ${state.result.minTemp.toFixed(1)} degC to ${state.result.maxTemp.toFixed(1)} degC.`
+        : `Simulation complete. Range ${state.result.minTemp.toFixed(1)} degC to ${state.result.maxTemp.toFixed(1)} degC.`;
+
+      state.layers.forEach((layer, index) => {
+        const viewKey = `layer:${layer.id}`;
+        if (!state.result.views[viewKey]) return;
+        const button = document.createElement("button");
+        button.textContent = `Layer ${index + 1} temperature field`;
+        button.className = state.activeResultLayerId === layer.id ? "active" : "";
+        button.onclick = () => toggleResultLayerView(layer.id);
+        refs.resultLayerButtons.appendChild(button);
+      });
+      updateResultViewButtons();
+      updateRunLog();
+      updateComponentSummary();
+    }
+
+    function updateResultViewButtons() {
+      document.getElementById("resultIso").classList.toggle("active", state.result && !state.activeResultLayerId && state.viewMode === "result3d");
+      document.getElementById("resultTop").classList.toggle("active", state.result && !state.activeResultLayerId && state.viewMode === "top");
+      document.getElementById("resultBottom").classList.toggle("active", state.result && !state.activeResultLayerId && state.viewMode === "bottom");
+    }
+
+    function updateRunLog() {
+      const log = state.lastRunLog || {};
+      const solver = state.result?.solver || {};
+      const diagnostics = solver.diagnostics || {};
+      refs.resultRunLog.innerHTML = `
+        <div><strong>Ambient:</strong> ${Number(state.ambientTemperatureC).toFixed(1)} degC</div>
+        <div><strong>Displayed temperature:</strong> solver K converted directly to degC. Ambient is applied inside the solver boundary condition.</div>
+        <div><strong>dx/dy/dz:</strong> ${formatMetric(log.dx, "mm")} / ${formatMetric(log.dy, "mm")} / ${formatMetric(log.dz, "mm")}</div>
+        <div><strong>Actual z cell range:</strong> ${formatMetric(diagnostics.min_dz_mm, "mm")} to ${formatMetric(diagnostics.max_dz_mm, "mm")}</div>
+        <div><strong>Matrix size:</strong> ${diagnostics.grid_shape ? diagnostics.grid_shape.join(" x ") : "n/a"} = ${diagnostics.cell_count ? Number(diagnostics.cell_count).toLocaleString() : "n/a"} unknown temperatures</div>
+        <div><strong>Matrix nonzeros:</strong> ${diagnostics.matrix_nonzeros ? Number(diagnostics.matrix_nonzeros).toLocaleString() : "n/a"}</div>
+        <div><strong>Legacy SOR omega:</strong> ${formatMetric(log.omega, "")}</div>
+        <div><strong>Tolerance:</strong> ${formatMetric(log.tolerance, "K")}</div>
+        <div><strong>Simulation time:</strong> ${log.duration || "not recorded"}</div>
+        <div><strong>Iterations:</strong> ${solver.iterations ?? "n/a"}</div>
+        <div><strong>Radiation outer iterations:</strong> ${diagnostics.radiation_outer_iterations_used ?? "n/a"}</div>
+        <div><strong>Converged:</strong> ${solver.converged === false ? "false" : "true"}</div>
+        <div><strong>Residual:</strong> ${solver.max_delta_k ?? "n/a"}</div>
+        <div><strong>Energy balance error:</strong> ${formatMetric(diagnostics.energy_balance_error_w, "W")}</div>
+      `;
+    }
+
+    function updateComponentSummary() {
+      refs.componentSummary.innerHTML = "";
+      state.components.forEach(component => {
+        const report = (state.result.componentReports || []).find(item => item.name === component.name);
+        const fieldMaxTemp = report?.board_max_temperature_c ?? componentDisplayTemperature(component);
+        const junctionRise = report?.junction_rise_c ?? (component.power * component.rth);
+        const estimatedJunctionTemp = report?.estimated_junction_temperature_c
+          ?? (Number.isFinite(fieldMaxTemp) ? fieldMaxTemp + junctionRise : NaN);
+        const item = document.createElement("div");
+        item.className = "summary";
+        item.innerHTML = `
+          <div><strong>${component.name}</strong></div>
+          <div><strong>Field max under footprint:</strong> ${Number.isFinite(fieldMaxTemp) ? fieldMaxTemp.toFixed(2) : "n/a"} degC</div>
+          <div><strong>Rth junction rise:</strong> ${junctionRise.toFixed(2)} degC</div>
+          <div><strong>Estimated junction:</strong> ${Number.isFinite(estimatedJunctionTemp) ? estimatedJunctionTemp.toFixed(2) : "n/a"} degC</div>
+          <div><strong>Power:</strong> ${component.power.toFixed(3)} W</div>
+          <div><strong>Rth:</strong> ${component.rth.toFixed(3)} K/W</div>
+        `;
+        refs.componentSummary.appendChild(item);
+      });
+    }
+
+    function formatMetric(value, unit) {
+      if (!Number.isFinite(Number(value))) return "n/a";
+      const suffix = unit ? ` ${unit}` : "";
+      return `${Number(value).toFixed(4).replace(/\.?0+$/, "")}${suffix}`;
+    }
+
+    function setHidden(element, hidden) {
+      element.classList.toggle("hidden", hidden);
+    }
+
+    function updateDynamicControls() {
+      const selected = selectedRecord();
+      setHidden(refs.applyLayer, state.placementMode !== "layer");
+      setHidden(refs.cancelLayer, state.placementMode !== "layer");
+      setHidden(refs.applyVia, state.placementMode !== "via");
+      setHidden(refs.cancelVia, state.placementMode !== "via");
+      setHidden(refs.removeComponent, !(selected && "power" in selected) || Boolean(state.placementMode));
+      setHidden(refs.removeVia, !(selected && !("power" in selected)) || Boolean(state.placementMode));
+      setHidden(refs.removeLayer, !state.selectedLayerId || Boolean(state.placementMode));
+      setHidden(refs.applySelected, !selected || Boolean(state.placementMode));
+    }
+
+    function syncXrayControls() {
+      const copperBlend = blendedHex(0x28735a, 0xc47c22, 0.52);
+      refs.xrayToggle.classList.toggle("active", state.xrayMode);
+      refs.xrayToggle.textContent = state.result
+        ? (state.xrayMode ? "Layers/Vias On" : "Show Layers/Vias")
+        : (state.xrayMode ? "X-Ray On" : "X-Ray");
+      refs.xraySwatch.classList.toggle("active", state.xrayMode);
+      refs.xraySwatchChip.style.background = hexLabel(copperBlend);
+      refs.xraySwatchText.textContent = state.result
+        ? `Layer overlay ${hexLabel(copperBlend)}`
+        : `Cu through PCB ${hexLabel(copperBlend)}`;
+    }
+
+    function setXrayMode(enabled) {
+      state.xrayMode = Boolean(enabled);
+      syncXrayControls();
+      refresh();
+    }
+
+    function selectedRecord() {
+      return state.components.find(item => item.id === state.selected)
+        || state.vias.find(item => item.id === state.selected)
+        || null;
+    }
+
+    function updateSummaries() {
+      const b = boardBounds();
+      const grid = gridSettings();
+      const nx = Math.max(1, Math.ceil(b.length / grid.dx));
+      const ny = Math.max(1, Math.ceil(b.width / grid.dy));
+      const nz = Math.max(1, Math.ceil(state.pcbThicknessMm / grid.dz));
+      refs.boardSummary.innerHTML = `
+        <div><strong>PCB:</strong> ${b.length.toFixed(2)} x ${b.width.toFixed(2)} x ${state.pcbThicknessMm.toFixed(2)} mm</div>
+        <div><strong>Grid:</strong> ${grid.dx.toFixed(3)} x ${grid.dy.toFixed(3)} x ${grid.dz.toFixed(3)} mm, about ${nx} x ${ny} x ${nz} = ${(nx * ny * nz).toLocaleString()} cells</div>
+        <div><strong>Origin:</strong> ${b.originX.toFixed(2)}, ${b.originY.toFixed(2)} mm</div>
+        <div><strong>Objects:</strong> ${state.components.length} components, ${state.layers.length} copper layers, ${state.vias.length} vias</div>
+      `;
+
+      const record = selectedRecord();
+      if (!record) {
+        refs.selectionSummary.textContent = "Nothing selected.";
+        ["selectedX", "selectedY", "selectedRot", "selectedL", "selectedW", "selectedH"].forEach(id => document.getElementById(id).value = "");
+      } else if ("power" in record) {
+        refs.selectionSummary.innerHTML = `<strong>${record.name}</strong><br>${record.l} x ${record.w} x ${record.h} mm, ${record.power} W, Rth ${record.rth} K/W`;
+        writeNumber("selectedX", record.x);
+        writeNumber("selectedY", record.y);
+        writeNumber("selectedRot", record.rotation || 0);
+        writeNumber("selectedL", record.l);
+        writeNumber("selectedW", record.w);
+        writeNumber("selectedH", record.h);
+      } else {
+        refs.selectionSummary.innerHTML = `<strong>${record.id}</strong><br>Thermal via, diameter ${record.diameter} mm`;
+        writeNumber("selectedX", record.x);
+        writeNumber("selectedY", record.y);
+        writeNumber("selectedRot", 0);
+        writeNumber("selectedL", record.diameter);
+        writeNumber("selectedW", record.diameter);
+        writeNumber("selectedH", state.pcbThicknessMm);
+      }
+      if (state.result) {
+        refs.legendRange.textContent = `${state.result.minTemp.toFixed(1)} degC - ${state.result.maxTemp.toFixed(1)} degC`;
+      }
+    }
+
+    function refresh() {
+      syncInputs();
+      renderBoard();
+      renderLayers();
+      renderComponents();
+      renderVias();
+      renderTemperatureSlice();
+      renderPlacementPreview();
+      updateLists();
+      if (!state.result) state.activeResultLayerId = null;
+      updateResultPanel();
+      updateSummaries();
+      updateDynamicControls();
+      syncXrayControls();
+    }
+
+    function fitCamera(mode = "iso") {
+      const b = boardBounds();
+      const cx = (b.minX + b.maxX) / 2;
+      const cy = (b.minY + b.maxY) / 2;
+      const span = Math.max(b.length, b.width, 30);
+      const workspaceBiasX = 0;
+      const workspaceBiasY = 0;
+      controls.target.set(cx + workspaceBiasX, cy + workspaceBiasY, state.pcbThicknessMm / 2);
+      if (mode === "top") {
+        camera.position.set(cx, cy, span * 1.55);
+        camera.up.set(0, 1, 0);
+      } else if (mode === "bottom") {
+        camera.position.set(cx, cy, -span * 1.55);
+        camera.up.set(0, -1, 0);
+      } else if (mode === "zx") {
+        camera.position.set(cx, b.minY - span * 1.85, state.pcbThicknessMm / 2);
+        camera.up.set(0, 0, 1);
+      } else {
+        camera.position.set(cx + workspaceBiasX + span * 0.62, cy + workspaceBiasY - span * 0.95, span * 0.82);
+        camera.up.set(0, 0, 1);
+      }
+      camera.near = 0.1;
+      camera.far = span * 10;
+      camera.updateProjectionMatrix();
+      controls.update();
+    }
+
+    function toggleResultLayerView(layerId) {
+      if (!state.result) return;
+      if (state.activeResultLayerId === layerId) {
+        state.activeResultLayerId = null;
+        state.viewMode = "result3d";
+        fitCamera("iso");
+      } else {
+        state.activeResultLayerId = layerId;
+        state.selectedLayerId = layerId;
+        state.viewMode = "layer";
+        fitCamera("top");
+      }
+      refresh();
+    }
+
+    function showResultView(mode) {
+      if (!state.result) return;
+      state.activeResultLayerId = null;
+      state.viewMode = mode;
+      if (mode === "top") {
+        fitCamera("top");
+      } else if (mode === "bottom") {
+        fitCamera("bottom");
+      } else {
+        state.viewMode = "result3d";
+        fitCamera("iso");
+      }
+      refresh();
+    }
+
+    function openResultsPage() {
+      if (!state.result) return;
+      state.resultPage = true;
+      setPanelCollapsed(true);
+      refresh();
+      window.setTimeout(() => {
+        resize();
+        fitCamera(state.activeResultLayerId ? "top" : (state.viewMode === "bottom" ? "bottom" : state.viewMode === "top" ? "top" : "iso"));
+      }, 190);
+    }
+
+    function leaveResultsPage() {
+      state.resultPage = false;
+      setPanelCollapsed(false);
+      refresh();
+      window.setTimeout(() => {
+        resize();
+        fitCamera(state.activeResultLayerId ? "top" : (state.viewMode === "bottom" ? "bottom" : state.viewMode === "top" ? "top" : "iso"));
+      }, 190);
+    }
+
+    function pointerFromEvent(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    }
+
+    function interactiveObjects() {
+      return [...groups.components.children, ...groups.vias.children, ...groups.temperatures.children];
+    }
+
+    function findHit(event) {
+      pointerFromEvent(event);
+      raycaster.setFromCamera(pointer, camera);
+      return raycaster.intersectObjects(interactiveObjects(), true)[0] || null;
+    }
+
+    function updatePlacementFromPointer(event) {
+      if (!state.placementMode) return false;
+      pointerFromEvent(event);
+      raycaster.setFromCamera(pointer, camera);
+      const b = boardBounds();
+      if (state.placementMode === "layer") {
+        layerPlacementPlane.constant = -((b.minY + b.maxY) / 2);
+        if (!raycaster.ray.intersectPlane(layerPlacementPlane, dragPoint)) return false;
+        const layer = state.pendingLayer || draftLayer();
+        layer.thickness = Math.max(0.005, readNumber("layerThickness", layer.thickness));
+        layer.name = document.getElementById("layerName").value || layer.name;
+        layer.z = Math.max(layer.thickness / 2, Math.min(state.pcbThicknessMm - layer.thickness / 2, dragPoint.z));
+        state.pendingLayer = layer;
+        writeNumber("layerZ", layer.z);
+        return true;
+      }
+
+      if (state.placementMode === "via") {
+        viaPlacementPlane.constant = -state.pcbThicknessMm;
+        if (!raycaster.ray.intersectPlane(viaPlacementPlane, dragPoint)) return false;
+        const via = state.pendingVia || draftVia();
+        via.diameter = Math.max(0.1, readNumber("viaDiameter", via.diameter));
+        via.x = Math.max(b.minX, Math.min(b.maxX, dragPoint.x));
+        via.y = Math.max(b.minY, Math.min(b.maxY, dragPoint.y));
+        state.pendingVia = via;
+        writeNumber("viaX", via.x);
+        writeNumber("viaY", via.y);
+        return true;
+      }
+      return false;
+    }
+
+    function formatDuration(ms) {
+      const totalSeconds = Math.max(0, Math.round(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes} minutes ${seconds} seconds`;
+    }
+
+    function setSolverProgress(percent, text) {
+      refs.solverProgress.classList.add("active");
+      refs.progressFill.style.width = `${Math.max(0, Math.min(100, percent)).toFixed(1)}%`;
+      refs.progressText.textContent = text;
+    }
+
+    function startSolverProgress(startTime) {
+      const stages = [
+        [0, "Preparing board geometry and component power map."],
+        [12, "Sending component, copper layer, and thermal via data to Python backend."],
+        [24, "Building the 3D finite-difference grid and assigning material conductivity."],
+        [38, "Assembling sparse matrix coefficients for conduction and boundaries."],
+        [56, "Solving the sparse linear system A T = b."],
+        [76, "Extracting top, bottom, and copper-layer temperature slices."],
+        [90, "Preparing temperature colors for PCB and component surfaces."]
+      ];
+      let stageIndex = 0;
+      setSolverProgress(3, stages[0][1]);
+      return window.setInterval(() => {
+        const elapsedSeconds = (performance.now() - startTime) / 1000;
+        while (stageIndex + 1 < stages.length && elapsedSeconds > (stageIndex + 1) * 3.5) {
+          stageIndex += 1;
+        }
+        const base = stages[stageIndex][0];
+        const next = stageIndex + 1 < stages.length ? stages[stageIndex + 1][0] : 95;
+        const local = Math.min(1, (elapsedSeconds - stageIndex * 3.5) / 3.5);
+        const percent = Math.min(95, base + (next - base) * local);
+        setSolverProgress(percent, `${stages[stageIndex][1]} Elapsed: ${formatDuration(performance.now() - startTime)}.`);
+      }, 350);
+    }
+
+    function solverApiUrl() {
+      if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+        return `${window.location.origin}/api/simulate`;
+      }
+      return "http://127.0.0.1:9023/api/simulate";
+    }
+
+    function solverStartUrl() {
+      return `${solverApiUrl()}/start`;
+    }
+
+    function solverStatusUrl(jobId) {
+      return `${solverApiUrl()}/status?job_id=${encodeURIComponent(jobId)}`;
+    }
+
+    function simulationSetupSummary(gridOverride = null) {
+      const b = boardBounds();
+      const grid = gridOverride || gridSettings();
+      const nx = Math.max(1, Math.ceil(b.length / grid.dx));
+      const ny = Math.max(1, Math.ceil(b.width / grid.dy));
+      const nz = Math.max(1, Math.ceil(state.pcbThicknessMm / grid.dz));
+      return {
+        b,
+        grid,
+        nx,
+        ny,
+        nz,
+        cells: nx * ny * nz
+      };
+    }
+
+    function gridCostMessage(cells) {
+      if (cells >= 500000) {
+        return "Very large grid. This can take a long time and may exceed local memory. Use a coarser grid unless this is a final high-resolution run.";
+      }
+      if (cells >= 150000) {
+        return "Large grid. The backend will use iterative sparse CG instead of direct solve; expect several minutes and higher memory use.";
+      }
+      if (cells >= 50000) {
+        return "Medium grid. The backend will use iterative sparse CG to avoid direct-solver memory spikes.";
+      }
+      return "Small grid. The backend can use the direct sparse solve.";
+    }
+
+    function openSimulationModal() {
+      const recommended = recommendedGridSettings();
+      const setup = simulationSetupSummary(recommended);
+      const omega = recommendedSorOmega(setup.nx, setup.ny, setup.nz);
+      writeNumber("dxInput", recommended.dx);
+      writeNumber("dyInput", recommended.dy);
+      writeNumber("dzInput", recommended.dz);
+      writeNumber("omegaInput", omega);
+      writeNumber("ambientInput", state.ambientTemperatureC);
+      refs.simulationGridSummary.innerHTML = `
+        <div><strong>PCB:</strong> ${setup.b.length.toFixed(2)} x ${setup.b.width.toFixed(2)} x ${state.pcbThicknessMm.toFixed(2)} mm</div>
+        <div><strong>Grid spacing:</strong> dx=${setup.grid.dx.toFixed(3)} mm, dy=${setup.grid.dy.toFixed(3)} mm, dz=${setup.grid.dz.toFixed(3)} mm</div>
+        <div><strong>Matrix size:</strong> about ${setup.nx} x ${setup.ny} x ${setup.nz} = ${setup.cells.toLocaleString()} unknown temperatures</div>
+        <div><strong>Runtime note:</strong> ${gridCostMessage(setup.cells)}</div>
+        <div><strong>Legacy SOR omega:</strong> ${omega.toFixed(3)} from the largest grid count. The sparse solve ignores omega, but the value is kept for comparing with the earlier SOR method.</div>
+        <div><strong>Why these values:</strong> dx/dy follow the smallest lateral feature: component minimum ${recommended.componentMin.toFixed(3)} mm, via-informed feature ${recommended.viaMin.toFixed(3)} mm diameter, and board span. dz follows PCB thickness and the thinnest copper layer (${recommended.minLayerT.toFixed(3)} mm) so stack features are not skipped.</div>
+        <div><strong>Convergence impact:</strong> these spacings define the unknown count and matrix conditioning. Smaller spacing resolves layers, vias, and component footprints better, but increases solve time and memory.</div>
+      `;
+      refs.simulationModal.classList.add("active");
+    }
+
+    function closeSimulationModal() {
+      refs.simulationModal.classList.remove("active");
+    }
+
+    function postJson(url, payload) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState !== XMLHttpRequest.DONE) return;
+          let data = null;
+          try {
+            data = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+          } catch (error) {
+            reject(new Error(`Solver returned non-JSON response: ${xhr.responseText.slice(0, 180)}`));
+            return;
+          }
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(data);
+          } else if (xhr.status === 0) {
+            reject(new Error(
+              "The browser did not receive a response from the solver. The Python server may not be running, may have crashed during the solve, or the page may have been opened from a different origin."
+            ));
+          } else {
+            reject(new Error(data.error || `Solver request failed with HTTP ${xhr.status}.`));
+          }
+        };
+        xhr.onerror = () => reject(new Error(`Could not connect to ${url}.`));
+        xhr.ontimeout = () => reject(new Error("Solver request timed out. For fine grids, reduce resolution or wait for the Python process to finish if it is still running."));
+        xhr.timeout = 1800000;
+        xhr.send(JSON.stringify(payload));
+      });
+    }
+
+    function getJson(url) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState !== XMLHttpRequest.DONE) return;
+          let data = null;
+          try {
+            data = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+          } catch (error) {
+            reject(new Error(`Solver returned non-JSON status: ${xhr.responseText.slice(0, 180)}`));
+            return;
+          }
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(data);
+          } else {
+            reject(new Error(data.error || `Solver status failed with HTTP ${xhr.status}.`));
+          }
+        };
+        xhr.onerror = () => reject(new Error(`Could not connect to ${url}.`));
+        xhr.timeout = 60000;
+        xhr.ontimeout = () => reject(new Error("Solver status request timed out."));
+        xhr.send();
+      });
+    }
+
+    async function runSolverJob(config, omega, startedAt) {
+      const start = await postJson(solverStartUrl(), { config, solver: { omega } });
+      const jobId = start.job_id;
+      if (!jobId) throw new Error("Solver did not return a job id.");
+      let pollDelayMs = 1200;
+      while (true) {
+        await new Promise(resolve => window.setTimeout(resolve, pollDelayMs));
+        const status = await getJson(solverStatusUrl(jobId));
+        if (status.message) {
+          const elapsed = formatDuration(performance.now() - startedAt);
+          refs.progressText.textContent = `${status.message} Elapsed: ${elapsed}.`;
+        }
+        if (status.status === "done") return status.result;
+        if (status.status === "error") throw new Error(status.error || "Solver job failed.");
+        if (status.status === "missing") throw new Error(status.error || "Solver job was not found.");
+        pollDelayMs = Math.min(3000, pollDelayMs + 150);
+      }
+    }
+
+    async function runSimulationFromModal() {
+      const ambientC = Number(refs.ambientInput.value);
+      if (!Number.isFinite(ambientC)) {
+        window.alert("Ambient temperature must be a valid number in degC.");
+        return;
+      }
+      const omega = Number(refs.omegaInput.value);
+      if (!Number.isFinite(omega) || omega <= 0 || omega >= 2) {
+        window.alert("SOR omega must be a number greater than 0 and less than 2.");
+        return;
+      }
+      const tolerance = Number(refs.toleranceInput.value);
+      if (!Number.isFinite(tolerance) || tolerance <= 0) {
+        window.alert("Residual tolerance must be a positive number.");
+        return;
+      }
+      const setup = simulationSetupSummary();
+      if (setup.cells >= 500000 && !window.confirm(`${setup.cells.toLocaleString()} grid cells is a very large local solve and may fail from memory pressure. Continue anyway?`)) {
+        return;
+      }
+      closeSimulationModal();
+
+      const startedAt = performance.now();
+      const progressTimer = startSolverProgress(startedAt);
+      refs.status.textContent = "Running sparse backend solver...";
+      document.getElementById("runSimulation").disabled = true;
+      try {
+        state.ambientTemperatureC = ambientC;
+        const config = solverConfig();
+        config.solver_tolerance_k = tolerance;
+        config.radiation_outer_iterations = 1;
+        config.radiation_tolerance_k = 0.05;
+        config.boundary = {
+          ambient_temperature_k: ambientC + 273.15,
+          surrounding_temperature_k: ambientC + 273.15,
+          convection_coefficient_w_m2k: 13.0,
+          emissivity: 0.8
+        };
+        const grid = gridSettings();
+        const payload = await runSolverJob(config, omega, startedAt);
+        setSolverProgress(97, "Solver returned temperature slices. Rendering PCB, component, and layer temperature colors.");
+        const duration = formatDuration(performance.now() - startedAt);
+        state.lastRunLog = {
+          ambientC,
+          omega,
+          tolerance,
+          dx: grid.dx,
+          dy: grid.dy,
+          dz: grid.dz,
+          duration,
+          completedAt: new Date().toISOString()
+        };
+        window.applySolverResult(payload, state.lastRunLog);
+        const completionText = payload.solver.converged
+          ? `Simulation complete in ${duration}. Sparse residual: ${payload.solver.max_delta_k}.`
+          : `Simulation finished after ${duration}, but sparse residual did not meet tolerance. Residual: ${payload.solver.max_delta_k}.`;
+        setSolverProgress(
+          100,
+          completionText
+        );
+        refs.status.textContent = payload.solver.converged
+          ? `Solver complete in ${duration}.`
+          : `Solver did not converge in ${duration}.`;
+      } catch (error) {
+        setSolverProgress(100, `Simulation failed after ${formatDuration(performance.now() - startedAt)}.`);
+        refs.status.textContent = "Backend solver unavailable or failed.";
+        window.alert(
+          `Could not run the Python solver.\n\n${error.message}\n\nStart it with:\ncd "/Users/amolverma/Cursor/3D Steady-State Temperature field generator/Version3"\npython3 server.py\n\nThen open http://127.0.0.1:9023/pcb_temperature_app.html`
+        );
+      } finally {
+        window.clearInterval(progressTimer);
+        document.getElementById("runSimulation").disabled = false;
+      }
+    }
+
+    function nearestViaFactor(x, y) {
+      if (!state.vias.length) return 1;
+      const minD2 = Math.min(...state.vias.map(via => (via.x - x) ** 2 + (via.y - y) ** 2));
+      return 1 - 0.22 * Math.exp(-minD2 / 36);
+    }
+
+    function componentConductivity(component) {
+      const heightM = component.h * 1e-3;
+      const lengthM = component.l * 1e-3;
+      const widthM = component.w * 1e-3;
+      return heightM / (component.rth * lengthM * widthM);
+    }
+
+    function draftLayer() {
+      return {
+        id: `L${state.layers.length + 1}`,
+        name: document.getElementById("layerName").value || `L${state.layers.length + 1}`,
+        z: Math.max(0, Math.min(state.pcbThicknessMm, readNumber("layerZ", state.pcbThicknessMm))),
+        thickness: Math.max(0.005, readNumber("layerThickness", 0.035)),
+        conductivity: 385
+      };
+    }
+
+    function draftVia() {
+      return {
+        id: `V${state.vias.length + 1}`,
+        x: readNumber("viaX", 0),
+        y: readNumber("viaY", 0),
+        diameter: Math.max(0.1, readNumber("viaDiameter", 0.35)),
+        conductivity: 385
+      };
+    }
+
+    function currentSlice() {
+      if (!state.result) return null;
+      if (state.activeResultLayerId) return state.result.views[`layer:${state.activeResultLayerId}`] || state.result.views.top;
+      if (state.viewMode === "bottom") return state.result.views.bottom;
+      if (state.viewMode === "layer") return state.result.views[`layer:${state.selectedLayerId}`] || state.result.views.top;
+      return state.result.views.top;
+    }
+
+    function solverConfig() {
+      const b = boardBounds();
+      const grid = gridSettings();
+      return {
+        board: {
+          length_mm: Number(b.length.toFixed(4)),
+          width_mm: Number(b.width.toFixed(4)),
+          thickness_mm: Number(state.pcbThicknessMm.toFixed(4)),
+          dx_mm: Number(grid.dx.toFixed(4)),
+          dy_mm: Number(grid.dy.toFixed(4)),
+          dz_mm: Number(grid.dz.toFixed(4)),
+          origin_x_mm: Number(b.originX.toFixed(4)),
+          origin_y_mm: Number(b.originY.toFixed(4))
+        },
+        components: state.components.map(component => ({
+          id: component.id,
+          name: component.name,
+          x_mm: Number((component.x - b.originX).toFixed(4)),
+          y_mm: Number((component.y - b.originY).toFixed(4)),
+          z_mm: Number(component.z.toFixed(4)),
+          width_mm: Number(component.l.toFixed(4)),
+          depth_mm: Number(component.w.toFixed(4)),
+          height_mm: Number(component.h.toFixed(4)),
+          box_dimensions_mm: {
+            x: Number(component.l.toFixed(4)),
+            y: Number(component.w.toFixed(4)),
+            z: Number(component.h.toFixed(4))
+          },
+          rotation_deg: Number((component.rotation || 0).toFixed(4)),
+          power_w: Number(component.power.toFixed(6)),
+          steady_state_thermal_resistance_k_per_w: Number(component.rth.toFixed(6)),
+          equivalent_thermal_conductivity_w_mk: Number(componentConductivity(component).toFixed(6))
+        })),
+        copper_layers: state.layers.map(layer => ({
+          id: layer.id,
+          name: layer.name,
+          z_center_mm: Number(layer.z.toFixed(4)),
+          z_start_mm: Number(Math.max(0, layer.z - layer.thickness / 2).toFixed(4)),
+          z_end_mm: Number(Math.min(state.pcbThicknessMm, layer.z + layer.thickness / 2).toFixed(4)),
+          thickness_mm: Number(layer.thickness.toFixed(4)),
+          conductivity_w_mk: layer.conductivity
+        })),
+        thermal_vias: state.vias.map(via => ({
+          id: via.id,
+          x_mm: Number((via.x - b.originX).toFixed(4)),
+          y_mm: Number((via.y - b.originY).toFixed(4)),
+          diameter_mm: Number(via.diameter.toFixed(4)),
+          z_start_mm: 0,
+          z_end_mm: Number(state.pcbThicknessMm.toFixed(4)),
+          conductivity_w_mk: via.conductivity
+        }))
+      };
+    }
+
+    function downloadText(name, text, mime = "text/plain") {
+      const blob = new Blob([text], { type: mime });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function downloadCsv() {
+      if (!state.result) {
+        window.alert("Run simulation before downloading temperature CSV.");
+        return;
+      }
+      const b = boardBounds();
+      const slice = currentSlice();
+      const rows = ["x_mm,y_mm,z_mm,temperature_c"];
+      for (let ix = 0; ix < slice.nx; ix++) {
+        const x = b.minX + (ix + 0.5) * b.length / slice.nx - b.originX;
+        for (let iy = 0; iy < slice.ny; iy++) {
+          const y = b.minY + (iy + 0.5) * b.width / slice.ny - b.originY;
+          rows.push(`${x.toFixed(4)},${y.toFixed(4)},${slice.z.toFixed(4)},${slice.values[ix][iy].toFixed(5)}`);
+        }
+      }
+      downloadText(`temperature_${state.viewMode}.csv`, rows.join("\n"), "text/csv");
+    }
+
+    function downloadPng() {
+      renderer.render(scene, camera);
+      const link = document.createElement("a");
+      link.href = renderer.domElement.toDataURL("image/png");
+      link.download = `pcb_temperature_${state.viewMode}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    function downloadHtml() {
+      const html = document.documentElement.outerHTML.replace(
+        "const state = {",
+        `const savedSnapshot = ${JSON.stringify({
+          components: state.components,
+          layers: state.layers,
+          vias: state.vias,
+          marginMm: state.marginMm,
+          pcbThicknessMm: state.pcbThicknessMm,
+          xrayMode: state.xrayMode,
+          activeResultLayerId: state.activeResultLayerId,
+          resultPage: state.resultPage,
+          ambientTemperatureC: state.ambientTemperatureC,
+          lastRunLog: state.lastRunLog,
+          result: state.result
+        })};\n    const state = {`
+      );
+      downloadText("pcb_temperature_configurator.html", "<!doctype html>\n" + html, "text/html");
+    }
+
+    function addComponent() {
+      const id = `C${state.components.length + 1}`;
+      state.components.push({
+        id,
+        name: document.getElementById("componentName").value || id,
+        x: readNumber("componentX", 0),
+        y: readNumber("componentY", 0),
+        z: state.pcbThicknessMm,
+        l: Math.max(0.5, readNumber("componentL", 5)),
+        w: Math.max(0.5, readNumber("componentW", 5)),
+        h: Math.max(0.1, readNumber("componentH", 1)),
+        power: Math.max(0, readNumber("componentPower", 1)),
+        rth: Math.max(0.1, readNumber("componentRth", 20)),
+        rotation: 0
+      });
+      state.selected = id;
+      state.result = null;
+      refresh();
+    }
+
+    function startLayerPlacement() {
+      state.placementMode = "layer";
+      state.pendingLayer = draftLayer();
+      state.pendingVia = null;
+      state.placementLocked = false;
+      controls.enabled = false;
+      fitCamera("zx");
+      refresh();
+    }
+
+    function applyLayerPlacement() {
+      if (state.placementMode !== "layer") return;
+      const layer = state.pendingLayer || draftLayer();
+      state.layers.push({ ...layer, id: `L${state.layers.length + 1}` });
+      state.selectedLayerId = state.layers[state.layers.length - 1].id;
+      clearPlacementMode();
+      state.result = null;
+      refresh();
+    }
+
+    function startViaPlacement() {
+      state.placementMode = "via";
+      state.pendingVia = draftVia();
+      state.pendingLayer = null;
+      state.placementLocked = false;
+      state.xrayMode = true;
+      controls.enabled = false;
+      fitCamera("top");
+      refresh();
+    }
+
+    function applyViaPlacement() {
+      if (state.placementMode !== "via") return;
+      const via = state.pendingVia || draftVia();
+      state.vias.push({ ...via, id: `V${state.vias.length + 1}` });
+      state.selected = state.vias[state.vias.length - 1].id;
+      clearPlacementMode();
+      state.result = null;
+      refresh();
+    }
+
+    function clearPlacementMode() {
+      state.placementMode = null;
+      state.pendingLayer = null;
+      state.pendingVia = null;
+      state.placementLocked = false;
+      controls.enabled = true;
+      refresh();
+    }
+
+    function cancelPlacementMode() {
+      clearPlacementMode();
+    }
+
+    function setPanelCollapsed(collapsed) {
+      refs.setupPanel.classList.toggle("collapsed", collapsed);
+      refs.panelTab.classList.toggle("visible", collapsed);
+      document.body.classList.toggle("panel-collapsed", collapsed);
+      window.setTimeout(() => {
+        resize();
+        controls.update();
+      }, 190);
+    }
+
+    function applySelected() {
+      const record = selectedRecord();
+      if (!record) return;
+      record.x = readNumber("selectedX", record.x);
+      record.y = readNumber("selectedY", record.y);
+      if ("power" in record) {
+        record.rotation = readNumber("selectedRot", record.rotation || 0);
+        record.l = Math.max(0.5, readNumber("selectedL", record.l));
+        record.w = Math.max(0.5, readNumber("selectedW", record.w));
+        record.h = Math.max(0.1, readNumber("selectedH", record.h));
+      } else {
+        record.diameter = Math.max(0.1, readNumber("selectedL", record.diameter));
+      }
+      state.result = null;
+      refresh();
+    }
+
+    function removeSelectedComponent() {
+      const record = selectedRecord();
+      if (!record || !("power" in record)) return;
+      state.components = state.components.filter(item => item.id !== record.id);
+      state.selected = null;
+      state.result = null;
+      refresh();
+    }
+
+    function removeSelectedLayer() {
+      state.layers = state.layers.filter(layer => layer.id !== state.selectedLayerId);
+      state.selectedLayerId = state.layers[0]?.id || "";
+      state.result = null;
+      refresh();
+    }
+
+    function removeSelectedVia() {
+      if (!state.selected || !state.selected.startsWith("V")) return;
+      state.vias = state.vias.filter(via => via.id !== state.selected);
+      state.selected = null;
+      state.result = null;
+      refresh();
+    }
+
+    function onPointerDown(event) {
+      if (state.placementMode) {
+        const didUpdate = updatePlacementFromPointer(event);
+        if (didUpdate) {
+          state.placementLocked = true;
+          refs.status.textContent = state.placementMode === "layer"
+            ? `Layer z selected at ${state.pendingLayer.z.toFixed(3)} mm. Click Apply Layer to commit.`
+            : `Via location selected at x=${state.pendingVia.x.toFixed(2)} mm, y=${state.pendingVia.y.toFixed(2)} mm. Click Apply Via to commit.`;
+        }
+        refresh();
+        return;
+      }
+      const hit = findHit(event);
+      if (!hit || !["component", "via"].includes(hit.object.userData.kind)) return;
+      state.selected = hit.object.userData.id;
+      dragRecord = selectedRecord();
+      raycaster.ray.intersectPlane(dragPlane, dragPoint);
+      dragOffset.set(dragRecord.x, dragRecord.y, 0).sub(dragPoint);
+      controls.enabled = false;
+      refresh();
+    }
+
+    function onPointerMove(event) {
+      refs.tooltip.style.left = `${event.clientX}px`;
+      refs.tooltip.style.top = `${event.clientY}px`;
+
+      if (state.placementMode) {
+        if (state.placementLocked) {
+          return;
+        }
+        if (updatePlacementFromPointer(event)) {
+          const text = state.placementMode === "layer"
+            ? `Layer preview<br>z ${state.pendingLayer.z.toFixed(3)} mm<br>thickness ${state.pendingLayer.thickness.toFixed(3)} mm`
+            : `Via preview<br>x ${state.pendingVia.x.toFixed(2)} mm, y ${state.pendingVia.y.toFixed(2)} mm<br>diameter ${state.pendingVia.diameter.toFixed(2)} mm`;
+          refs.tooltip.innerHTML = text;
+          refs.tooltip.style.display = "block";
+          refs.hoverReadout.innerHTML = text;
+          refresh();
+        }
+        return;
+      }
+
+      if (dragRecord) {
+        pointerFromEvent(event);
+        raycaster.setFromCamera(pointer, camera);
+        if (raycaster.ray.intersectPlane(dragPlane, dragPoint)) {
+          const p = dragPoint.add(dragOffset);
+          dragRecord.x = p.x;
+          dragRecord.y = p.y;
+          state.result = null;
+          refresh();
+        }
+        return;
+      }
+
+      const hit = findHit(event);
+      const tile = hit && hit.object.userData.kind === "temperature" ? hit.object : null;
+      if (tile !== hoverTile) {
+        hoverTile = tile;
+        if (tile) {
+          const d = tile.userData;
+          const text = `${d.view}<br>x ${d.x.toFixed(2)} mm, y ${d.y.toFixed(2)} mm<br>z ${d.z.toFixed(2)} mm<br>${d.temp.toFixed(3)} degC`;
+          refs.tooltip.innerHTML = text;
+          refs.tooltip.style.display = "block";
+          refs.hoverReadout.innerHTML = text;
+        } else {
+          refs.tooltip.style.display = "none";
+        }
+      }
+    }
+
+    function onPointerUp() {
+      dragRecord = null;
+      controls.enabled = true;
+    }
+
+    function resize() {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+
+    function bindEvents() {
+      document.getElementById("marginInput").addEventListener("input", refresh);
+      document.getElementById("thicknessInput").addEventListener("input", refresh);
+      document.getElementById("dxInput").addEventListener("input", refresh);
+      document.getElementById("dyInput").addEventListener("input", refresh);
+      document.getElementById("dzInput").addEventListener("input", refresh);
+      document.getElementById("addComponent").onclick = addComponent;
+      document.getElementById("addLayer").onclick = startLayerPlacement;
+      document.getElementById("applyLayer").onclick = applyLayerPlacement;
+      document.getElementById("cancelLayer").onclick = cancelPlacementMode;
+      document.getElementById("removeLayer").onclick = removeSelectedLayer;
+      document.getElementById("addVia").onclick = startViaPlacement;
+      document.getElementById("applyVia").onclick = applyViaPlacement;
+      document.getElementById("cancelVia").onclick = cancelPlacementMode;
+      document.getElementById("removeVia").onclick = removeSelectedVia;
+      document.getElementById("removeComponent").onclick = removeSelectedComponent;
+      document.getElementById("applySelected").onclick = applySelected;
+      document.getElementById("runSimulation").onclick = openSimulationModal;
+      document.getElementById("confirmSimulation").onclick = runSimulationFromModal;
+      document.getElementById("cancelSimulation").onclick = closeSimulationModal;
+      document.getElementById("collapsePanel").onclick = () => setPanelCollapsed(true);
+      document.getElementById("panelTab").onclick = () => setPanelCollapsed(false);
+      document.getElementById("downloadCsv").onclick = downloadCsv;
+      document.getElementById("downloadPng").onclick = downloadPng;
+      document.getElementById("downloadHtml").onclick = downloadHtml;
+      document.getElementById("downloadConfig").onclick = () => downloadText("solver_config.json", JSON.stringify(solverConfig(), null, 2), "application/json");
+      document.getElementById("copyConfig").onclick = async () => {
+        await navigator.clipboard.writeText(JSON.stringify(solverConfig(), null, 2));
+        refs.status.textContent = "Solver config copied.";
+      };
+      document.getElementById("resultIso").onclick = () => showResultView("result3d");
+      document.getElementById("resultTop").onclick = () => showResultView("top");
+      document.getElementById("resultBottom").onclick = () => showResultView("bottom");
+      document.getElementById("backToSetup").onclick = leaveResultsPage;
+      refs.xrayToggle.onclick = () => setXrayMode(!state.xrayMode);
+      document.getElementById("viewTop").onclick = () => {
+        state.activeResultLayerId = null;
+        state.viewMode = "top";
+        fitCamera("top");
+        refresh();
+      };
+      document.getElementById("viewBottom").onclick = () => {
+        state.activeResultLayerId = null;
+        state.viewMode = "bottom";
+        fitCamera("bottom");
+        refresh();
+      };
+      document.getElementById("viewIso").onclick = () => {
+        state.activeResultLayerId = null;
+        fitCamera("iso");
+        refresh();
+      };
+      document.getElementById("viewLayer").onclick = () => {
+        state.activeResultLayerId = null;
+        state.viewMode = "layer";
+        refresh();
+      };
+      refs.layerViewSelect.onchange = event => {
+        state.activeResultLayerId = null;
+        state.selectedLayerId = event.target.value;
+        state.viewMode = "layer";
+        refresh();
+      };
+      renderer.domElement.addEventListener("pointerdown", onPointerDown);
+      renderer.domElement.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("resize", resize);
+    }
+
+    window.applySolverResult = function applySolverResult(payload, runLog = null) {
+      const b = boardBounds();
+      const nx = payload.nx || payload.x_mm?.length || 1;
+      const ny = payload.ny || payload.y_mm?.length || 1;
+      const ambientC = runLog?.ambientC ?? state.ambientTemperatureC;
+      const views = {};
+      const addView = (name, z, values) => {
+        views[name] = { name, z, nx, ny, values: transformViewValuesToDisplayC(values, ambientC) };
+      };
+      if (payload.views) {
+        Object.entries(payload.views).forEach(([key, view]) => {
+          views[key] = {
+            ...view,
+            values: transformViewValuesToDisplayC(view.values, ambientC)
+          };
+        });
+      } else if (payload.temperature_k) {
+        addView("top", state.pcbThicknessMm + 0.04, payload.temperature_k);
+      }
+      let minTemp = Infinity;
+      let maxTemp = -Infinity;
+      Object.values(views).forEach(view => {
+        view.nx = view.nx || nx;
+        view.ny = view.ny || ny;
+        view.z = view.z ?? state.pcbThicknessMm + 0.04;
+        for (let ix = 0; ix < view.values.length; ix++) {
+          for (let iy = 0; iy < view.values[ix].length; iy++) {
+            minTemp = Math.min(minTemp, view.values[ix][iy]);
+            maxTemp = Math.max(maxTemp, view.values[ix][iy]);
+          }
+        }
+      });
+      state.result = {
+        generatedAt: payload.generated_at || new Date().toISOString(),
+        solver: payload.solver || null,
+        minTemp,
+        maxTemp,
+        views,
+        componentReports: transformComponentReportsToDisplayC(payload.component_reports, ambientC)
+      };
+      state.xrayMode = false;
+      state.activeResultLayerId = null;
+      state.viewMode = "result3d";
+      state.resultPage = true;
+      refs.status.textContent = payload.solver && payload.solver.converged === false
+        ? "Sparse solve returned, but residual is above tolerance. Field is shown with a warning."
+        : "Results complete.";
+      refresh();
+      openResultsPage();
+    };
+
+    function animate() {
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    bindEvents();
+    refresh();
+    resize();
+    fitCamera("iso");
+    animate();
+  </script>
+</body>
+</html>
