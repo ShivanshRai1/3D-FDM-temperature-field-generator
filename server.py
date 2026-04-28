@@ -329,7 +329,7 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
+        server = ThreadingHTTPServer(("0.0.0.0", args.port), Handler)
     except OSError as exc:
         if exc.errno == 48:
             raise SystemExit(
@@ -340,7 +340,7 @@ def main() -> None:
             ) from exc
         raise
 
-    print(f"Serving Version3 at http://127.0.0.1:{args.port}/pcb_temperature_app.html")
+    print(f"Serving Version3 at http://0.0.0.0:{args.port}/pcb_temperature_app.html")
     print("Press Ctrl+C to stop.")
     server.serve_forever()
 
