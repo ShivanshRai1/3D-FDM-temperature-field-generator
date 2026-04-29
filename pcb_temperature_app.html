@@ -768,7 +768,7 @@
       </p>
       <div class="grid2">
         <div>
-          <label for="ambientInput">Ambient temperature (degC)</label>
+          <label for="ambientInput">Ambient temperature (°C)</label>
           <input id="ambientInput" type="number" step="1" value="25">
         </div>
         <div>
@@ -1499,8 +1499,8 @@
       }
       const solver = state.result.solver || {};
       refs.resultState.textContent = solver.converged === false
-        ? `Simulation finished with residual warning. Range ${state.result.minTemp.toFixed(1)} degC to ${state.result.maxTemp.toFixed(1)} degC.`
-        : `Simulation complete. Range ${state.result.minTemp.toFixed(1)} degC to ${state.result.maxTemp.toFixed(1)} degC.`;
+        ? `Simulation finished with residual warning. Range ${state.result.minTemp.toFixed(1)} °C to ${state.result.maxTemp.toFixed(1)} °C.`
+        : `Simulation complete. Range ${state.result.minTemp.toFixed(1)} °C to ${state.result.maxTemp.toFixed(1)} °C.`;
 
       state.layers.forEach((layer, index) => {
         const viewKey = `layer:${layer.id}`;
@@ -1527,8 +1527,8 @@
       const solver = state.result?.solver || {};
       const diagnostics = solver.diagnostics || {};
       refs.resultRunLog.innerHTML = `
-        <div><strong>Ambient:</strong> ${Number(state.ambientTemperatureC).toFixed(1)} degC</div>
-        <div><strong>Displayed temperature:</strong> solver K converted directly to degC. Ambient is applied inside the solver boundary condition.</div>
+        <div><strong>Ambient:</strong> ${Number(state.ambientTemperatureC).toFixed(1)} °C</div>
+        <div><strong>Displayed temperature:</strong> solver K converted directly to °C. Ambient is applied inside the solver boundary condition.</div>
         <div><strong>dx/dy/dz:</strong> ${formatMetric(log.dx, "mm")} / ${formatMetric(log.dy, "mm")} / ${formatMetric(log.dz, "mm")}</div>
         <div><strong>Actual z cell range:</strong> ${formatMetric(diagnostics.min_dz_mm, "mm")} to ${formatMetric(diagnostics.max_dz_mm, "mm")}</div>
         <div><strong>Matrix size:</strong> ${diagnostics.grid_shape ? diagnostics.grid_shape.join(" x ") : "n/a"} = ${diagnostics.cell_count ? Number(diagnostics.cell_count).toLocaleString() : "n/a"} unknown temperatures</div>
@@ -1556,9 +1556,9 @@
         item.className = "summary";
         item.innerHTML = `
           <div><strong>${component.name}</strong></div>
-          <div><strong>Field max under footprint:</strong> ${Number.isFinite(fieldMaxTemp) ? fieldMaxTemp.toFixed(2) : "n/a"} degC</div>
-          <div><strong>Rth junction rise:</strong> ${junctionRise.toFixed(2)} degC</div>
-          <div><strong>Estimated junction:</strong> ${Number.isFinite(estimatedJunctionTemp) ? estimatedJunctionTemp.toFixed(2) : "n/a"} degC</div>
+          <div><strong>Field max under footprint:</strong> ${Number.isFinite(fieldMaxTemp) ? fieldMaxTemp.toFixed(2) : "n/a"} °C</div>
+          <div><strong>Rth junction rise:</strong> ${junctionRise.toFixed(2)} °C</div>
+          <div><strong>Estimated junction:</strong> ${Number.isFinite(estimatedJunctionTemp) ? estimatedJunctionTemp.toFixed(2) : "n/a"} °C</div>
           <div><strong>Power:</strong> ${component.power.toFixed(3)} W</div>
           <div><strong>Rth:</strong> ${component.rth.toFixed(3)} K/W</div>
         `;
@@ -1648,7 +1648,7 @@
         writeNumber("selectedH", state.pcbThicknessMm);
       }
       if (state.result) {
-        refs.legendRange.textContent = `${state.result.minTemp.toFixed(1)} degC - ${state.result.maxTemp.toFixed(1)} degC`;
+        refs.legendRange.textContent = `${state.result.minTemp.toFixed(1)} °C - ${state.result.maxTemp.toFixed(1)} °C`;
       }
     }
 
@@ -1980,7 +1980,7 @@
     async function runSimulationFromModal() {
       const ambientC = Number(refs.ambientInput.value);
       if (!Number.isFinite(ambientC)) {
-        window.alert("Ambient temperature must be a valid number in degC.");
+        window.alert("Ambient temperature must be a valid number in °C.");
         return;
       }
       const omega = Number(refs.omegaInput.value);
@@ -2392,7 +2392,7 @@
         hoverTile = tile;
         if (tile) {
           const d = tile.userData;
-          const text = `${d.view}<br>x ${d.x.toFixed(2)} mm, y ${d.y.toFixed(2)} mm<br>z ${d.z.toFixed(2)} mm<br>${d.temp.toFixed(3)} degC`;
+          const text = `${d.view}<br>x ${d.x.toFixed(2)} mm, y ${d.y.toFixed(2)} mm<br>z ${d.z.toFixed(2)} mm<br>${d.temp.toFixed(3)} °C`;
           refs.tooltip.innerHTML = text;
           refs.tooltip.style.display = "block";
           refs.hoverReadout.innerHTML = text;

@@ -208,10 +208,10 @@ Run log text should say ambient is applied inside the solver boundary condition.
 The user observed results like:
 
 ```text
-Temperature range: 277.6 degC - 631.1 degC
-Buck regulator estimated junction: 391.22 degC
-Power resistor estimated junction: 413.76 degC
-MOSFET estimated junction: 701.10 degC
+Temperature range: 277.6 °C - 631.1 °C
+Buck regulator estimated junction: 391.22 °C
+Power resistor estimated junction: 413.76 °C
+MOSFET estimated junction: 701.10 °C
 ```
 
 For configuration roughly:
@@ -273,10 +273,10 @@ User wants:
 - Copper layer placement should lock to ZX stack view.
 - Via placement should lock to XY view.
 - X-Ray mode to see layers/vias through PCB.
-- Simulation modal should show ambient temperature in degC, legacy SOR omega, dx/dy/dz, and explanation of why grid is needed.
+- Simulation modal should show ambient temperature in °C, legacy SOR omega, dx/dy/dz, and explanation of why grid is needed.
 - Progress bar with current solver status.
 - On simulation completion: dedicated results page/mode, run log, component summary, view buttons, downloadable CSV/PNG/HTML.
-- Temperature results shown in degC.
+- Temperature results shown in °C.
 - Avoid color conflicts between base PCB/layer colors and temperature gradient.
 - Accuracy matters more than just having a visually plausible result.
 
@@ -414,6 +414,6 @@ http://127.0.0.1:8080/pcb_temperature_app.html
 
 ## Last Known User Sentiment
 
-User is not confident in accuracy of current numerical results, especially with high temperatures like `277-631 degC` field range and `701 degC` MOSFET estimated junction. This concern is valid.
+User is not confident in accuracy of current numerical results, especially with high temperatures like `277-631 °C` field range and `701 °C` MOSFET estimated junction. This concern is valid.
 
 The UI is mostly acceptable now. Solver physics and validation are the main remaining problems.
