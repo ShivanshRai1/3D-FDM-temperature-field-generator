@@ -1,0 +1,234 @@
+{
+  "created_at": "2026-04-29T11:09:42.067707+00:00",
+  "error": null,
+  "finished_at": "2026-04-29T11:09:42.076593+00:00",
+  "job_id": "0a520727715e4f21bf966fc006ca2fd6",
+  "mode": "sync",
+  "normalized_config": {
+    "board": {
+      "dx_mm": 3.0,
+      "dy_mm": 3.0,
+      "dz_mm": 0.8,
+      "length_mm": 12.0,
+      "thickness_mm": 1.6,
+      "width_mm": 10.0
+    },
+    "boundary": {
+      "ambient_temperature_k": 298.15,
+      "convection_coefficient_w_m2k": 13.0,
+      "emissivity": 0.8,
+      "surrounding_temperature_k": 298.15
+    },
+    "components": [
+      {
+        "depth_mm": 2.0,
+        "heat_application": "top",
+        "heat_depth_mm": 0.8,
+        "height_mm": 1.0,
+        "name": "Test",
+        "power_w": 1.0,
+        "steady_state_thermal_resistance_k_per_w": 10.0,
+        "width_mm": 2.0,
+        "x_mm": 4.0,
+        "y_mm": 3.0,
+        "z_mm": 1.6
+      }
+    ],
+    "layers": [
+      {
+        "conductivity_w_mk": 0.35,
+        "name": "FR4 core",
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "name": "Top copper",
+        "z_end_mm": 1.6,
+        "z_start_mm": 1.56
+      }
+    ],
+    "solver": {
+      "initial_temperature_k": 298.15,
+      "max_iterations": 20000,
+      "radiation_outer_iterations": 1,
+      "radiation_tolerance_k": 0.05,
+      "relaxation_factor": 1.2,
+      "tolerance_k": 0.001
+    },
+    "thermal_vias": [
+      {
+        "conductivity_w_mk": 385.0,
+        "count_x": 1,
+        "count_y": 1,
+        "diameter_mm": 0.3,
+        "name": "V1",
+        "pitch_x_mm": 0.0,
+        "pitch_y_mm": 0.0,
+        "x_mm": 5.0,
+        "y_mm": 4.0,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      }
+    ]
+  },
+  "omega": 1.2,
+  "raw_request": {
+    "config": {
+      "board": {
+        "dx_mm": 3,
+        "dy_mm": 3,
+        "dz_mm": 0.8,
+        "length_mm": 12,
+        "thickness_mm": 1.6,
+        "width_mm": 10
+      },
+      "boundary": {
+        "ambient_temperature_k": 298.15,
+        "convection_coefficient_w_m2k": 13,
+        "emissivity": 0.8,
+        "surrounding_temperature_k": 298.15
+      },
+      "components": [
+        {
+          "depth_mm": 2,
+          "height_mm": 1,
+          "id": "C1",
+          "name": "Test",
+          "power_w": 1,
+          "steady_state_thermal_resistance_k_per_w": 10,
+          "width_mm": 2,
+          "x_mm": 4,
+          "y_mm": 3
+        }
+      ],
+      "copper_layers": [
+        {
+          "conductivity_w_mk": 385,
+          "id": "L1",
+          "name": "Top copper",
+          "thickness_mm": 0.04,
+          "z_center_mm": 1.58,
+          "z_end_mm": 1.6,
+          "z_start_mm": 1.56
+        }
+      ],
+      "radiation_outer_iterations": 1,
+      "radiation_tolerance_k": 0.05,
+      "solver_tolerance_k": 0.001,
+      "thermal_vias": [
+        {
+          "conductivity_w_mk": 385,
+          "diameter_mm": 0.3,
+          "id": "V1",
+          "x_mm": 5,
+          "y_mm": 4,
+          "z_end_mm": 1.6,
+          "z_start_mm": 0
+        }
+      ]
+    },
+    "solver": {
+      "omega": 1.2
+    }
+  },
+  "result": {
+    "component_reports": [
+      {
+        "board_average_temperature_k": 505.2859759807605,
+        "board_max_temperature_k": 505.28597598076044,
+        "component_model": "surface_heat_flux_plus_junction_rise",
+        "equivalent_thermal_conductivity_w_mk": 25.0,
+        "estimated_junction_temperature_k": 515.2859759807604,
+        "junction_rise_k": 10.0,
+        "name": "Test",
+        "occupied_cell_count": 1
+      }
+    ],
+    "max_temperature_k": 505.28597598076044,
+    "min_temperature_k": 463.81035288018484,
+    "solver": {
+      "converged": true,
+      "diagnostics": {
+        "boundary_loss_w": 1.000000000000016,
+        "cell_count": 48,
+        "energy_balance_error_w": -1.5987211554602254e-14,
+        "exact_radiation_balance_error_w": -0.3617204348662926,
+        "exact_radiation_boundary_loss_w": 1.3617204348662926,
+        "grid_shape": [
+          4,
+          4,
+          3
+        ],
+        "matrix_nonzeros": 256,
+        "max_dx_mm": 3.000000000000001,
+        "max_dy_mm": 2.5000000000000004,
+        "max_dz_mm": 0.8,
+        "min_dx_mm": 2.999999999999999,
+        "min_dy_mm": 2.4999999999999996,
+        "min_dz_mm": 0.03999999999999989,
+        "radiation_outer_iterations_used": 1,
+        "total_power_w": 1.0
+      },
+      "iterations": 1,
+      "max_delta_k": 6.63358257213531e-15
+    }
+  },
+  "schema": "pcb_thermal_simulation_run_manifest_v1",
+  "source_config": {
+    "board": {
+      "dx_mm": 3,
+      "dy_mm": 3,
+      "dz_mm": 0.8,
+      "length_mm": 12,
+      "thickness_mm": 1.6,
+      "width_mm": 10
+    },
+    "boundary": {
+      "ambient_temperature_k": 298.15,
+      "convection_coefficient_w_m2k": 13,
+      "emissivity": 0.8,
+      "surrounding_temperature_k": 298.15
+    },
+    "components": [
+      {
+        "depth_mm": 2,
+        "height_mm": 1,
+        "id": "C1",
+        "name": "Test",
+        "power_w": 1,
+        "steady_state_thermal_resistance_k_per_w": 10,
+        "width_mm": 2,
+        "x_mm": 4,
+        "y_mm": 3
+      }
+    ],
+    "copper_layers": [
+      {
+        "conductivity_w_mk": 385,
+        "id": "L1",
+        "name": "Top copper",
+        "thickness_mm": 0.04,
+        "z_center_mm": 1.58,
+        "z_end_mm": 1.6,
+        "z_start_mm": 1.56
+      }
+    ],
+    "radiation_outer_iterations": 1,
+    "radiation_tolerance_k": 0.05,
+    "solver_tolerance_k": 0.001,
+    "thermal_vias": [
+      {
+        "conductivity_w_mk": 385,
+        "diameter_mm": 0.3,
+        "id": "V1",
+        "x_mm": 5,
+        "y_mm": 4,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0
+      }
+    ]
+  },
+  "status": "done",
+  "updated_at": "2026-04-29T11:09:42.076916+00:00"
+}

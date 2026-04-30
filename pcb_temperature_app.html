@@ -161,12 +161,14 @@
 
     input,
     select,
+    textarea,
     button {
       font: inherit;
     }
 
     input,
-    select {
+    select,
+    textarea {
       width: 100%;
       min-height: 34px;
       padding: 7px 8px;
@@ -174,6 +176,14 @@
       background: var(--field);
       border: 1px solid var(--line);
       border-radius: 4px;
+    }
+
+    textarea {
+      min-height: 86px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     button {
@@ -339,11 +349,14 @@
       display: none;
       width: 280px;
       max-height: calc(100vh - 146px);
-      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
       padding: 10px;
       background: var(--panel);
       border: 1px solid var(--line);
       box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+      overflow-wrap: anywhere;
+      word-break: normal;
     }
 
     body.results-page .results-panel {
@@ -366,6 +379,14 @@
       margin-top: 0;
     }
 
+    .results-panel *,
+    .result-log *,
+    .component-summary * {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
     .result-state {
       padding: 9px 10px;
       color: #064e3b;
@@ -374,6 +395,12 @@
       border-radius: 6px;
       font-size: 13px;
       line-height: 1.35;
+    }
+
+    .result-state.warning {
+      color: #7c2d12;
+      background: #ffedd5;
+      border-color: #fdba74;
     }
 
     .result-view-list {
@@ -407,6 +434,17 @@
 
     .component-summary .summary {
       background: #ffffff;
+    }
+
+    .component-rth-needed {
+      border-color: #f59e0b !important;
+      background: #fff7ed !important;
+    }
+
+    .field-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .bar {
@@ -552,6 +590,58 @@
       font-size: 13px;
     }
 
+    .guide-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 4;
+      display: none;
+      background: rgba(15, 23, 42, 0.58);
+      pointer-events: none;
+    }
+
+    .guide-backdrop.active {
+      display: block;
+    }
+
+    .guide-popover {
+      position: fixed;
+      z-index: 33;
+      display: none;
+      width: min(340px, calc(100vw - 32px));
+      padding: 14px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 54px rgba(15, 23, 42, 0.28);
+      pointer-events: auto;
+    }
+
+    .guide-popover.active {
+      display: block;
+    }
+
+    .guide-popover h2 {
+      margin: 0 0 8px;
+      color: var(--text);
+      font-size: 15px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .guide-popover p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .guide-highlight {
+      position: relative;
+      z-index: 32 !important;
+      outline: 3px solid #f59e0b;
+      outline-offset: 4px;
+      box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.18);
+    }
+
     @media (max-width: 880px) {
       .toolbar {
         left: 16px;
@@ -603,7 +693,7 @@
   <canvas id="scene"></canvas>
   <button id="panelTab" class="panel-tab">Setup</button>
 
-  <div class="toolbar">
+  <div id="topToolbar" class="toolbar">
     <button id="viewTop" class="icon-button secondary" title="Top view">T</button>
     <button id="viewBottom" class="icon-button secondary" title="Bottom view">B</button>
     <button id="viewIso" class="icon-button secondary" title="Isometric view">I</button>
@@ -645,7 +735,7 @@
   <aside id="setupPanel" class="panel">
     <h1>PCB Thermal Setup <button id="collapsePanel" class="icon-button secondary panel-toggle" title="Collapse setup panel">‹</button></h1>
 
-    <div class="section-card">
+    <div id="boardSetupSection" class="section-card">
       <h2>Board</h2>
       <div class="grid2">
         <div>
@@ -657,10 +747,14 @@
           <input id="thicknessInput" type="number" step="0.1" min="0.2" value="1.6">
         </div>
       </div>
+      <div style="margin-top: 8px;">
+        <label for="convectionInput">Convective coefficient (W/m²K)</label>
+        <input id="convectionInput" type="number" step="0.5" min="0" value="13">
+      </div>
       <div id="boardSummary" class="summary" style="margin-top: 8px;"></div>
     </div>
 
-    <div class="section-card">
+    <div id="componentsSection" class="section-card">
       <h2>Components</h2>
       <div class="stack">
       <div>
@@ -682,11 +776,17 @@
       </div>
       <button id="addComponent">Add Component</button>
       <button id="removeComponent" class="danger hidden">Remove Selected Component</button>
+      <div>
+        <label for="componentArrayInput">Component array import</label>
+        <textarea id="componentArrayInput" placeholder='[[10, 8, 5, 5, 1.2, 7, "MOSFET"]]'></textarea>
+        <div class="field-note">Format: [[x, y, length, width, height, Rth, "Component_Name"]]. Imported rows use the current Power (W) value.</div>
+      </div>
+      <button id="importComponentArray" class="secondary">Import Component Array</button>
       </div>
       <div id="componentList" class="list" style="margin-top: 8px;"></div>
     </div>
 
-    <div class="section-card">
+    <div id="layersSection" class="section-card">
       <h2>Copper Layers</h2>
       <div id="placementBanner" class="mode-banner"></div>
       <div class="grid3">
@@ -703,7 +803,7 @@
       <div id="layerList" class="list" style="margin-top: 8px;"></div>
     </div>
 
-    <div class="section-card">
+    <div id="viasSection" class="section-card">
       <h2>Thermal Vias</h2>
       <div class="grid3">
       <div><label for="viaX">X (mm)</label><input id="viaX" type="number" step="0.5" value="14"></div>
@@ -735,27 +835,33 @@
     <div class="row" style="margin-top: 8px;">
       <button id="applySelected">Apply</button>
     </div>
+    <div class="grid2" style="margin-top: 8px;">
+      <div><label for="selectedPower">Power (W)</label><input id="selectedPower" type="number" step="0.1" min="0"></div>
+      <div><label for="selectedRth">Rth (K/W)</label><input id="selectedRth" type="number" step="0.1" min="0.1"></div>
+    </div>
     </div>
 
-    <div class="section-card">
+    <div id="solverSetupSection" class="section-card">
       <h2>Solver Handoff</h2>
       <div class="row">
         <button id="downloadConfig" class="secondary">Config JSON</button>
         <button id="copyConfig" class="secondary">Copy JSON</button>
+        <button id="startGuide" class="secondary">Guide</button>
       </div>
     </div>
   </aside>
 
-  <div class="legend">
-    <div class="row" style="justify-content: space-between;">
-      <strong>Temperature</strong>
-      <span id="legendRange">300.0 K - 340.0 K</span>
-    </div>
-    <div class="bar"></div>
-    <div id="hoverReadout" class="summary">Hover a temperature tile after running simulation.</div>
-  </div>
-
   <div id="tooltip" class="tooltip"></div>
+
+  <div id="guideBackdrop" class="guide-backdrop"></div>
+  <div id="guidePopover" class="guide-popover">
+    <h2 id="guideTitle"></h2>
+    <p id="guideText"></p>
+    <div class="row" style="justify-content: flex-end;">
+      <button id="skipGuide" class="secondary">Skip</button>
+      <button id="nextGuide">Next</button>
+    </div>
+  </div>
 
   <div id="simulationModal" class="modal-backdrop">
     <div class="modal">
@@ -780,6 +886,10 @@
         <div>
           <label for="toleranceInput">Residual tolerance</label>
           <input id="toleranceInput" type="number" step="0.0001" min="0.000001" value="0.001">
+        </div>
+        <div>
+          <label for="radiationIterationsInput">Radiation iterations</label>
+          <input id="radiationIterationsInput" type="number" step="1" min="1" max="64" value="24">
         </div>
       </div>
       <div class="grid3" style="margin-top: 8px;">
@@ -827,8 +937,14 @@
       activeResultLayerId: null,
       resultPage: false,
       ambientTemperatureC: 25,
+      convectionCoefficientWm2K: 13,
       lastRunLog: null,
-      result: null
+      result: null,
+      guide: {
+        active: false,
+        index: 0,
+        pendingResultsStep: false
+      }
     };
 
     if (typeof savedSnapshot !== "undefined") {
@@ -841,6 +957,7 @@
       state.activeResultLayerId = savedSnapshot.activeResultLayerId ?? state.activeResultLayerId;
       state.resultPage = savedSnapshot.resultPage ?? state.resultPage;
       state.ambientTemperatureC = savedSnapshot.ambientTemperatureC ?? state.ambientTemperatureC;
+      state.convectionCoefficientWm2K = savedSnapshot.convectionCoefficientWm2K ?? state.convectionCoefficientWm2K;
       state.lastRunLog = savedSnapshot.lastRunLog ?? state.lastRunLog;
       state.result = savedSnapshot.result ?? state.result;
       state.selectedLayerId = state.layers[0]?.id || state.selectedLayerId;
@@ -903,8 +1020,6 @@
       xraySwatchText: document.getElementById("xraySwatchText"),
       status: document.getElementById("status"),
       tooltip: document.getElementById("tooltip"),
-      hoverReadout: document.getElementById("hoverReadout"),
-      legendRange: document.getElementById("legendRange"),
       placementBanner: document.getElementById("placementBanner"),
       solverProgress: document.getElementById("solverProgress"),
       progressFill: document.getElementById("progressFill"),
@@ -918,6 +1033,7 @@
       ambientInput: document.getElementById("ambientInput"),
       omegaInput: document.getElementById("omegaInput"),
       toleranceInput: document.getElementById("toleranceInput"),
+      radiationIterationsInput: document.getElementById("radiationIterationsInput"),
       setupPanel: document.getElementById("setupPanel"),
       panelTab: document.getElementById("panelTab"),
       applyLayer: document.getElementById("applyLayer"),
@@ -927,7 +1043,13 @@
       cancelVia: document.getElementById("cancelVia"),
       removeVia: document.getElementById("removeVia"),
       removeComponent: document.getElementById("removeComponent"),
-      applySelected: document.getElementById("applySelected")
+      applySelected: document.getElementById("applySelected"),
+      guideBackdrop: document.getElementById("guideBackdrop"),
+      guidePopover: document.getElementById("guidePopover"),
+      guideTitle: document.getElementById("guideTitle"),
+      guideText: document.getElementById("guideText"),
+      nextGuide: document.getElementById("nextGuide"),
+      skipGuide: document.getElementById("skipGuide")
     };
 
     function readNumber(id, fallback) {
@@ -937,6 +1059,189 @@
 
     function writeNumber(id, value) {
       document.getElementById(id).value = Number(value).toFixed(3).replace(/\.?0+$/, "");
+    }
+
+    const guideSteps = [
+      {
+        target: "boardSetupSection",
+        group: "setup",
+        title: "Board",
+        text: "Set the PCB margin and thickness. The board summary shows the derived PCB size, grid estimate, origin, and object counts."
+      },
+      {
+        target: "componentsSection",
+        group: "setup",
+        title: "Components",
+        text: "Add one component manually or import a 2D array. Select an existing component to remove it or edit placement, size, power, and Rth."
+      },
+      {
+        target: "layersSection",
+        group: "setup",
+        title: "Copper Layers",
+        text: "Place copper planes by choosing their z position and thickness. Use Apply Layer to commit a preview, or remove the selected layer from the list."
+      },
+      {
+        target: "viasSection",
+        group: "setup",
+        title: "Thermal Vias",
+        text: "Place vias in the top view, set their diameter, and apply them to improve through-board heat spreading. Selected vias can be moved or removed."
+      },
+      {
+        target: "solverSetupSection",
+        group: "setup",
+        title: "Setup And Solver",
+        text: "Board thickness, margins, grid spacing, ambient temperature, and solver tolerance control accuracy, solve time, and the exported verification manifest."
+      },
+      {
+        target: "viewTop",
+        group: "toolbar",
+        title: "Top View",
+        text: "T switches the camera to the PCB top view."
+      },
+      {
+        target: "viewBottom",
+        group: "toolbar",
+        title: "Bottom View",
+        text: "B switches the camera to the PCB bottom view."
+      },
+      {
+        target: "viewIso",
+        group: "toolbar",
+        title: "Isometric View",
+        text: "I returns to the angled 3D view for placement and inspection."
+      },
+      {
+        target: "viewLayer",
+        group: "toolbar",
+        title: "Layer View",
+        text: "Layer shows the selected copper layer as a focused slice."
+      },
+      {
+        target: "layerViewSelect",
+        group: "toolbar",
+        title: "Layer Dropdown",
+        text: "Choose which copper layer is active for layer viewing and result slices."
+      },
+      {
+        target: "xrayToggle",
+        group: "toolbar",
+        title: "X-Ray",
+        text: "X-Ray reveals internal copper layers and thermal vias through the board."
+      },
+      {
+        target: "runSimulation",
+        group: "toolbar",
+        title: "Run Simulation",
+        text: "Run Simulation opens the solver dialog, then sends the current board, components, copper layers, vias, and solver settings to the backend."
+      },
+      {
+        target: "downloadCsv",
+        group: "toolbar",
+        title: "CSV Export",
+        text: "CSV exports the active temperature slice after a simulation run."
+      },
+      {
+        target: "downloadPng",
+        group: "toolbar",
+        title: "PNG Export",
+        text: "PNG saves the current 3D canvas view as an image."
+      },
+      {
+        target: "downloadHtml",
+        group: "toolbar",
+        title: "HTML Export",
+        text: "HTML exports a standalone copy of the configured page state."
+      },
+      {
+        target: "resultsPanel",
+        group: "results",
+        title: "Results",
+        text: "After a run, use the results panel to compare temperature ranges, matrix diagnostics, residual, energy balance, and per-component junction estimates."
+      }
+    ];
+
+    function clearGuideHighlight() {
+      document.querySelectorAll(".guide-highlight").forEach(element => {
+        element.classList.remove("guide-highlight");
+      });
+    }
+
+    function positionGuidePopover(target) {
+      const targetRect = target.getBoundingClientRect();
+      const popoverRect = refs.guidePopover.getBoundingClientRect();
+      const margin = 16;
+      let left = targetRect.right + 16;
+      if (left + popoverRect.width > window.innerWidth - margin) {
+        left = targetRect.left - popoverRect.width - 16;
+      }
+      if (left < margin) left = margin;
+      let top = targetRect.top;
+      if (top + popoverRect.height > window.innerHeight - margin) {
+        top = window.innerHeight - popoverRect.height - margin;
+      }
+      refs.guidePopover.style.left = `${Math.max(margin, left)}px`;
+      refs.guidePopover.style.top = `${Math.max(margin, top)}px`;
+    }
+
+    function showGuideStep(index) {
+      const step = guideSteps[index];
+      if (!step) {
+        skipGuide(true);
+        return;
+      }
+      if (step.group === "setup") {
+        leaveResultsPage();
+        setPanelCollapsed(false);
+      }
+      if (step.target === "resultsPanel" && !state.result) {
+        state.guide.active = false;
+        state.guide.pendingResultsStep = true;
+        refs.guideBackdrop.classList.remove("active");
+        refs.guidePopover.classList.remove("active");
+        clearGuideHighlight();
+        refs.status.textContent = "Guide will continue with results after the next simulation run.";
+        return;
+      }
+
+      const target = document.getElementById(step.target);
+      if (!target) return;
+      state.guide.active = true;
+      state.guide.index = index;
+      refs.guideTitle.textContent = step.title;
+      refs.guideText.textContent = step.text;
+      refs.nextGuide.textContent = index === guideSteps.length - 1 ? "Done" : "Next";
+      refs.guideBackdrop.classList.add("active");
+      refs.guidePopover.classList.add("active");
+      clearGuideHighlight();
+      target.classList.add("guide-highlight");
+      target.scrollIntoView({ block: "nearest", inline: "nearest" });
+      window.setTimeout(() => positionGuidePopover(target), 0);
+    }
+
+    function startGuide(index = 0) {
+      state.guide.pendingResultsStep = false;
+      if (guideSteps[index]?.group === "results" && state.result) {
+        openResultsPage();
+      } else if (guideSteps[index]?.group === "setup") {
+        leaveResultsPage();
+        setPanelCollapsed(false);
+      }
+      showGuideStep(index);
+    }
+
+    function nextGuideStep() {
+      showGuideStep(state.guide.index + 1);
+    }
+
+    function skipGuide(remember = true) {
+      state.guide.active = false;
+      state.guide.pendingResultsStep = false;
+      refs.guideBackdrop.classList.remove("active");
+      refs.guidePopover.classList.remove("active");
+      clearGuideHighlight();
+      if (remember) {
+        window.localStorage.setItem("pcbThermalGuideSkipped", "true");
+      }
     }
 
     function gridSettings() {
@@ -1074,10 +1379,7 @@
     function syncInputs() {
       state.marginMm = Math.max(0, readNumber("marginInput", state.marginMm));
       state.pcbThicknessMm = Math.max(0.2, readNumber("thicknessInput", state.pcbThicknessMm));
-      const grid = gridSettings();
-      writeNumber("dxInput", grid.dx);
-      writeNumber("dyInput", grid.dy);
-      writeNumber("dzInput", grid.dz);
+      state.convectionCoefficientWm2K = Math.max(0, readNumber("convectionInput", state.convectionCoefficientWm2K));
       state.components.forEach(component => {
         component.z = state.pcbThicknessMm;
       });
@@ -1445,8 +1747,12 @@
       refs.componentList.innerHTML = "";
       state.components.forEach(component => {
         const item = document.createElement("button");
-        item.textContent = `${component.name}  x=${component.x.toFixed(2)} y=${component.y.toFixed(2)}  ${component.l.toFixed(2)} x ${component.w.toFixed(2)} x ${component.h.toFixed(2)} mm`;
-        item.className = state.selected === component.id ? "active" : "";
+        const rthNote = component.rthMissing ? "  Rth required" : "";
+        item.textContent = `${component.name}  x=${component.x.toFixed(2)} y=${component.y.toFixed(2)}  ${component.l.toFixed(2)} x ${component.w.toFixed(2)} x ${component.h.toFixed(2)} mm${rthNote}`;
+        item.className = [
+          state.selected === component.id ? "active" : "",
+          component.rthMissing ? "component-rth-needed" : ""
+        ].filter(Boolean).join(" ");
         item.onclick = () => {
           state.selected = component.id;
           refresh();
@@ -1491,6 +1797,7 @@
       document.body.classList.toggle("results-ready", Boolean(state.result));
       document.body.classList.toggle("results-page", Boolean(state.resultPage && state.result));
       refs.resultLayerButtons.innerHTML = "";
+      refs.resultState.classList.remove("warning");
       if (!state.result) {
         refs.resultState.textContent = "Run simulation to generate temperature results.";
         refs.resultRunLog.textContent = "No simulation run yet.";
@@ -1498,9 +1805,19 @@
         return;
       }
       const solver = state.result.solver || {};
-      refs.resultState.textContent = solver.converged === false
-        ? `Simulation finished with residual warning. Range ${state.result.minTemp.toFixed(1)} °C to ${state.result.maxTemp.toFixed(1)} °C.`
-        : `Simulation complete. Range ${state.result.minTemp.toFixed(1)} °C to ${state.result.maxTemp.toFixed(1)} °C.`;
+      const diagnostics = solver.diagnostics || {};
+      const exactBalanceError = Number(diagnostics.exact_radiation_balance_error_w);
+      const totalPower = Math.max(1e-9, Math.abs(Number(diagnostics.total_power_w) || 0));
+      const exactRadiationWarning = Number.isFinite(exactBalanceError)
+        && Math.abs(exactBalanceError) > Math.max(0.5, totalPower * 0.05);
+      refs.resultState.classList.toggle("warning", solver.converged === false || exactRadiationWarning);
+      if (exactRadiationWarning) {
+        refs.resultState.textContent = `Simulation needs more radiation convergence. Range ${state.result.minTemp.toFixed(1)} °C to ${state.result.maxTemp.toFixed(1)} °C; exact radiation balance error ${exactBalanceError.toFixed(3)} W.`;
+      } else {
+        refs.resultState.textContent = solver.converged === false
+          ? `Simulation finished with convergence warning. Range ${state.result.minTemp.toFixed(1)} °C to ${state.result.maxTemp.toFixed(1)} °C.`
+          : `Simulation complete. Range ${state.result.minTemp.toFixed(1)} °C to ${state.result.maxTemp.toFixed(1)} °C.`;
+      }
 
       state.layers.forEach((layer, index) => {
         const viewKey = `layer:${layer.id}`;
@@ -1535,12 +1852,14 @@
         <div><strong>Matrix nonzeros:</strong> ${diagnostics.matrix_nonzeros ? Number(diagnostics.matrix_nonzeros).toLocaleString() : "n/a"}</div>
         <div><strong>Legacy SOR omega:</strong> ${formatMetric(log.omega, "")}</div>
         <div><strong>Tolerance:</strong> ${formatMetric(log.tolerance, "K")}</div>
+        <div><strong>Requested radiation iterations:</strong> ${log.radiationIterations ?? "n/a"}</div>
         <div><strong>Simulation time:</strong> ${log.duration || "not recorded"}</div>
         <div><strong>Iterations:</strong> ${solver.iterations ?? "n/a"}</div>
         <div><strong>Radiation outer iterations:</strong> ${diagnostics.radiation_outer_iterations_used ?? "n/a"}</div>
         <div><strong>Converged:</strong> ${solver.converged === false ? "false" : "true"}</div>
         <div><strong>Residual:</strong> ${solver.max_delta_k ?? "n/a"}</div>
         <div><strong>Energy balance error:</strong> ${formatMetric(diagnostics.energy_balance_error_w, "W")}</div>
+        <div><strong>Exact radiation balance error:</strong> ${formatMetric(diagnostics.exact_radiation_balance_error_w, "W")}</div>
       `;
     }
 
@@ -1622,6 +1941,7 @@
       refs.boardSummary.innerHTML = `
         <div><strong>PCB:</strong> ${b.length.toFixed(2)} x ${b.width.toFixed(2)} x ${state.pcbThicknessMm.toFixed(2)} mm</div>
         <div><strong>Grid:</strong> ${grid.dx.toFixed(3)} x ${grid.dy.toFixed(3)} x ${grid.dz.toFixed(3)} mm, about ${nx} x ${ny} x ${nz} = ${(nx * ny * nz).toLocaleString()} cells</div>
+        <div><strong>Convection:</strong> ${state.convectionCoefficientWm2K.toFixed(2)} W/m²K</div>
         <div><strong>Origin:</strong> ${b.originX.toFixed(2)}, ${b.originY.toFixed(2)} mm</div>
         <div><strong>Objects:</strong> ${state.components.length} components, ${state.layers.length} copper layers, ${state.vias.length} vias</div>
       `;
@@ -1629,15 +1949,20 @@
       const record = selectedRecord();
       if (!record) {
         refs.selectionSummary.textContent = "Nothing selected.";
-        ["selectedX", "selectedY", "selectedRot", "selectedL", "selectedW", "selectedH"].forEach(id => document.getElementById(id).value = "");
+        ["selectedX", "selectedY", "selectedRot", "selectedL", "selectedW", "selectedH", "selectedPower", "selectedRth"].forEach(id => document.getElementById(id).value = "");
       } else if ("power" in record) {
-        refs.selectionSummary.innerHTML = `<strong>${record.name}</strong><br>${record.l} x ${record.w} x ${record.h} mm, ${record.power} W, Rth ${record.rth} K/W`;
+        const rthWarning = record.rthMissing
+          ? "<br><strong>Rth required:</strong> enter the steady-state K/W value from the datasheet thermal impedance curve."
+          : "";
+        refs.selectionSummary.innerHTML = `<strong>${record.name}</strong><br>${record.l} x ${record.w} x ${record.h} mm, ${record.power} W, Rth ${record.rth} K/W${rthWarning}`;
         writeNumber("selectedX", record.x);
         writeNumber("selectedY", record.y);
         writeNumber("selectedRot", record.rotation || 0);
         writeNumber("selectedL", record.l);
         writeNumber("selectedW", record.w);
         writeNumber("selectedH", record.h);
+        writeNumber("selectedPower", record.power);
+        writeNumber("selectedRth", record.rth);
       } else {
         refs.selectionSummary.innerHTML = `<strong>${record.id}</strong><br>Thermal via, diameter ${record.diameter} mm`;
         writeNumber("selectedX", record.x);
@@ -1646,9 +1971,8 @@
         writeNumber("selectedL", record.diameter);
         writeNumber("selectedW", record.diameter);
         writeNumber("selectedH", state.pcbThicknessMm);
-      }
-      if (state.result) {
-        refs.legendRange.textContent = `${state.result.minTemp.toFixed(1)} °C - ${state.result.maxTemp.toFixed(1)} °C`;
+        document.getElementById("selectedPower").value = "";
+        document.getElementById("selectedRth").value = "";
       }
     }
 
@@ -1847,6 +2171,10 @@
       return `${solverApiUrl()}/status?job_id=${encodeURIComponent(jobId)}`;
     }
 
+    function componentImportUrl() {
+      return solverApiUrl().replace(/\/api\/simulate$/, "/api/components/import");
+    }
+
     function simulationSetupSummary(gridOverride = null) {
       const b = boardBounds();
       const grid = gridOverride || gridSettings();
@@ -1861,6 +2189,37 @@
         nz,
         cells: nx * ny * nz
       };
+    }
+
+    function readSolverGridSettingsForRun() {
+      const fields = [
+        { id: "dxInput", label: "dx", min: 0.25 },
+        { id: "dyInput", label: "dy", min: 0.25 },
+        { id: "dzInput", label: "dz", min: 0.05 }
+      ];
+      const values = {};
+      const problems = [];
+      fields.forEach(field => {
+        const raw = document.getElementById(field.id).value.trim();
+        const value = Number(raw);
+        if (raw === "" || !Number.isFinite(value)) {
+          problems.push(`${field.label} must be a number.`);
+          return;
+        }
+        if (value < field.min) {
+          problems.push(`${field.label} must be at least ${field.min} mm.`);
+          return;
+        }
+        values[field.label] = value;
+      });
+      if (problems.length) {
+        window.alert(`Fix the grid spacing before running the solver:\n\n${problems.join("\n")}`);
+        return null;
+      }
+      writeNumber("dxInput", values.dx);
+      writeNumber("dyInput", values.dy);
+      writeNumber("dzInput", values.dz);
+      return values;
     }
 
     function gridCostMessage(cells) {
@@ -1891,6 +2250,7 @@
         <div><strong>Matrix size:</strong> about ${setup.nx} x ${setup.ny} x ${setup.nz} = ${setup.cells.toLocaleString()} unknown temperatures</div>
         <div><strong>Runtime note:</strong> ${gridCostMessage(setup.cells)}</div>
         <div><strong>Legacy SOR omega:</strong> ${omega.toFixed(3)} from the largest grid count. The sparse solve ignores omega, but the value is kept for comparing with the earlier SOR method.</div>
+        <div><strong>Radiation:</strong> nonlinear radiation now defaults to 24 outer iterations. High-power boards can run much longer than a single linearized pass, but the exact radiation balance is more meaningful.</div>
         <div><strong>Why these values:</strong> dx/dy follow the smallest lateral feature: component minimum ${recommended.componentMin.toFixed(3)} mm, via-informed feature ${recommended.viaMin.toFixed(3)} mm diameter, and board span. dz follows PCB thickness and the thinnest copper layer (${recommended.minLayerT.toFixed(3)} mm) so stack features are not skipped.</div>
         <div><strong>Convergence impact:</strong> these spacings define the unknown count and matrix conditioning. Smaller spacing resolves layers, vias, and component footprints better, but increases solve time and memory.</div>
       `;
@@ -1970,7 +2330,13 @@
           const elapsed = formatDuration(performance.now() - startedAt);
           refs.progressText.textContent = `${status.message} Elapsed: ${elapsed}.`;
         }
-        if (status.status === "done") return status.result;
+        if (status.status === "done") {
+          return {
+            ...status.result,
+            job_id: status.job_id,
+            manifest_path: status.manifest_path
+          };
+        }
         if (status.status === "error") throw new Error(status.error || "Solver job failed.");
         if (status.status === "missing") throw new Error(status.error || "Solver job was not found.");
         pollDelayMs = Math.min(3000, pollDelayMs + 150);
@@ -1978,6 +2344,13 @@
     }
 
     async function runSimulationFromModal() {
+      const missingRth = state.components.filter(component => component.rthMissing);
+      if (missingRth.length) {
+        window.alert(
+          `Enter Rth for these imported components before running:\n\n${missingRth.map(component => component.name).join("\n")}\n\nUse the component datasheet thermal impedance curve to choose the steady-state K/W value.`
+        );
+        return;
+      }
       const ambientC = Number(refs.ambientInput.value);
       if (!Number.isFinite(ambientC)) {
         window.alert("Ambient temperature must be a valid number in °C.");
@@ -1993,7 +2366,14 @@
         window.alert("Residual tolerance must be a positive number.");
         return;
       }
-      const setup = simulationSetupSummary();
+      const radiationIterations = Number(refs.radiationIterationsInput.value);
+      if (!Number.isInteger(radiationIterations) || radiationIterations < 1 || radiationIterations > 64) {
+        window.alert("Radiation iterations must be a whole number from 1 to 64.");
+        return;
+      }
+      const validatedGrid = readSolverGridSettingsForRun();
+      if (!validatedGrid) return;
+      const setup = simulationSetupSummary(validatedGrid);
       if (setup.cells >= 500000 && !window.confirm(`${setup.cells.toLocaleString()} grid cells is a very large local solve and may fail from memory pressure. Continue anyway?`)) {
         return;
       }
@@ -2007,15 +2387,15 @@
         state.ambientTemperatureC = ambientC;
         const config = solverConfig();
         config.solver_tolerance_k = tolerance;
-        config.radiation_outer_iterations = 1;
+        config.radiation_outer_iterations = radiationIterations;
         config.radiation_tolerance_k = 0.05;
         config.boundary = {
           ambient_temperature_k: ambientC + 273.15,
           surrounding_temperature_k: ambientC + 273.15,
-          convection_coefficient_w_m2k: 13.0,
+          convection_coefficient_w_m2k: state.convectionCoefficientWm2K,
           emissivity: 0.8
         };
-        const grid = gridSettings();
+        const grid = validatedGrid;
         const payload = await runSolverJob(config, omega, startedAt);
         setSolverProgress(97, "Solver returned temperature slices. Rendering PCB, component, and layer temperature colors.");
         const duration = formatDuration(performance.now() - startedAt);
@@ -2023,11 +2403,14 @@
           ambientC,
           omega,
           tolerance,
+          radiationIterations,
           dx: grid.dx,
           dy: grid.dy,
           dz: grid.dz,
           duration,
-          completedAt: new Date().toISOString()
+          completedAt: new Date().toISOString(),
+          jobId: payload.job_id || null,
+          manifestPath: payload.manifest_path || null
         };
         window.applySolverResult(payload, state.lastRunLog);
         const completionText = payload.solver.converged
@@ -2044,7 +2427,7 @@
         setSolverProgress(100, `Simulation failed after ${formatDuration(performance.now() - startedAt)}.`);
         refs.status.textContent = "Backend solver unavailable or failed.";
         window.alert(
-          `Could not run the Python solver.\n\n${error.message}\n\nStart it with:\ncd "/Users/amolverma/Cursor/3D Steady-State Temperature field generator/Version3"\npython3 server.py\n\nThen open http://127.0.0.1:9023/pcb_temperature_app.html`
+          `Could not run the Python solver.\n\n${error.message}\n\nStart it with:\ncd "/Users/amolverma/Cursor/3D Steady-State Temperature field generator/Version4"\npython3 server.py\n\nThen open http://127.0.0.1:9023/pcb_temperature_app.html`
         );
       } finally {
         window.clearInterval(progressTimer);
@@ -2199,6 +2582,7 @@
           activeResultLayerId: state.activeResultLayerId,
           resultPage: state.resultPage,
           ambientTemperatureC: state.ambientTemperatureC,
+          convectionCoefficientWm2K: state.convectionCoefficientWm2K,
           lastRunLog: state.lastRunLog,
           result: state.result
         })};\n    const state = {`
@@ -2224,6 +2608,46 @@
       state.selected = id;
       state.result = null;
       refresh();
+    }
+
+    async function importComponentArray() {
+      const input = document.getElementById("componentArrayInput");
+      let rows = null;
+      try {
+        rows = JSON.parse(input.value);
+      } catch (error) {
+        window.alert("Component array must be valid JSON, for example [[10, 8, 5, 5, 1.2, 7, \"MOSFET\"]].");
+        return;
+      }
+
+      try {
+        refs.status.textContent = "Importing component array...";
+        const response = await postJson(componentImportUrl(), {
+          components: rows,
+          default_power_w: Math.max(0, readNumber("componentPower", 0)),
+          default_rth_k_per_w: Math.max(0.1, readNumber("componentRth", 1)),
+          next_index: state.components.length + 1
+        });
+        const imported = (response.components || []).map(component => ({
+          ...component,
+          z: state.pcbThicknessMm
+        }));
+        state.components.push(...imported);
+        if (imported.length) state.selected = imported[imported.length - 1].id;
+        state.result = null;
+        input.value = "";
+        refresh();
+        if (response.missing_rth && response.missing_rth.length) {
+          window.alert(
+            `Imported ${imported.length} components.\n\nRth is missing for:\n${response.missing_rth.join("\n")}\n\nSelect each component and enter Rth from the datasheet thermal impedance curve before running simulation.`
+          );
+        } else {
+          refs.status.textContent = `Imported ${imported.length} components.`;
+        }
+      } catch (error) {
+        refs.status.textContent = "Component array import failed.";
+        window.alert(`Could not import component array.\n\n${error.message}`);
+      }
     }
 
     function startLayerPlacement() {
@@ -2300,6 +2724,9 @@
         record.l = Math.max(0.5, readNumber("selectedL", record.l));
         record.w = Math.max(0.5, readNumber("selectedW", record.w));
         record.h = Math.max(0.1, readNumber("selectedH", record.h));
+        record.power = Math.max(0, readNumber("selectedPower", record.power));
+        record.rth = Math.max(0.1, readNumber("selectedRth", record.rth));
+        record.rthMissing = false;
       } else {
         record.diameter = Math.max(0.1, readNumber("selectedL", record.diameter));
       }
@@ -2367,7 +2794,6 @@
             : `Via preview<br>x ${state.pendingVia.x.toFixed(2)} mm, y ${state.pendingVia.y.toFixed(2)} mm<br>diameter ${state.pendingVia.diameter.toFixed(2)} mm`;
           refs.tooltip.innerHTML = text;
           refs.tooltip.style.display = "block";
-          refs.hoverReadout.innerHTML = text;
           refresh();
         }
         return;
@@ -2395,7 +2821,6 @@
           const text = `${d.view}<br>x ${d.x.toFixed(2)} mm, y ${d.y.toFixed(2)} mm<br>z ${d.z.toFixed(2)} mm<br>${d.temp.toFixed(3)} °C`;
           refs.tooltip.innerHTML = text;
           refs.tooltip.style.display = "block";
-          refs.hoverReadout.innerHTML = text;
         } else {
           refs.tooltip.style.display = "none";
         }
@@ -2419,10 +2844,9 @@
     function bindEvents() {
       document.getElementById("marginInput").addEventListener("input", refresh);
       document.getElementById("thicknessInput").addEventListener("input", refresh);
-      document.getElementById("dxInput").addEventListener("input", refresh);
-      document.getElementById("dyInput").addEventListener("input", refresh);
-      document.getElementById("dzInput").addEventListener("input", refresh);
+      document.getElementById("convectionInput").addEventListener("input", refresh);
       document.getElementById("addComponent").onclick = addComponent;
+      document.getElementById("importComponentArray").onclick = importComponentArray;
       document.getElementById("addLayer").onclick = startLayerPlacement;
       document.getElementById("applyLayer").onclick = applyLayerPlacement;
       document.getElementById("cancelLayer").onclick = cancelPlacementMode;
@@ -2446,6 +2870,9 @@
         await navigator.clipboard.writeText(JSON.stringify(solverConfig(), null, 2));
         refs.status.textContent = "Solver config copied.";
       };
+      document.getElementById("startGuide").onclick = () => startGuide(0);
+      refs.nextGuide.onclick = nextGuideStep;
+      refs.skipGuide.onclick = () => skipGuide(true);
       document.getElementById("resultIso").onclick = () => showResultView("result3d");
       document.getElementById("resultTop").onclick = () => showResultView("top");
       document.getElementById("resultBottom").onclick = () => showResultView("bottom");
@@ -2534,6 +2961,10 @@
         : "Results complete.";
       refresh();
       openResultsPage();
+      if (state.guide.pendingResultsStep) {
+        state.guide.pendingResultsStep = false;
+        window.setTimeout(() => startGuide(guideSteps.length - 1), 250);
+      }
     };
 
     function animate() {
@@ -2546,6 +2977,9 @@
     refresh();
     resize();
     fitCamera("iso");
+    if (!window.localStorage.getItem("pcbThermalGuideSkipped")) {
+      window.setTimeout(() => startGuide(0), 500);
+    }
     animate();
   </script>
 </body>

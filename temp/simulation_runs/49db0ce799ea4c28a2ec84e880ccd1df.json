@@ -1,0 +1,640 @@
+{
+  "created_at": "2026-04-29T11:49:40.673168+00:00",
+  "error": null,
+  "finished_at": "2026-04-29T11:50:15.003933+00:00",
+  "job_id": "49db0ce799ea4c28a2ec84e880ccd1df",
+  "mode": "async",
+  "normalized_config": {
+    "board": {
+      "dx_mm": 0.25,
+      "dy_mm": 0.25,
+      "dz_mm": 0.05,
+      "length_mm": 30.0,
+      "thickness_mm": 1.6,
+      "width_mm": 23.9738
+    },
+    "boundary": {
+      "ambient_temperature_k": 298.15,
+      "convection_coefficient_w_m2k": 13.0,
+      "emissivity": 0.8,
+      "surrounding_temperature_k": 298.15
+    },
+    "components": [
+      {
+        "depth_mm": 8.0,
+        "heat_application": "top",
+        "heat_depth_mm": 0.05,
+        "height_mm": 1.2,
+        "name": "Buck regulator",
+        "power_w": 1.8,
+        "steady_state_thermal_resistance_k_per_w": 22.0,
+        "width_mm": 8.0,
+        "x_mm": 2.0,
+        "y_mm": 3.2181,
+        "z_mm": 1.6
+      },
+      {
+        "depth_mm": 3.0,
+        "heat_application": "top",
+        "heat_depth_mm": 0.05,
+        "height_mm": 0.9,
+        "name": "Power resistor",
+        "power_w": 0.75,
+        "steady_state_thermal_resistance_k_per_w": 55.0,
+        "width_mm": 6.0,
+        "x_mm": 22.0,
+        "y_mm": 17.2181,
+        "z_mm": 1.6
+      },
+      {
+        "depth_mm": 5.0,
+        "heat_application": "top",
+        "heat_depth_mm": 0.05,
+        "height_mm": 5.0,
+        "name": "MOSFET",
+        "power_w": 15.0,
+        "steady_state_thermal_resistance_k_per_w": 7.0,
+        "width_mm": 5.0,
+        "x_mm": 21.5331,
+        "y_mm": 2.0,
+        "z_mm": 1.6
+      },
+      {
+        "depth_mm": 5.0,
+        "heat_application": "top",
+        "heat_depth_mm": 0.05,
+        "height_mm": 20.0,
+        "name": "Capacitor",
+        "power_w": 3.0,
+        "steady_state_thermal_resistance_k_per_w": 12.0,
+        "width_mm": 5.0,
+        "x_mm": 3.591,
+        "y_mm": 16.9738,
+        "z_mm": 1.6
+      }
+    ],
+    "layers": [
+      {
+        "conductivity_w_mk": 0.35,
+        "name": "FR4 core",
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "name": "Bottom copper",
+        "z_end_mm": 0.035,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "name": "Top copper",
+        "z_end_mm": 1.6,
+        "z_start_mm": 1.565
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "name": "Cu",
+        "z_end_mm": 0.7806,
+        "z_start_mm": 0.7456
+      }
+    ],
+    "solver": {
+      "initial_temperature_k": 298.15,
+      "max_iterations": 20000,
+      "radiation_outer_iterations": 24,
+      "radiation_tolerance_k": 0.05,
+      "relaxation_factor": 1.872,
+      "tolerance_k": 0.001
+    },
+    "thermal_vias": [
+      {
+        "conductivity_w_mk": 385.0,
+        "count_x": 1,
+        "count_y": 1,
+        "diameter_mm": 0.35,
+        "name": "V1",
+        "pitch_x_mm": 0.0,
+        "pitch_y_mm": 0.0,
+        "x_mm": 5.0,
+        "y_mm": 6.2181,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "count_x": 1,
+        "count_y": 1,
+        "diameter_mm": 0.35,
+        "name": "V2",
+        "pitch_x_mm": 0.0,
+        "pitch_y_mm": 0.0,
+        "x_mm": 7.0,
+        "y_mm": 6.2181,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "count_x": 1,
+        "count_y": 1,
+        "diameter_mm": 0.35,
+        "name": "V3",
+        "pitch_x_mm": 0.0,
+        "pitch_y_mm": 0.0,
+        "x_mm": 5.0,
+        "y_mm": 8.2181,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "count_x": 1,
+        "count_y": 1,
+        "diameter_mm": 0.35,
+        "name": "V4",
+        "pitch_x_mm": 0.0,
+        "pitch_y_mm": 0.0,
+        "x_mm": 7.0,
+        "y_mm": 8.2181,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "count_x": 1,
+        "count_y": 1,
+        "diameter_mm": 0.35,
+        "name": "V5",
+        "pitch_x_mm": 0.0,
+        "pitch_y_mm": 0.0,
+        "x_mm": 23.3052,
+        "y_mm": 5.9273,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "count_x": 1,
+        "count_y": 1,
+        "diameter_mm": 0.35,
+        "name": "V6",
+        "pitch_x_mm": 0.0,
+        "pitch_y_mm": 0.0,
+        "x_mm": 25.253,
+        "y_mm": 3.5702,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      }
+    ]
+  },
+  "omega": 1.872,
+  "raw_request": {
+    "config": {
+      "board": {
+        "dx_mm": 0.25,
+        "dy_mm": 0.25,
+        "dz_mm": 0.05,
+        "length_mm": 30,
+        "origin_x_mm": 8,
+        "origin_y_mm": 4.7819,
+        "thickness_mm": 1.6,
+        "width_mm": 23.9738
+      },
+      "boundary": {
+        "ambient_temperature_k": 298.15,
+        "convection_coefficient_w_m2k": 13,
+        "emissivity": 0.8,
+        "surrounding_temperature_k": 298.15
+      },
+      "components": [
+        {
+          "box_dimensions_mm": {
+            "x": 8,
+            "y": 8,
+            "z": 1.2
+          },
+          "depth_mm": 8,
+          "equivalent_thermal_conductivity_w_mk": 0.852273,
+          "height_mm": 1.2,
+          "id": "C1",
+          "name": "Buck regulator",
+          "power_w": 1.8,
+          "rotation_deg": 0,
+          "steady_state_thermal_resistance_k_per_w": 22,
+          "width_mm": 8,
+          "x_mm": 2,
+          "y_mm": 3.2181,
+          "z_mm": 1.6
+        },
+        {
+          "box_dimensions_mm": {
+            "x": 6,
+            "y": 3,
+            "z": 0.9
+          },
+          "depth_mm": 3,
+          "equivalent_thermal_conductivity_w_mk": 0.909091,
+          "height_mm": 0.9,
+          "id": "C2",
+          "name": "Power resistor",
+          "power_w": 0.75,
+          "rotation_deg": 0,
+          "steady_state_thermal_resistance_k_per_w": 55,
+          "width_mm": 6,
+          "x_mm": 22,
+          "y_mm": 17.2181,
+          "z_mm": 1.6
+        },
+        {
+          "box_dimensions_mm": {
+            "x": 5,
+            "y": 5,
+            "z": 5
+          },
+          "depth_mm": 5,
+          "equivalent_thermal_conductivity_w_mk": 28.571429,
+          "height_mm": 5,
+          "id": "C3",
+          "name": "MOSFET",
+          "power_w": 15,
+          "rotation_deg": 0,
+          "steady_state_thermal_resistance_k_per_w": 7,
+          "width_mm": 5,
+          "x_mm": 21.5331,
+          "y_mm": 2,
+          "z_mm": 1.6
+        },
+        {
+          "box_dimensions_mm": {
+            "x": 5,
+            "y": 5,
+            "z": 20
+          },
+          "depth_mm": 5,
+          "equivalent_thermal_conductivity_w_mk": 66.666667,
+          "height_mm": 20,
+          "id": "C4",
+          "name": "Capacitor",
+          "power_w": 3,
+          "rotation_deg": 0,
+          "steady_state_thermal_resistance_k_per_w": 12,
+          "width_mm": 5,
+          "x_mm": 3.591,
+          "y_mm": 16.9738,
+          "z_mm": 1.6
+        }
+      ],
+      "copper_layers": [
+        {
+          "conductivity_w_mk": 385,
+          "id": "L1",
+          "name": "Bottom copper",
+          "thickness_mm": 0.035,
+          "z_center_mm": 0.0175,
+          "z_end_mm": 0.035,
+          "z_start_mm": 0
+        },
+        {
+          "conductivity_w_mk": 385,
+          "id": "L2",
+          "name": "Top copper",
+          "thickness_mm": 0.035,
+          "z_center_mm": 1.5825,
+          "z_end_mm": 1.6,
+          "z_start_mm": 1.565
+        },
+        {
+          "conductivity_w_mk": 385,
+          "id": "L3",
+          "name": "Cu",
+          "thickness_mm": 0.035,
+          "z_center_mm": 0.7631,
+          "z_end_mm": 0.7806,
+          "z_start_mm": 0.7456
+        }
+      ],
+      "radiation_outer_iterations": 24,
+      "radiation_tolerance_k": 0.05,
+      "solver_tolerance_k": 0.001,
+      "thermal_vias": [
+        {
+          "conductivity_w_mk": 385,
+          "diameter_mm": 0.35,
+          "id": "V1",
+          "x_mm": 5,
+          "y_mm": 6.2181,
+          "z_end_mm": 1.6,
+          "z_start_mm": 0
+        },
+        {
+          "conductivity_w_mk": 385,
+          "diameter_mm": 0.35,
+          "id": "V2",
+          "x_mm": 7,
+          "y_mm": 6.2181,
+          "z_end_mm": 1.6,
+          "z_start_mm": 0
+        },
+        {
+          "conductivity_w_mk": 385,
+          "diameter_mm": 0.35,
+          "id": "V3",
+          "x_mm": 5,
+          "y_mm": 8.2181,
+          "z_end_mm": 1.6,
+          "z_start_mm": 0
+        },
+        {
+          "conductivity_w_mk": 385,
+          "diameter_mm": 0.35,
+          "id": "V4",
+          "x_mm": 7,
+          "y_mm": 8.2181,
+          "z_end_mm": 1.6,
+          "z_start_mm": 0
+        },
+        {
+          "conductivity_w_mk": 385,
+          "diameter_mm": 0.35,
+          "id": "V5",
+          "x_mm": 23.3052,
+          "y_mm": 5.9273,
+          "z_end_mm": 1.6,
+          "z_start_mm": 0
+        },
+        {
+          "conductivity_w_mk": 385,
+          "diameter_mm": 0.35,
+          "id": "V6",
+          "x_mm": 25.253,
+          "y_mm": 3.5702,
+          "z_end_mm": 1.6,
+          "z_start_mm": 0
+        }
+      ]
+    },
+    "solver": {
+      "omega": 1.872
+    }
+  },
+  "result": {
+    "component_reports": [
+      {
+        "board_average_temperature_k": 628.9539429618102,
+        "board_max_temperature_k": 639.6447141268192,
+        "component_model": "surface_heat_flux_plus_junction_rise",
+        "equivalent_thermal_conductivity_w_mk": 0.8522727272727272,
+        "estimated_junction_temperature_k": 679.2447141268192,
+        "junction_rise_k": 39.6,
+        "name": "Buck regulator",
+        "occupied_cell_count": 1056
+      },
+      {
+        "board_average_temperature_k": 646.6142812721695,
+        "board_max_temperature_k": 654.3886140509923,
+        "component_model": "surface_heat_flux_plus_junction_rise",
+        "equivalent_thermal_conductivity_w_mk": 0.9090909090909092,
+        "estimated_junction_temperature_k": 695.6386140509923,
+        "junction_rise_k": 41.25,
+        "name": "Power resistor",
+        "occupied_cell_count": 312
+      },
+      {
+        "board_average_temperature_k": 849.6517168959828,
+        "board_max_temperature_k": 880.5270420536827,
+        "component_model": "surface_heat_flux_plus_junction_rise",
+        "equivalent_thermal_conductivity_w_mk": 28.57142857142857,
+        "estimated_junction_temperature_k": 985.5270420536827,
+        "junction_rise_k": 105.0,
+        "name": "MOSFET",
+        "occupied_cell_count": 441
+      },
+      {
+        "board_average_temperature_k": 653.5346121283345,
+        "board_max_temperature_k": 660.4033663020034,
+        "component_model": "surface_heat_flux_plus_junction_rise",
+        "equivalent_thermal_conductivity_w_mk": 66.66666666666667,
+        "estimated_junction_temperature_k": 696.4033663020034,
+        "junction_rise_k": 36.0,
+        "name": "Capacitor",
+        "occupied_cell_count": 441
+      }
+    ],
+    "max_temperature_k": 880.5270420536827,
+    "min_temperature_k": 596.6395864708697,
+    "solver": {
+      "converged": false,
+      "diagnostics": {
+        "boundary_loss_w": 20.550078700367376,
+        "cell_count": 403200,
+        "energy_balance_error_w": -7.870036737855912e-05,
+        "exact_radiation_balance_error_w": 0.23245125915315157,
+        "exact_radiation_boundary_loss_w": 20.317548740846846,
+        "grid_shape": [
+          120,
+          96,
+          35
+        ],
+        "matrix_nonzeros": 2784240,
+        "max_dx_mm": 0.2500000000000002,
+        "max_dy_mm": 0.24972708333333496,
+        "max_dz_mm": 0.04808750000000021,
+        "min_dx_mm": 0.24999999999999675,
+        "min_dy_mm": 0.2497270833333315,
+        "min_dz_mm": 0.014999999999999823,
+        "radiation_outer_iterations_used": 24,
+        "total_power_w": 20.549999999999997
+      },
+      "iterations": 13341,
+      "max_delta_k": 9.847555140927867e-05
+    }
+  },
+  "schema": "pcb_thermal_simulation_run_manifest_v1",
+  "source_config": {
+    "board": {
+      "dx_mm": 0.25,
+      "dy_mm": 0.25,
+      "dz_mm": 0.05,
+      "length_mm": 30,
+      "origin_x_mm": 8,
+      "origin_y_mm": 4.7819,
+      "thickness_mm": 1.6,
+      "width_mm": 23.9738
+    },
+    "boundary": {
+      "ambient_temperature_k": 298.15,
+      "convection_coefficient_w_m2k": 13,
+      "emissivity": 0.8,
+      "surrounding_temperature_k": 298.15
+    },
+    "components": [
+      {
+        "box_dimensions_mm": {
+          "x": 8,
+          "y": 8,
+          "z": 1.2
+        },
+        "depth_mm": 8,
+        "equivalent_thermal_conductivity_w_mk": 0.852273,
+        "height_mm": 1.2,
+        "id": "C1",
+        "name": "Buck regulator",
+        "power_w": 1.8,
+        "rotation_deg": 0,
+        "steady_state_thermal_resistance_k_per_w": 22,
+        "width_mm": 8,
+        "x_mm": 2,
+        "y_mm": 3.2181,
+        "z_mm": 1.6
+      },
+      {
+        "box_dimensions_mm": {
+          "x": 6,
+          "y": 3,
+          "z": 0.9
+        },
+        "depth_mm": 3,
+        "equivalent_thermal_conductivity_w_mk": 0.909091,
+        "height_mm": 0.9,
+        "id": "C2",
+        "name": "Power resistor",
+        "power_w": 0.75,
+        "rotation_deg": 0,
+        "steady_state_thermal_resistance_k_per_w": 55,
+        "width_mm": 6,
+        "x_mm": 22,
+        "y_mm": 17.2181,
+        "z_mm": 1.6
+      },
+      {
+        "box_dimensions_mm": {
+          "x": 5,
+          "y": 5,
+          "z": 5
+        },
+        "depth_mm": 5,
+        "equivalent_thermal_conductivity_w_mk": 28.571429,
+        "height_mm": 5,
+        "id": "C3",
+        "name": "MOSFET",
+        "power_w": 15,
+        "rotation_deg": 0,
+        "steady_state_thermal_resistance_k_per_w": 7,
+        "width_mm": 5,
+        "x_mm": 21.5331,
+        "y_mm": 2,
+        "z_mm": 1.6
+      },
+      {
+        "box_dimensions_mm": {
+          "x": 5,
+          "y": 5,
+          "z": 20
+        },
+        "depth_mm": 5,
+        "equivalent_thermal_conductivity_w_mk": 66.666667,
+        "height_mm": 20,
+        "id": "C4",
+        "name": "Capacitor",
+        "power_w": 3,
+        "rotation_deg": 0,
+        "steady_state_thermal_resistance_k_per_w": 12,
+        "width_mm": 5,
+        "x_mm": 3.591,
+        "y_mm": 16.9738,
+        "z_mm": 1.6
+      }
+    ],
+    "copper_layers": [
+      {
+        "conductivity_w_mk": 385,
+        "id": "L1",
+        "name": "Bottom copper",
+        "thickness_mm": 0.035,
+        "z_center_mm": 0.0175,
+        "z_end_mm": 0.035,
+        "z_start_mm": 0
+      },
+      {
+        "conductivity_w_mk": 385,
+        "id": "L2",
+        "name": "Top copper",
+        "thickness_mm": 0.035,
+        "z_center_mm": 1.5825,
+        "z_end_mm": 1.6,
+        "z_start_mm": 1.565
+      },
+      {
+        "conductivity_w_mk": 385,
+        "id": "L3",
+        "name": "Cu",
+        "thickness_mm": 0.035,
+        "z_center_mm": 0.7631,
+        "z_end_mm": 0.7806,
+        "z_start_mm": 0.7456
+      }
+    ],
+    "radiation_outer_iterations": 24,
+    "radiation_tolerance_k": 0.05,
+    "solver_tolerance_k": 0.001,
+    "thermal_vias": [
+      {
+        "conductivity_w_mk": 385,
+        "diameter_mm": 0.35,
+        "id": "V1",
+        "x_mm": 5,
+        "y_mm": 6.2181,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0
+      },
+      {
+        "conductivity_w_mk": 385,
+        "diameter_mm": 0.35,
+        "id": "V2",
+        "x_mm": 7,
+        "y_mm": 6.2181,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0
+      },
+      {
+        "conductivity_w_mk": 385,
+        "diameter_mm": 0.35,
+        "id": "V3",
+        "x_mm": 5,
+        "y_mm": 8.2181,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0
+      },
+      {
+        "conductivity_w_mk": 385,
+        "diameter_mm": 0.35,
+        "id": "V4",
+        "x_mm": 7,
+        "y_mm": 8.2181,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0
+      },
+      {
+        "conductivity_w_mk": 385,
+        "diameter_mm": 0.35,
+        "id": "V5",
+        "x_mm": 23.3052,
+        "y_mm": 5.9273,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0
+      },
+      {
+        "conductivity_w_mk": 385,
+        "diameter_mm": 0.35,
+        "id": "V6",
+        "x_mm": 25.253,
+        "y_mm": 3.5702,
+        "z_end_mm": 1.6,
+        "z_start_mm": 0
+      }
+    ]
+  },
+  "status": "done",
+  "updated_at": "2026-04-29T11:50:15.005188+00:00"
+}

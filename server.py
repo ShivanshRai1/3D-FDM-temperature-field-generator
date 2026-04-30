@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
+from datetime import datetime, timezone
 import json
 import os
 import threading
@@ -26,6 +28,7 @@ from temperature_field.solver import solve_steady_state
 
 
 ROOT = Path(__file__).resolve().parent
+RUN_MANIFEST_DIR = ROOT / "temp" / "simulation_runs"
 JOBS: dict[str, dict[str, Any]] = {}
 JOBS_LOCK = threading.Lock()
 
@@ -120,7 +123,7 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
         relaxation_factor=omega,
         tolerance_k=float(payload.get("solver_tolerance_k", 1e-4)),
         max_iterations=int(payload.get("solver_max_iterations", 20_000)),
-        radiation_outer_iterations=int(payload.get("radiation_outer_iterations", 1)),
+        radiation_outer_iterations=int(payload.get("radiation_outer_iterations", 24)),
         radiation_tolerance_k=float(payload.get("radiation_tolerance_k", 0.05)),
     )
 
@@ -132,6 +135,134 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
         components=components,
         thermal_vias=vias,
     )
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _manifest_path(job_id: str) -> Path:
+    return RUN_MANIFEST_DIR / f"{job_id}.json"
+
+
+def _write_run_manifest(job_id: str, payload: dict[str, Any]) -> Path:
+    RUN_MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
+    path = _manifest_path(job_id)
+    temp_path = path.with_suffix(".json.tmp")
+    temp_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    temp_path.replace(path)
+    return path
+
+
+def _create_run_manifest(
+    job_id: str,
+    request: dict[str, Any],
+    source_config: dict[str, Any],
+    normalized_config: SimulationConfig,
+    omega: float,
+    mode: str,
+) -> Path:
+    manifest = {
+        "schema": "pcb_thermal_simulation_run_manifest_v1",
+        "job_id": job_id,
+        "mode": mode,
+        "status": "running",
+        "created_at": _utc_now_iso(),
+        "updated_at": _utc_now_iso(),
+        "omega": omega,
+        "raw_request": request,
+        "source_config": source_config,
+        "normalized_config": asdict(normalized_config),
+        "timing": {
+            "solver_started_at": None,
+            "solver_finished_at": None,
+            "solver_wall_time_s": None,
+            "response_prepared_at": None,
+            "total_wall_time_s": None,
+        },
+        "result": None,
+        "response_payload": None,
+        "error": None,
+    }
+    return _write_run_manifest(job_id, manifest)
+
+
+def _update_run_manifest(job_id: str, **updates: Any) -> None:
+    path = _manifest_path(job_id)
+    if path.exists():
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    else:
+        manifest = {
+            "schema": "pcb_thermal_simulation_run_manifest_v1",
+            "job_id": job_id,
+            "created_at": _utc_now_iso(),
+        }
+    manifest.update(updates)
+    manifest["updated_at"] = _utc_now_iso()
+    _write_run_manifest(job_id, manifest)
+
+
+def _normalize_component_array(payload: dict[str, Any]) -> dict[str, Any]:
+    rows = payload.get("components")
+    if not isinstance(rows, list):
+        raise ValueError("Component import payload must contain a 'components' array.")
+
+    default_power_w = float(payload.get("default_power_w", 0.0))
+    default_rth = payload.get("default_rth_k_per_w", None)
+    next_index = int(payload.get("next_index", 1))
+    normalized: list[dict[str, Any]] = []
+    missing_rth: list[str] = []
+
+    for row_index, row in enumerate(rows, start=1):
+        if not isinstance(row, list):
+            raise ValueError(f"Component row {row_index} must be an array.")
+        if len(row) < 5:
+            raise ValueError(
+                f"Component row {row_index} must have at least x, y, length, width, and height."
+            )
+
+        name_value: Any = None
+        rth_value: Any = None
+        if len(row) >= 7:
+            rth_value = row[5]
+            name_value = row[6]
+        elif len(row) == 6:
+            if isinstance(row[5], str):
+                name_value = row[5]
+            else:
+                rth_value = row[5]
+
+        component_id = f"C{next_index + row_index - 1}"
+        name = str(name_value).strip() if name_value is not None else component_id
+        if not name:
+            name = component_id
+
+        rth_missing = rth_value in (None, "")
+        if rth_missing:
+            fallback_rth = float(default_rth) if default_rth not in (None, "") else 1.0
+            rth = max(0.1, fallback_rth)
+            missing_rth.append(name)
+        else:
+            rth = max(0.1, float(rth_value))
+
+        normalized.append(
+            {
+                "id": component_id,
+                "name": name,
+                "x": float(row[0]),
+                "y": float(row[1]),
+                "z": None,
+                "l": max(0.5, float(row[2])),
+                "w": max(0.5, float(row[3])),
+                "h": max(0.1, float(row[4])),
+                "power": max(0.0, default_power_w),
+                "rth": rth,
+                "rotation": 0,
+                "rthMissing": rth_missing,
+            }
+        )
+
+    return {"components": normalized, "missing_rth": missing_rth}
 
 
 def _nearest_z_index(z_m: np.ndarray, z_mm: float) -> int:
@@ -218,10 +349,34 @@ def _run_solver_job(job_id: str, request: dict[str, Any]) -> None:
             raise ValueError("Legacy SOR omega must be in the open interval (0, 2).")
         source_config = request["config"]
         config = _build_config(source_config, omega)
+        manifest_path = _create_run_manifest(
+            job_id, request, source_config, config, omega, mode="async"
+        )
+        _set_job(job_id, manifest_path=str(manifest_path))
         _set_job(job_id, message="Solving sparse thermal system.")
+        solve_started_at = time.perf_counter()
+        solve_started_iso = _utc_now_iso()
         result = solve_steady_state(config)
+        solve_finished_at = time.perf_counter()
+        solve_finished_iso = _utc_now_iso()
         _set_job(job_id, message="Preparing temperature views.")
         response = _payload_from_result(result, source_config)
+        response_prepared_iso = _utc_now_iso()
+        _update_run_manifest(
+            job_id,
+            status="done",
+            finished_at=response_prepared_iso,
+            timing={
+                "solver_started_at": solve_started_iso,
+                "solver_finished_at": solve_finished_iso,
+                "solver_wall_time_s": solve_finished_at - solve_started_at,
+                "response_prepared_at": response_prepared_iso,
+                "total_wall_time_s": solve_finished_at - solve_started_at,
+            },
+            result=response,
+            response_payload=response,
+            error=None,
+        )
         _set_job(
             job_id,
             status="done",
@@ -230,6 +385,12 @@ def _run_solver_job(job_id: str, request: dict[str, Any]) -> None:
             finished_at=time.time(),
         )
     except Exception as exc:
+        _update_run_manifest(
+            job_id,
+            status="error",
+            finished_at=_utc_now_iso(),
+            error=str(exc),
+        )
         _set_job(
             job_id,
             status="error",
@@ -272,34 +433,27 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
-        
-        # Redirect root to the app
-        if parsed.path == "/":
-            self.send_response(302)
-            self.send_header("Location", "/pcb_temperature_app.html")
-            self.end_headers()
+        if parsed.path != "/api/simulate/status":
+            super().do_GET()
             return
-        
-        # Handle API status endpoint
-        if parsed.path == "/api/simulate/status":
-            query = parse_qs(parsed.query)
-            job_id = query.get("job_id", [""])[0]
-            snapshot = _job_snapshot(job_id)
-            status = 404 if snapshot.get("status") == "missing" else 200
-            self._send_json(snapshot, status)
-            return
-        
-        # Serve static files
-        super().do_GET()
+        query = parse_qs(parsed.query)
+        job_id = query.get("job_id", [""])[0]
+        snapshot = _job_snapshot(job_id)
+        status = 404 if snapshot.get("status") == "missing" else 200
+        self._send_json(snapshot, status)
 
     def do_POST(self) -> None:
-        if self.path not in {"/api/simulate", "/api/simulate/start"}:
+        if self.path not in {"/api/simulate", "/api/simulate/start", "/api/components/import"}:
             self.send_error(404, "Unknown endpoint")
             return
 
         try:
             length = int(self.headers.get("Content-Length", "0"))
             request = json.loads(self.rfile.read(length).decode("utf-8"))
+            if self.path == "/api/components/import":
+                self._send_json(_normalize_component_array(request))
+                return
+
             if self.path == "/api/simulate/start":
                 job_id = uuid.uuid4().hex
                 with JOBS_LOCK:
@@ -322,15 +476,41 @@ class Handler(SimpleHTTPRequestHandler):
                 raise ValueError("Legacy SOR omega must be in the open interval (0, 2).")
             source_config = request["config"]
             config = _build_config(source_config, omega)
+            job_id = uuid.uuid4().hex
+            manifest_path = _create_run_manifest(
+                job_id, request, source_config, config, omega, mode="sync"
+            )
+            solve_started_at = time.perf_counter()
+            solve_started_iso = _utc_now_iso()
             result = solve_steady_state(config)
+            solve_finished_at = time.perf_counter()
+            solve_finished_iso = _utc_now_iso()
             response = _payload_from_result(result, source_config)
+            response_prepared_iso = _utc_now_iso()
+            _update_run_manifest(
+                job_id,
+                status="done",
+                finished_at=response_prepared_iso,
+                timing={
+                    "solver_started_at": solve_started_iso,
+                    "solver_finished_at": solve_finished_iso,
+                    "solver_wall_time_s": solve_finished_at - solve_started_at,
+                    "response_prepared_at": response_prepared_iso,
+                    "total_wall_time_s": solve_finished_at - solve_started_at,
+                },
+                result=response,
+                response_payload=response,
+                error=None,
+            )
+            response["job_id"] = job_id
+            response["manifest_path"] = str(manifest_path)
             self._send_json(response)
         except Exception as exc:
             self._send_json({"error": str(exc)}, 400)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Serve the Version3 PCB temperature app.")
+    parser = argparse.ArgumentParser(description="Serve the Version4 PCB temperature app.")
     parser.add_argument(
         "--port",
         type=int,
@@ -340,18 +520,18 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        server = ThreadingHTTPServer(("0.0.0.0", args.port), Handler)
+        server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     except OSError as exc:
         if exc.errno == 48:
             raise SystemExit(
                 f"Port {args.port} is already in use on 127.0.0.1.\n"
-                f"If that is your running Version3 server, open "
+                f"If that is your running Version4 server, open "
                 f"http://127.0.0.1:{args.port}/pcb_temperature_app.html instead.\n"
                 f"Otherwise stop the other process or run: python3 server.py --port {args.port + 1}"
             ) from exc
         raise
 
-    print(f"Serving Version3 at http://0.0.0.0:{args.port}/pcb_temperature_app.html")
+    print(f"Serving Version4 at http://127.0.0.1:{args.port}/pcb_temperature_app.html")
     print("Press Ctrl+C to stop.")
     server.serve_forever()
 

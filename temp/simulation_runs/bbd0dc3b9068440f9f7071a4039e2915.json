@@ -1,0 +1,409 @@
+{
+  "created_at": "2026-04-29T11:39:52.483236+00:00",
+  "error": null,
+  "finished_at": "2026-04-29T11:39:52.487594+00:00",
+  "job_id": "bbd0dc3b9068440f9f7071a4039e2915",
+  "mode": "sync",
+  "normalized_config": {
+    "board": {
+      "dx_mm": 4.0,
+      "dy_mm": 3.0,
+      "dz_mm": 0.8,
+      "length_mm": 8.0,
+      "thickness_mm": 1.6,
+      "width_mm": 6.0
+    },
+    "boundary": {
+      "ambient_temperature_k": 298.15,
+      "convection_coefficient_w_m2k": 13.0,
+      "emissivity": 0.8,
+      "surrounding_temperature_k": 298.15
+    },
+    "components": [
+      {
+        "depth_mm": 2.0,
+        "heat_application": "top",
+        "heat_depth_mm": 0.8,
+        "height_mm": 1.0,
+        "name": "Smoke",
+        "power_w": 0.25,
+        "steady_state_thermal_resistance_k_per_w": 10.0,
+        "width_mm": 2.0,
+        "x_mm": 2.0,
+        "y_mm": 2.0,
+        "z_mm": 1.6
+      }
+    ],
+    "layers": [
+      {
+        "conductivity_w_mk": 0.35,
+        "name": "FR4 core",
+        "z_end_mm": 1.6,
+        "z_start_mm": 0.0
+      },
+      {
+        "conductivity_w_mk": 385.0,
+        "name": "Top copper",
+        "z_end_mm": 1.6,
+        "z_start_mm": 1.56
+      }
+    ],
+    "solver": {
+      "initial_temperature_k": 298.15,
+      "max_iterations": 20000,
+      "radiation_outer_iterations": 2,
+      "radiation_tolerance_k": 0.05,
+      "relaxation_factor": 1.2,
+      "tolerance_k": 0.001
+    },
+    "thermal_vias": []
+  },
+  "omega": 1.2,
+  "raw_request": {
+    "config": {
+      "board": {
+        "dx_mm": 4,
+        "dy_mm": 3,
+        "dz_mm": 0.8,
+        "length_mm": 8,
+        "thickness_mm": 1.6,
+        "width_mm": 6
+      },
+      "boundary": {
+        "ambient_temperature_k": 298.15,
+        "convection_coefficient_w_m2k": 13,
+        "emissivity": 0.8,
+        "surrounding_temperature_k": 298.15
+      },
+      "components": [
+        {
+          "depth_mm": 2,
+          "height_mm": 1,
+          "id": "C1",
+          "name": "Smoke",
+          "power_w": 0.25,
+          "steady_state_thermal_resistance_k_per_w": 10,
+          "width_mm": 2,
+          "x_mm": 2,
+          "y_mm": 2
+        }
+      ],
+      "copper_layers": [
+        {
+          "conductivity_w_mk": 385,
+          "id": "L1",
+          "name": "Top copper",
+          "thickness_mm": 0.04,
+          "z_center_mm": 1.58,
+          "z_end_mm": 1.6,
+          "z_start_mm": 1.56
+        }
+      ],
+      "radiation_outer_iterations": 2,
+      "radiation_tolerance_k": 0.05,
+      "solver_tolerance_k": 0.001,
+      "thermal_vias": []
+    },
+    "solver": {
+      "omega": 1.2
+    }
+  },
+  "response_payload": {
+    "component_reports": [
+      {
+        "board_average_temperature_k": 389.99837667780713,
+        "board_max_temperature_k": 389.99837667780713,
+        "component_model": "surface_heat_flux_plus_junction_rise",
+        "equivalent_thermal_conductivity_w_mk": 25.0,
+        "estimated_junction_temperature_k": 392.49837667780713,
+        "junction_rise_k": 2.5,
+        "name": "Smoke",
+        "occupied_cell_count": 2
+      }
+    ],
+    "generated_at": "backend",
+    "max_temperature_k": 389.99837667780713,
+    "min_temperature_k": 377.9599074702,
+    "solver": {
+      "converged": false,
+      "diagnostics": {
+        "boundary_loss_w": 0.24999999999999695,
+        "cell_count": 12,
+        "energy_balance_error_w": 3.0531133177191805e-15,
+        "exact_radiation_balance_error_w": 0.006119843960805477,
+        "exact_radiation_boundary_loss_w": 0.24388015603919452,
+        "grid_shape": [
+          2,
+          2,
+          3
+        ],
+        "matrix_nonzeros": 52,
+        "max_dx_mm": 4.0,
+        "max_dy_mm": 3.0,
+        "max_dz_mm": 0.8,
+        "min_dx_mm": 4.0,
+        "min_dy_mm": 3.0,
+        "min_dz_mm": 0.03999999999999989,
+        "radiation_outer_iterations_used": 2,
+        "total_power_w": 0.25
+      },
+      "iterations": 2,
+      "max_delta_k": 3.1363800445660672e-15
+    },
+    "views": {
+      "bottom": {
+        "name": "bottom",
+        "nx": 2,
+        "ny": 2,
+        "values": [
+          [
+            382.1133412645913,
+            382.11334126459144
+          ],
+          [
+            377.9599074702,
+            377.95990747020005
+          ]
+        ],
+        "z": -0.04
+      },
+      "layer:L1": {
+        "name": "layer:L1",
+        "nx": 2,
+        "ny": 2,
+        "values": [
+          [
+            389.9983766778071,
+            389.99837667780713
+          ],
+          [
+            384.9128233397671,
+            384.9128233397671
+          ]
+        ],
+        "z": 1.58
+      },
+      "top": {
+        "name": "top",
+        "nx": 2,
+        "ny": 2,
+        "values": [
+          [
+            389.9983766778071,
+            389.99837667780713
+          ],
+          [
+            384.9128233397671,
+            384.9128233397671
+          ]
+        ],
+        "z": 1.6400000000000001
+      }
+    },
+    "x_edges_mm": [
+      0.0,
+      4.0,
+      8.0
+    ],
+    "x_mm": [
+      2.0,
+      6.0
+    ],
+    "y_edges_mm": [
+      0.0,
+      3.0,
+      6.0
+    ],
+    "y_mm": [
+      1.5,
+      4.500000000000001
+    ],
+    "z_edges_mm": [
+      0.0,
+      0.8,
+      1.5600000000000003,
+      1.6
+    ],
+    "z_mm": [
+      0.4,
+      1.1800000000000002,
+      1.5800000000000003
+    ]
+  },
+  "result": {
+    "component_reports": [
+      {
+        "board_average_temperature_k": 389.99837667780713,
+        "board_max_temperature_k": 389.99837667780713,
+        "component_model": "surface_heat_flux_plus_junction_rise",
+        "equivalent_thermal_conductivity_w_mk": 25.0,
+        "estimated_junction_temperature_k": 392.49837667780713,
+        "junction_rise_k": 2.5,
+        "name": "Smoke",
+        "occupied_cell_count": 2
+      }
+    ],
+    "generated_at": "backend",
+    "max_temperature_k": 389.99837667780713,
+    "min_temperature_k": 377.9599074702,
+    "solver": {
+      "converged": false,
+      "diagnostics": {
+        "boundary_loss_w": 0.24999999999999695,
+        "cell_count": 12,
+        "energy_balance_error_w": 3.0531133177191805e-15,
+        "exact_radiation_balance_error_w": 0.006119843960805477,
+        "exact_radiation_boundary_loss_w": 0.24388015603919452,
+        "grid_shape": [
+          2,
+          2,
+          3
+        ],
+        "matrix_nonzeros": 52,
+        "max_dx_mm": 4.0,
+        "max_dy_mm": 3.0,
+        "max_dz_mm": 0.8,
+        "min_dx_mm": 4.0,
+        "min_dy_mm": 3.0,
+        "min_dz_mm": 0.03999999999999989,
+        "radiation_outer_iterations_used": 2,
+        "total_power_w": 0.25
+      },
+      "iterations": 2,
+      "max_delta_k": 3.1363800445660672e-15
+    },
+    "views": {
+      "bottom": {
+        "name": "bottom",
+        "nx": 2,
+        "ny": 2,
+        "values": [
+          [
+            382.1133412645913,
+            382.11334126459144
+          ],
+          [
+            377.9599074702,
+            377.95990747020005
+          ]
+        ],
+        "z": -0.04
+      },
+      "layer:L1": {
+        "name": "layer:L1",
+        "nx": 2,
+        "ny": 2,
+        "values": [
+          [
+            389.9983766778071,
+            389.99837667780713
+          ],
+          [
+            384.9128233397671,
+            384.9128233397671
+          ]
+        ],
+        "z": 1.58
+      },
+      "top": {
+        "name": "top",
+        "nx": 2,
+        "ny": 2,
+        "values": [
+          [
+            389.9983766778071,
+            389.99837667780713
+          ],
+          [
+            384.9128233397671,
+            384.9128233397671
+          ]
+        ],
+        "z": 1.6400000000000001
+      }
+    },
+    "x_edges_mm": [
+      0.0,
+      4.0,
+      8.0
+    ],
+    "x_mm": [
+      2.0,
+      6.0
+    ],
+    "y_edges_mm": [
+      0.0,
+      3.0,
+      6.0
+    ],
+    "y_mm": [
+      1.5,
+      4.500000000000001
+    ],
+    "z_edges_mm": [
+      0.0,
+      0.8,
+      1.5600000000000003,
+      1.6
+    ],
+    "z_mm": [
+      0.4,
+      1.1800000000000002,
+      1.5800000000000003
+    ]
+  },
+  "schema": "pcb_thermal_simulation_run_manifest_v1",
+  "source_config": {
+    "board": {
+      "dx_mm": 4,
+      "dy_mm": 3,
+      "dz_mm": 0.8,
+      "length_mm": 8,
+      "thickness_mm": 1.6,
+      "width_mm": 6
+    },
+    "boundary": {
+      "ambient_temperature_k": 298.15,
+      "convection_coefficient_w_m2k": 13,
+      "emissivity": 0.8,
+      "surrounding_temperature_k": 298.15
+    },
+    "components": [
+      {
+        "depth_mm": 2,
+        "height_mm": 1,
+        "id": "C1",
+        "name": "Smoke",
+        "power_w": 0.25,
+        "steady_state_thermal_resistance_k_per_w": 10,
+        "width_mm": 2,
+        "x_mm": 2,
+        "y_mm": 2
+      }
+    ],
+    "copper_layers": [
+      {
+        "conductivity_w_mk": 385,
+        "id": "L1",
+        "name": "Top copper",
+        "thickness_mm": 0.04,
+        "z_center_mm": 1.58,
+        "z_end_mm": 1.6,
+        "z_start_mm": 1.56
+      }
+    ],
+    "radiation_outer_iterations": 2,
+    "radiation_tolerance_k": 0.05,
+    "solver_tolerance_k": 0.001,
+    "thermal_vias": []
+  },
+  "status": "done",
+  "timing": {
+    "response_prepared_at": "2026-04-29T11:39:52.487594+00:00",
+    "solver_finished_at": "2026-04-29T11:39:52.487509+00:00",
+    "solver_started_at": "2026-04-29T11:39:52.485177+00:00",
+    "solver_wall_time_s": 0.002332959000000301,
+    "total_wall_time_s": 0.002332959000000301
+  },
+  "updated_at": "2026-04-29T11:39:52.487749+00:00"
+}
