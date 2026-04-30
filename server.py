@@ -433,14 +433,25 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
-        if parsed.path != "/api/simulate/status":
-            super().do_GET()
+
+        # Redirect root to the app
+        if parsed.path == "/":
+            self.send_response(302)
+            self.send_header("Location", "/pcb_temperature_app.html")
+            self.end_headers()
             return
-        query = parse_qs(parsed.query)
-        job_id = query.get("job_id", [""])[0]
-        snapshot = _job_snapshot(job_id)
-        status = 404 if snapshot.get("status") == "missing" else 200
-        self._send_json(snapshot, status)
+
+        # Handle API status endpoint
+        if parsed.path == "/api/simulate/status":
+            query = parse_qs(parsed.query)
+            job_id = query.get("job_id", [""])[0]
+            snapshot = _job_snapshot(job_id)
+            status = 404 if snapshot.get("status") == "missing" else 200
+            self._send_json(snapshot, status)
+            return
+
+        # Serve static files
+        super().do_GET()
 
     def do_POST(self) -> None:
         if self.path not in {"/api/simulate", "/api/simulate/start", "/api/components/import"}:
