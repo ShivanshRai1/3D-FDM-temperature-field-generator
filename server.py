@@ -520,18 +520,18 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
+        server = ThreadingHTTPServer(("0.0.0.0", args.port), Handler)
     except OSError as exc:
         if exc.errno == 48:
             raise SystemExit(
-                f"Port {args.port} is already in use on 127.0.0.1.\n"
+                f"Port {args.port} is already in use on 0.0.0.0.\n"
                 f"If that is your running Version4 server, open "
                 f"http://127.0.0.1:{args.port}/pcb_temperature_app.html instead.\n"
                 f"Otherwise stop the other process or run: python3 server.py --port {args.port + 1}"
             ) from exc
         raise
 
-    print(f"Serving Version4 at http://127.0.0.1:{args.port}/pcb_temperature_app.html")
+    print(f"Serving Version4 at http://0.0.0.0:{args.port}/pcb_temperature_app.html")
     print("Press Ctrl+C to stop.")
     server.serve_forever()
 
