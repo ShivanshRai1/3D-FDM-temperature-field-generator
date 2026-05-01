@@ -17,6 +17,13 @@ from urllib.error import HTTPError
 from urllib.parse import parse_qs, quote, urlparse
 from urllib.request import Request, urlopen
 
+# Force single-thread BLAS by default before NumPy/SciPy initialize.
+# This protects deployments where dashboard/render.yaml env vars are missing.
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+
 import numpy as np
 
 from temperature_field.models import (
@@ -716,6 +723,13 @@ def main() -> None:
         raise
 
     print(f"Serving Version4 at http://0.0.0.0:{args.port}/pcb_temperature_app.html")
+    print(
+        "BLAS thread env: "
+        f"OMP_NUM_THREADS={os.environ.get('OMP_NUM_THREADS')} "
+        f"OPENBLAS_NUM_THREADS={os.environ.get('OPENBLAS_NUM_THREADS')} "
+        f"MKL_NUM_THREADS={os.environ.get('MKL_NUM_THREADS')} "
+        f"NUMEXPR_NUM_THREADS={os.environ.get('NUMEXPR_NUM_THREADS')}"
+    )
     print("Press Ctrl+C to stop.")
     server.serve_forever()
 
