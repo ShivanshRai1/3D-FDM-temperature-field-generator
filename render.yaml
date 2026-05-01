@@ -14,3 +14,11 @@ services:
         value: "4"
       - key: SOLVER_DIRECT_SOLVE_CELL_LIMIT
         value: "180000"
+      - key: MANIFEST_SYNC_MODE
+        value: "github"
+      - key: MANIFEST_GITHUB_REPO
+        value: "ShivanshRai1/3D-FDM-temperature-field-generator"
+      - key: MANIFEST_GITHUB_BRANCH
+        value: "main"
+      - key: MANIFEST_GITHUB_PATH
+        value: "temp/simulation_runs"

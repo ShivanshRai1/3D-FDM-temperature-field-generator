@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 from dataclasses import asdict
 from datetime import datetime, timezone
 import json
@@ -11,7 +12,9 @@ import uuid
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, urlparse
+from urllib.error import HTTPError
+from urllib.parse import parse_qs, quote, urlparse
+from urllib.request import Request, urlopen
 
 import numpy as np
 
@@ -33,6 +36,13 @@ JOBS: dict[str, dict[str, Any]] = {}
 JOBS_LOCK = threading.Lock()
 MAX_CELLS = int(os.environ.get("SOLVER_MAX_CELLS", "250000"))
 MAX_RADIATION_OUTER = int(os.environ.get("SOLVER_MAX_RADIATION_OUTER", "4"))
+MANIFEST_SYNC_MODE = os.environ.get("MANIFEST_SYNC_MODE", "none").strip().lower()
+MANIFEST_GITHUB_REPO = os.environ.get("MANIFEST_GITHUB_REPO", "").strip()
+MANIFEST_GITHUB_BRANCH = os.environ.get("MANIFEST_GITHUB_BRANCH", "main").strip() or "main"
+MANIFEST_GITHUB_PATH = (
+    os.environ.get("MANIFEST_GITHUB_PATH", "temp/simulation_runs").strip().strip("/")
+)
+MANIFEST_GITHUB_TOKEN = os.environ.get("MANIFEST_GITHUB_TOKEN", "").strip()
 
 
 def _float(payload: dict[str, Any], key: str, default: float) -> float:
@@ -164,7 +174,7 @@ def _check_grid_size(config: SimulationConfig) -> None:
             f"(limit {MAX_CELLS:,}). "
             f"Please increase dx/dy/dz. "
             f"Current: dx={board.dx_mm}mm, dy={board.dy_mm}mm, dz={board.dz_mm}mm. "
-                        f"Try dx=dy=1.0mm and dz=0.2mm to stay within limits."
+            f"Try dx=dy=1.0mm and dz=0.2mm to stay within limits."
         )
 
 
@@ -176,12 +186,83 @@ def _manifest_path(job_id: str) -> Path:
     return RUN_MANIFEST_DIR / f"{job_id}.json"
 
 
+def _manifest_repo_path(job_id: str) -> str:
+    base = MANIFEST_GITHUB_PATH or "temp/simulation_runs"
+    return f"{base}/{job_id}.json"
+
+
+def _github_headers() -> dict[str, str]:
+    return {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {MANIFEST_GITHUB_TOKEN}",
+        "User-Agent": "pcb-temperature-app-manifest-sync",
+    }
+
+
+def _github_get_file_sha(path: str) -> str | None:
+    encoded_path = quote(path, safe="/")
+    url = (
+        f"https://api.github.com/repos/{MANIFEST_GITHUB_REPO}/contents/{encoded_path}"
+        f"?ref={quote(MANIFEST_GITHUB_BRANCH)}"
+    )
+    request = Request(url, headers=_github_headers(), method="GET")
+    try:
+        with urlopen(request, timeout=20) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+            sha = payload.get("sha")
+            return str(sha) if sha else None
+    except HTTPError as exc:
+        if exc.code == 404:
+            return None
+        raise
+
+
+def _sync_manifest_to_github(job_id: str, payload: dict[str, Any]) -> None:
+    if MANIFEST_SYNC_MODE != "github":
+        return
+    if not (MANIFEST_GITHUB_REPO and MANIFEST_GITHUB_TOKEN):
+        return
+
+    try:
+        repo_path = _manifest_repo_path(job_id)
+        current_sha = _github_get_file_sha(repo_path)
+        content = json.dumps(payload, indent=2, sort_keys=True).encode("utf-8")
+        encoded_content = base64.b64encode(content).decode("ascii")
+        body: dict[str, Any] = {
+            "message": f"Auto: update simulation manifest {job_id}",
+            "content": encoded_content,
+            "branch": MANIFEST_GITHUB_BRANCH,
+        }
+        if current_sha:
+            body["sha"] = current_sha
+
+        encoded_path = quote(repo_path, safe="/")
+        url = f"https://api.github.com/repos/{MANIFEST_GITHUB_REPO}/contents/{encoded_path}"
+        request = Request(
+            url,
+            data=json.dumps(body).encode("utf-8"),
+            headers={**_github_headers(), "Content-Type": "application/json"},
+            method="PUT",
+        )
+        with urlopen(request, timeout=30):
+            return
+    except Exception as exc:
+        print(f"Manifest sync failed for {job_id}: {exc}")
+
+
 def _write_run_manifest(job_id: str, payload: dict[str, Any]) -> Path:
     RUN_MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
     path = _manifest_path(job_id)
     temp_path = path.with_suffix(".json.tmp")
     temp_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
     temp_path.replace(path)
+    if MANIFEST_SYNC_MODE == "github":
+        worker = threading.Thread(
+            target=_sync_manifest_to_github,
+            args=(job_id, payload),
+            daemon=True,
+        )
+        worker.start()
     return path
 
 
