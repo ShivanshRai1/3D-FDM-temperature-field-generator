@@ -14,6 +14,16 @@ services:
         value: "4"
       - key: SOLVER_DIRECT_SOLVE_CELL_LIMIT
         value: "180000"
+      - key: SOLVER_MIN_DX_MM
+        value: "1.0"
+      - key: SOLVER_MIN_DY_MM
+        value: "1.0"
+      - key: SOLVER_MIN_DZ_MM
+        value: "0.2"
+      - key: SOLVER_MIN_TOLERANCE_K
+        value: "0.0005"
+      - key: SOLVER_MAX_LINEAR_ITERATIONS
+        value: "4000"
       - key: MANIFEST_SYNC_MODE
         value: "github"
       - key: MANIFEST_GITHUB_REPO

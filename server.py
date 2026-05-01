@@ -36,6 +36,11 @@ JOBS: dict[str, dict[str, Any]] = {}
 JOBS_LOCK = threading.Lock()
 MAX_CELLS = int(os.environ.get("SOLVER_MAX_CELLS", "250000"))
 MAX_RADIATION_OUTER = int(os.environ.get("SOLVER_MAX_RADIATION_OUTER", "4"))
+MIN_DX_MM = float(os.environ.get("SOLVER_MIN_DX_MM", "0"))
+MIN_DY_MM = float(os.environ.get("SOLVER_MIN_DY_MM", "0"))
+MIN_DZ_MM = float(os.environ.get("SOLVER_MIN_DZ_MM", "0"))
+MIN_TOLERANCE_K = float(os.environ.get("SOLVER_MIN_TOLERANCE_K", "0"))
+MAX_LINEAR_ITERATIONS = int(os.environ.get("SOLVER_MAX_LINEAR_ITERATIONS", "20000"))
 MANIFEST_SYNC_MODE = os.environ.get("MANIFEST_SYNC_MODE", "none").strip().lower()
 MANIFEST_GITHUB_REPO = os.environ.get("MANIFEST_GITHUB_REPO", "").strip()
 MANIFEST_GITHUB_BRANCH = os.environ.get("MANIFEST_GITHUB_BRANCH", "main").strip() or "main"
@@ -58,6 +63,9 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
     dx_mm = _float(board_payload, "dx_mm", max(1.0, min(length_mm, width_mm) / 28.0))
     dy_mm = _float(board_payload, "dy_mm", dx_mm)
     dz_mm = _float(board_payload, "dz_mm", max(0.1, thickness_mm / 4.0))
+    dx_mm = max(dx_mm, MIN_DX_MM) if MIN_DX_MM > 0.0 else dx_mm
+    dy_mm = max(dy_mm, MIN_DY_MM) if MIN_DY_MM > 0.0 else dy_mm
+    dz_mm = max(dz_mm, MIN_DZ_MM) if MIN_DZ_MM > 0.0 else dz_mm
 
     board = Board(
         length_mm=length_mm,
@@ -139,8 +147,8 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
     solver = SolverSettings(
         initial_temperature_k=boundary.ambient_temperature_k,
         relaxation_factor=omega,
-        tolerance_k=float(payload.get("solver_tolerance_k", 1e-4)),
-        max_iterations=int(payload.get("solver_max_iterations", 20_000)),
+        tolerance_k=max(float(payload.get("solver_tolerance_k", 1e-4)), MIN_TOLERANCE_K),
+        max_iterations=min(int(payload.get("solver_max_iterations", 20_000)), MAX_LINEAR_ITERATIONS),
         radiation_outer_iterations=radiation_outer,
         radiation_tolerance_k=float(payload.get("radiation_tolerance_k", 0.05)),
     )
