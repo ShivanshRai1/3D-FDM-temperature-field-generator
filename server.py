@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from dataclasses import asdict
 from datetime import datetime, timezone
 import json
@@ -36,6 +37,7 @@ JOBS: dict[str, dict[str, Any]] = {}
 JOBS_LOCK = threading.Lock()
 MAX_CELLS = int(os.environ.get("SOLVER_MAX_CELLS", "250000"))
 MAX_RADIATION_OUTER = int(os.environ.get("SOLVER_MAX_RADIATION_OUTER", "4"))
+SOLVER_TIMEOUT_S = int(os.environ.get("SOLVER_TIMEOUT_S", "0"))  # 0 = no limit
 MIN_DX_MM = float(os.environ.get("SOLVER_MIN_DX_MM", "0"))
 MIN_DY_MM = float(os.environ.get("SOLVER_MIN_DY_MM", "0"))
 MIN_DZ_MM = float(os.environ.get("SOLVER_MIN_DZ_MM", "0"))
@@ -499,7 +501,18 @@ def _run_solver_job(job_id: str, request: dict[str, Any]) -> None:
         _set_job(job_id, message="Solving sparse thermal system.")
         solve_started_at = time.perf_counter()
         solve_started_iso = _utc_now_iso()
-        result = solve_steady_state(config)
+        if SOLVER_TIMEOUT_S > 0:
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(solve_steady_state, config)
+                try:
+                    result = future.result(timeout=SOLVER_TIMEOUT_S)
+                except FuturesTimeoutError:
+                    raise ValueError(
+                        f"Solver exceeded the {SOLVER_TIMEOUT_S}s time limit. "
+                        f"Try a coarser grid (increase dx/dy/dz)."
+                    )
+        else:
+            result = solve_steady_state(config)
         solve_finished_at = time.perf_counter()
         solve_finished_iso = _utc_now_iso()
         _set_job(job_id, message="Preparing temperature views.")
@@ -641,7 +654,18 @@ class Handler(SimpleHTTPRequestHandler):
             )
             solve_started_at = time.perf_counter()
             solve_started_iso = _utc_now_iso()
-            result = solve_steady_state(config)
+            if SOLVER_TIMEOUT_S > 0:
+                with ThreadPoolExecutor(max_workers=1) as pool:
+                    future = pool.submit(solve_steady_state, config)
+                    try:
+                        result = future.result(timeout=SOLVER_TIMEOUT_S)
+                    except FuturesTimeoutError:
+                        raise ValueError(
+                            f"Solver exceeded the {SOLVER_TIMEOUT_S}s time limit. "
+                            f"Try a coarser grid (increase dx/dy/dz)."
+                        )
+            else:
+                result = solve_steady_state(config)
             solve_finished_at = time.perf_counter()
             solve_finished_iso = _utc_now_iso()
             response = _payload_from_result(result, source_config)

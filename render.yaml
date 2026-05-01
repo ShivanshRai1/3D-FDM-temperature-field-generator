@@ -8,6 +8,8 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: SOLVER_TIMEOUT_S
+        value: "300"
       - key: SOLVER_MAX_CELLS
         value: "50000"
       - key: SOLVER_MAX_RADIATION_OUTER
