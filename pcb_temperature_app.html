@@ -964,8 +964,36 @@
     }
 
     const canvas = document.getElementById("scene");
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    let renderer;
+    let webglAvailable = true;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        preserveDrawingBuffer: true,
+        powerPreference: "high-performance"
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    } catch (primaryError) {
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: false,
+          preserveDrawingBuffer: false,
+          powerPreference: "low-power"
+        });
+        renderer.setPixelRatio(1);
+      } catch (fallbackError) {
+        webglAvailable = false;
+        renderer = {
+          domElement: canvas,
+          setPixelRatio() {},
+          setSize() {},
+          render() {}
+        };
+        console.error("WebGL unavailable.", primaryError, fallbackError);
+      }
+    }
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xeef2f5);
@@ -1051,6 +1079,10 @@
       nextGuide: document.getElementById("nextGuide"),
       skipGuide: document.getElementById("skipGuide")
     };
+
+    if (!webglAvailable) {
+      refs.status.textContent = "3D view unavailable (WebGL failed in browser/GPU). Use Chrome or Edge, or enable hardware acceleration.";
+    }
 
     function readNumber(id, fallback) {
       const value = Number(document.getElementById(id).value);
