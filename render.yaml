@@ -9,11 +9,11 @@ services:
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: SOLVER_MAX_CELLS
-        value: "400000"
+        value: "50000"
       - key: SOLVER_MAX_RADIATION_OUTER
         value: "4"
       - key: SOLVER_DIRECT_SOLVE_CELL_LIMIT
-        value: "180000"
+        value: "9999999"
       - key: SOLVER_MIN_DX_MM
         value: "1.0"
       - key: SOLVER_MIN_DY_MM
