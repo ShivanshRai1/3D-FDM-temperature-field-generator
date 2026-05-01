@@ -141,7 +141,7 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
     )
 
 
-MAX_CELLS = 100_000  # hard limit to keep solves under ~60s on free tier
+MAX_CELLS = 250_000  # hard limit to keep solves under ~60s on free tier
 
 
 def _estimate_cell_count(config: SimulationConfig) -> int:
@@ -163,7 +163,7 @@ def _check_grid_size(config: SimulationConfig) -> None:
             f"(limit {MAX_CELLS:,}). "
             f"Please increase dx/dy/dz. "
             f"Current: dx={board.dx_mm}mm, dy={board.dy_mm}mm, dz={board.dz_mm}mm. "
-            f"Try dx=dy=2.0mm and dz=0.4mm to stay within limits."
+              f"Try dx=dy=1.0mm and dz=0.2mm to stay within limits."
         )
 
 
