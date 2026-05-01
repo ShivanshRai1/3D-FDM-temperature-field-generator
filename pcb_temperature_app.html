@@ -2427,7 +2427,7 @@
         setSolverProgress(100, `Simulation failed after ${formatDuration(performance.now() - startedAt)}.`);
         refs.status.textContent = "Backend solver unavailable or failed.";
         window.alert(
-          `Could not run the Python solver.\n\n${error.message}\n\nStart it with:\ncd "/Users/amolverma/Cursor/3D Steady-State Temperature field generator/Version4"\npython3 server.py\n\nThen open http://127.0.0.1:9023/pcb_temperature_app.html`
+          `Could not run the Python solver.\n\n${error.message}`
         );
       } finally {
         window.clearInterval(progressTimer);
