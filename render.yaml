@@ -23,9 +23,7 @@ services:
       - key: SOLVER_MAX_RADIATION_OUTER
         value: "1"
       - key: SOLVER_DIRECT_SOLVE_CELL_LIMIT
-        value: "0"
-      - key: SOLVER_DISABLE_ILU
-        value: "1"
+        value: "200000"
       - key: SOLVER_MIN_DX_MM
         value: "1.0"
       - key: SOLVER_MIN_DY_MM
