@@ -512,8 +512,14 @@ def _solve_sparse_system(
         nonlocal iterations
         iterations += 1
 
+    # Use a lightweight ILU: low fill_factor and aggressive drop_tol so the
+    # preconditioner build stays fast and fits in memory on constrained servers.
+    # Fall back to diagonal (Jacobi) if ILU fails for any reason.
+    n = matrix.shape[0]
+    fill = 3 if n > 50_000 else 6
+    drop = 1e-2 if n > 50_000 else 1e-3
     try:
-        ilu = sparse_linalg.spilu(matrix.tocsc(), drop_tol=1e-4, fill_factor=10)
+        ilu = sparse_linalg.spilu(matrix.tocsc(), drop_tol=drop, fill_factor=fill)
         preconditioner = sparse_linalg.LinearOperator(matrix.shape, ilu.solve)
     except Exception:
         diagonal = matrix.diagonal()
