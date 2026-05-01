@@ -8,6 +8,14 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: OPENBLAS_NUM_THREADS
+        value: "1"
+      - key: MKL_NUM_THREADS
+        value: "1"
+      - key: NUMEXPR_NUM_THREADS
+        value: "1"
       - key: SOLVER_TIMEOUT_S
         value: "300"
       - key: SOLVER_MAX_CELLS
