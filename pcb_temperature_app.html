@@ -2355,7 +2355,14 @@
       const jobId = start.job_id;
       if (!jobId) throw new Error("Solver did not return a job id.");
       let pollDelayMs = 1200;
+      const maxWaitMs = 6 * 60 * 1000;
       while (true) {
+        if (performance.now() - startedAt > maxWaitMs) {
+          throw new Error(
+            `Solver exceeded ${Math.round(maxWaitMs / 60000)} minutes without completion. ` +
+            `Job id: ${jobId}. Please rerun with coarser dx/dy/dz or lower radiation iterations.`
+          );
+        }
         await new Promise(resolve => window.setTimeout(resolve, pollDelayMs));
         const status = await getJson(solverStatusUrl(jobId));
         if (status.message) {
