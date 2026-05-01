@@ -11,6 +11,7 @@ from .models import Board, Component, Layer, SimulationConfig, ThermalVia
 
 SIGMA_W_M2K4 = 5.670374419e-8
 DIRECT_SOLVE_CELL_LIMIT = int(os.environ.get("SOLVER_DIRECT_SOLVE_CELL_LIMIT", "50000"))
+DISABLE_ILU = os.environ.get("SOLVER_DISABLE_ILU", "0").strip().lower() in {"1", "true", "yes", "on"}
 EPS_M = 1e-12
 
 
@@ -499,6 +500,11 @@ def _solve_sparse_system(
     rhs: np.ndarray,
     config: SimulationConfig,
 ) -> tuple[np.ndarray, int, bool, float]:
+    n = matrix.shape[0]
+    print(
+        f"[SOLVER] linear backend: n={n}, direct_limit={DIRECT_SOLVE_CELL_LIMIT}, disable_ilu={DISABLE_ILU}",
+        flush=True,
+    )
     if matrix.shape[0] <= DIRECT_SOLVE_CELL_LIMIT:
         solution = sparse_linalg.spsolve(matrix, rhs)
         residual = matrix @ solution - rhs
@@ -515,10 +521,11 @@ def _solve_sparse_system(
     # Use a lightweight ILU: low fill_factor and aggressive drop_tol so the
     # preconditioner build stays fast and fits in memory on constrained servers.
     # Fall back to diagonal (Jacobi) if ILU fails for any reason.
-    n = matrix.shape[0]
     fill = 3 if n > 50_000 else 6
     drop = 1e-2 if n > 50_000 else 1e-3
     try:
+        if DISABLE_ILU:
+            raise RuntimeError("ILU disabled via SOLVER_DISABLE_ILU")
         ilu = sparse_linalg.spilu(matrix.tocsc(), drop_tol=drop, fill_factor=fill)
         preconditioner = sparse_linalg.LinearOperator(matrix.shape, ilu.solve)
     except Exception:
