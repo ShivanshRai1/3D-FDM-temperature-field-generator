@@ -118,12 +118,16 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
         emissivity=_float(boundary_payload, "emissivity", 0.8),
     )
 
+    # Cap radiation outer iterations at 4 to keep solves responsive on limited hardware.
+    # The frontend may request more for high-accuracy runs; honour up to 4 on this server.
+    radiation_outer = min(4, max(1, int(payload.get("radiation_outer_iterations", 1))))
+
     solver = SolverSettings(
         initial_temperature_k=boundary.ambient_temperature_k,
         relaxation_factor=omega,
         tolerance_k=float(payload.get("solver_tolerance_k", 1e-4)),
         max_iterations=int(payload.get("solver_max_iterations", 20_000)),
-        radiation_outer_iterations=int(payload.get("radiation_outer_iterations", 24)),
+        radiation_outer_iterations=radiation_outer,
         radiation_tolerance_k=float(payload.get("radiation_tolerance_k", 0.05)),
     )
 
@@ -135,6 +139,32 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
         components=components,
         thermal_vias=vias,
     )
+
+
+MAX_CELLS = 100_000  # hard limit to keep solves under ~60s on free tier
+
+
+def _estimate_cell_count(config: SimulationConfig) -> int:
+    import math
+    board = config.board
+    nx = max(1, math.ceil(board.length_mm / board.dx_mm))
+    ny = max(1, math.ceil(board.width_mm / board.dy_mm))
+    # rough z-cell estimate: thickness / dz, plus extra planes for copper layers
+    nz = max(1, math.ceil(board.thickness_mm / board.dz_mm)) + 4 * len(config.layers)
+    return nx * ny * nz
+
+
+def _check_grid_size(config: SimulationConfig) -> None:
+    estimated = _estimate_cell_count(config)
+    if estimated > MAX_CELLS:
+        board = config.board
+        raise ValueError(
+            f"Grid too large for this server: estimated {estimated:,} cells "
+            f"(limit {MAX_CELLS:,}). "
+            f"Please increase dx/dy/dz. "
+            f"Current: dx={board.dx_mm}mm, dy={board.dy_mm}mm, dz={board.dz_mm}mm. "
+            f"Try dx=dy=2.0mm and dz=0.4mm to stay within limits."
+        )
 
 
 def _utc_now_iso() -> str:
@@ -349,6 +379,7 @@ def _run_solver_job(job_id: str, request: dict[str, Any]) -> None:
             raise ValueError("Legacy SOR omega must be in the open interval (0, 2).")
         source_config = request["config"]
         config = _build_config(source_config, omega)
+        _check_grid_size(config)
         manifest_path = _create_run_manifest(
             job_id, request, source_config, config, omega, mode="async"
         )
@@ -487,6 +518,7 @@ class Handler(SimpleHTTPRequestHandler):
                 raise ValueError("Legacy SOR omega must be in the open interval (0, 2).")
             source_config = request["config"]
             config = _build_config(source_config, omega)
+            _check_grid_size(config)
             job_id = uuid.uuid4().hex
             manifest_path = _create_run_manifest(
                 job_id, request, source_config, config, omega, mode="sync"
