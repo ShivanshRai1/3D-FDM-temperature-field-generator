@@ -254,7 +254,7 @@ def _write_run_manifest(job_id: str, payload: dict[str, Any]) -> Path:
     RUN_MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
     path = _manifest_path(job_id)
     temp_path = path.with_suffix(".json.tmp")
-    temp_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    temp_path.write_text(json.dumps(payload, separators=(",", ":"), sort_keys=True), encoding="utf-8")
     temp_path.replace(path)
     if MANIFEST_SYNC_MODE == "github":
         worker = threading.Thread(
@@ -292,11 +292,33 @@ def _create_run_manifest(
             "response_prepared_at": None,
             "total_wall_time_s": None,
         },
-        "result": None,
-        "response_payload": None,
+        "result_summary": None,
         "error": None,
     }
     return _write_run_manifest(job_id, manifest)
+
+
+def _manifest_result_summary(response: dict[str, Any]) -> dict[str, Any]:
+    solver = response.get("solver", {})
+    component_reports = response.get("component_reports", [])
+    views = response.get("views", {})
+    views_meta: dict[str, dict[str, Any]] = {}
+    for name, view in views.items():
+        if not isinstance(view, dict):
+            continue
+        views_meta[name] = {
+            "name": view.get("name"),
+            "z": view.get("z"),
+            "nx": view.get("nx"),
+            "ny": view.get("ny"),
+        }
+    return {
+        "solver": solver,
+        "min_temperature_k": response.get("min_temperature_k"),
+        "max_temperature_k": response.get("max_temperature_k"),
+        "component_reports": component_reports,
+        "views_meta": views_meta,
+    }
 
 
 def _update_run_manifest(job_id: str, **updates: Any) -> None:
@@ -475,21 +497,6 @@ def _run_solver_job(job_id: str, request: dict[str, Any]) -> None:
         _set_job(job_id, message="Preparing temperature views.")
         response = _payload_from_result(result, source_config)
         response_prepared_iso = _utc_now_iso()
-        _update_run_manifest(
-            job_id,
-            status="done",
-            finished_at=response_prepared_iso,
-            timing={
-                "solver_started_at": solve_started_iso,
-                "solver_finished_at": solve_finished_iso,
-                "solver_wall_time_s": solve_finished_at - solve_started_at,
-                "response_prepared_at": response_prepared_iso,
-                "total_wall_time_s": solve_finished_at - solve_started_at,
-            },
-            result=response,
-            response_payload=response,
-            error=None,
-        )
         _set_job(
             job_id,
             status="done",
@@ -497,6 +504,25 @@ def _run_solver_job(job_id: str, request: dict[str, Any]) -> None:
             result=response,
             finished_at=time.time(),
         )
+        manifest_worker = threading.Thread(
+            target=_update_run_manifest,
+            kwargs={
+                "job_id": job_id,
+                "status": "done",
+                "finished_at": response_prepared_iso,
+                "timing": {
+                    "solver_started_at": solve_started_iso,
+                    "solver_finished_at": solve_finished_iso,
+                    "solver_wall_time_s": solve_finished_at - solve_started_at,
+                    "response_prepared_at": response_prepared_iso,
+                    "total_wall_time_s": solve_finished_at - solve_started_at,
+                },
+                "result_summary": _manifest_result_summary(response),
+                "error": None,
+            },
+            daemon=True,
+        )
+        manifest_worker.start()
     except Exception as exc:
         _update_run_manifest(
             job_id,
@@ -612,21 +638,25 @@ class Handler(SimpleHTTPRequestHandler):
             solve_finished_iso = _utc_now_iso()
             response = _payload_from_result(result, source_config)
             response_prepared_iso = _utc_now_iso()
-            _update_run_manifest(
-                job_id,
-                status="done",
-                finished_at=response_prepared_iso,
-                timing={
-                    "solver_started_at": solve_started_iso,
-                    "solver_finished_at": solve_finished_iso,
-                    "solver_wall_time_s": solve_finished_at - solve_started_at,
-                    "response_prepared_at": response_prepared_iso,
-                    "total_wall_time_s": solve_finished_at - solve_started_at,
+            manifest_worker = threading.Thread(
+                target=_update_run_manifest,
+                kwargs={
+                    "job_id": job_id,
+                    "status": "done",
+                    "finished_at": response_prepared_iso,
+                    "timing": {
+                        "solver_started_at": solve_started_iso,
+                        "solver_finished_at": solve_finished_iso,
+                        "solver_wall_time_s": solve_finished_at - solve_started_at,
+                        "response_prepared_at": response_prepared_iso,
+                        "total_wall_time_s": solve_finished_at - solve_started_at,
+                    },
+                    "result_summary": _manifest_result_summary(response),
+                    "error": None,
                 },
-                result=response,
-                response_payload=response,
-                error=None,
+                daemon=True,
             )
+            manifest_worker.start()
             response["job_id"] = job_id
             response["manifest_path"] = str(manifest_path)
             self._send_json(response)
