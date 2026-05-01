@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: threed-fdm-temperature-field-generator
+    runtime: python
+    plan: standard
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py --port $PORT
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: SOLVER_MAX_CELLS
+        value: "400000"
+      - key: SOLVER_MAX_RADIATION_OUTER
+        value: "4"
+      - key: SOLVER_DIRECT_SOLVE_CELL_LIMIT
+        value: "180000"
