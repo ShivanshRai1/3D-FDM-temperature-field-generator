@@ -31,6 +31,8 @@ ROOT = Path(__file__).resolve().parent
 RUN_MANIFEST_DIR = ROOT / "temp" / "simulation_runs"
 JOBS: dict[str, dict[str, Any]] = {}
 JOBS_LOCK = threading.Lock()
+MAX_CELLS = int(os.environ.get("SOLVER_MAX_CELLS", "250000"))
+MAX_RADIATION_OUTER = int(os.environ.get("SOLVER_MAX_RADIATION_OUTER", "4"))
 
 
 def _float(payload: dict[str, Any], key: str, default: float) -> float:
@@ -118,9 +120,11 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
         emissivity=_float(boundary_payload, "emissivity", 0.8),
     )
 
-    # Cap radiation outer iterations at 4 to keep solves responsive on limited hardware.
-    # The frontend may request more for high-accuracy runs; honour up to 4 on this server.
-    radiation_outer = min(4, max(1, int(payload.get("radiation_outer_iterations", 1))))
+    # Cap radiation outer iterations to keep solves responsive on the deployed tier.
+    radiation_outer = min(
+        MAX_RADIATION_OUTER,
+        max(1, int(payload.get("radiation_outer_iterations", 1))),
+    )
 
     solver = SolverSettings(
         initial_temperature_k=boundary.ambient_temperature_k,
@@ -139,9 +143,6 @@ def _build_config(payload: dict[str, Any], omega: float) -> SimulationConfig:
         components=components,
         thermal_vias=vias,
     )
-
-
-MAX_CELLS = 250_000  # hard limit to keep solves under ~60s on free tier
 
 
 def _estimate_cell_count(config: SimulationConfig) -> int:
@@ -163,7 +164,7 @@ def _check_grid_size(config: SimulationConfig) -> None:
             f"(limit {MAX_CELLS:,}). "
             f"Please increase dx/dy/dz. "
             f"Current: dx={board.dx_mm}mm, dy={board.dy_mm}mm, dz={board.dz_mm}mm. "
-              f"Try dx=dy=1.0mm and dz=0.2mm to stay within limits."
+                        f"Try dx=dy=1.0mm and dz=0.2mm to stay within limits."
         )
 
 
