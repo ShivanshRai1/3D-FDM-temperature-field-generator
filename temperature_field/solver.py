@@ -511,14 +511,18 @@ def _solve_sparse_system(
         nonlocal iterations
         iterations += 1
 
-    diagonal = matrix.diagonal()
-    inverse_diagonal = np.divide(
-        1.0,
-        diagonal,
-        out=np.zeros_like(diagonal),
-        where=diagonal != 0.0,
-    )
-    preconditioner = sparse.diags(inverse_diagonal, format="csr")
+    try:
+        ilu = sparse_linalg.spilu(matrix.tocsc(), drop_tol=1e-4, fill_factor=10)
+        preconditioner = sparse_linalg.LinearOperator(matrix.shape, ilu.solve)
+    except Exception:
+        diagonal = matrix.diagonal()
+        inverse_diagonal = np.divide(
+            1.0,
+            diagonal,
+            out=np.zeros_like(diagonal),
+            where=diagonal != 0.0,
+        )
+        preconditioner = sparse.diags(inverse_diagonal, format="csr")
     initial = np.full_like(rhs, config.solver.initial_temperature_k, dtype=float)
     solution, info = sparse_linalg.cg(
         matrix,
