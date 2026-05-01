@@ -614,12 +614,19 @@ def _boundary_loss_w(
 
 def solve_steady_state(config: SimulationConfig) -> SimulationResult:
     """Solve the PCB steady-state temperature field as a sparse finite-volume system."""
+    import time as _time
+    _t0 = _time.perf_counter()
 
     _validate_config(config)
     grid = _build_grid(config.board, config.layers, config.components)
+    nx, ny, nz = len(grid.x_m), len(grid.y_m), len(grid.z_m)
+    cell_count = nx * ny * nz
+    print(f"[SOLVER] grid={nx}x{ny}x{nz}={cell_count} cells, radiation_outer={config.solver.radiation_outer_iterations}, DIRECT_SOLVE_CELL_LIMIT={DIRECT_SOLVE_CELL_LIMIT}", flush=True)
+
     conductivity = _layer_property_field(config.layers, grid)
     _apply_vias(conductivity, grid, config.thermal_vias)
     heat_w, component_weights = _build_heat_field(config, grid)
+    print(f"[SOLVER] grid built in {_time.perf_counter()-_t0:.3f}s", flush=True)
 
     total_iterations = 0
     max_delta = float("inf")
@@ -633,11 +640,15 @@ def solve_steady_state(config: SimulationConfig) -> SimulationResult:
     for outer_index in range(config.solver.radiation_outer_iterations):
         radiation_temperature = previous_temperature
         final_radiation_temperature = radiation_temperature
+        _ta = _time.perf_counter()
         matrix, rhs = _assemble_sparse_system(config, grid, conductivity, heat_w, radiation_temperature)
         matrix_nonzeros = int(matrix.nnz)
+        print(f"[SOLVER] outer={outer_index} assemble done in {_time.perf_counter()-_ta:.3f}s, nnz={matrix_nonzeros}", flush=True)
+        _tb = _time.perf_counter()
         flat_solution, iterations, linear_converged, max_delta = _solve_sparse_system(
             matrix, rhs, config
         )
+        print(f"[SOLVER] outer={outer_index} linear solve done in {_time.perf_counter()-_tb:.3f}s, iters={iterations}, converged={linear_converged}", flush=True)
         total_iterations += iterations
         temperature = flat_solution.reshape(conductivity.shape)
         outer_used = outer_index + 1

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import argparse
 import base64
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from dataclasses import asdict
 from datetime import datetime, timezone
 import json
-import multiprocessing as mp
 import os
 import threading
 import time
@@ -52,40 +52,23 @@ MANIFEST_GITHUB_PATH = (
 MANIFEST_GITHUB_TOKEN = os.environ.get("MANIFEST_GITHUB_TOKEN", "").strip()
 
 
-def _solver_worker(config: SimulationConfig, queue: Any) -> None:
-    try:
-        queue.put(("ok", solve_steady_state(config)))
-    except Exception as exc:
-        queue.put(("error", str(exc)))
-
-
 def _solve_with_hard_timeout(config: SimulationConfig) -> Any:
     if SOLVER_TIMEOUT_S <= 0:
         return solve_steady_state(config)
-
-    ctx = mp.get_context("spawn")
-    queue = ctx.Queue(maxsize=1)
-    process = ctx.Process(target=_solver_worker, args=(config, queue), daemon=True)
-    process.start()
-    process.join(SOLVER_TIMEOUT_S)
-
-    if process.is_alive():
-        process.terminate()
-        process.join(5)
+    # Use a thread (not subprocess) to avoid spawn overhead on single-CPU containers.
+    # We do NOT use 'with' executor because shutdown(wait=True) would block past timeout.
+    executor = ThreadPoolExecutor(max_workers=1)
+    future = executor.submit(solve_steady_state, config)
+    try:
+        result = future.result(timeout=SOLVER_TIMEOUT_S)
+        executor.shutdown(wait=False)
+        return result
+    except FuturesTimeoutError:
+        executor.shutdown(wait=False)
         raise ValueError(
             f"Solver exceeded the {SOLVER_TIMEOUT_S}s time limit. "
             f"Try a coarser grid (increase dx/dy/dz)."
         )
-
-    if queue.empty():
-        if process.exitcode not in (0, None):
-            raise ValueError(f"Solver worker exited unexpectedly (exit code {process.exitcode}).")
-        raise ValueError("Solver worker exited without returning a result.")
-
-    status, payload = queue.get()
-    if status == "ok":
-        return payload
-    raise ValueError(str(payload))
 
 
 def _float(payload: dict[str, Any], key: str, default: float) -> float:
