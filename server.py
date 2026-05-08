@@ -581,13 +581,24 @@ class Handler(SimpleHTTPRequestHandler):
 
     def end_headers(self) -> None:
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         super().end_headers()
 
     def do_OPTIONS(self) -> None:
         self.send_response(204)
         self.end_headers()
+
+    def _send_no_body(self, status: int = 200, extra_headers: dict[str, str] | None = None) -> None:
+        try:
+            self.send_response(status)
+            if extra_headers:
+                for key, value in extra_headers.items():
+                    self.send_header(key, value)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def _send_json(self, payload: dict[str, Any], status: int = 200) -> None:
         encoded = json.dumps(payload).encode("utf-8")
@@ -609,6 +620,10 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
 
+        if parsed.path in {"/healthz", "/api/health"}:
+            self._send_json({"status": "ok"})
+            return
+
         # Redirect root to the app
         if parsed.path == "/":
             self.send_response(302)
@@ -627,6 +642,27 @@ class Handler(SimpleHTTPRequestHandler):
 
         # Serve static files
         super().do_GET()
+
+    def do_HEAD(self) -> None:
+        parsed = urlparse(self.path)
+
+        if parsed.path in {"/healthz", "/api/health"}:
+            self._send_no_body(200)
+            return
+
+        if parsed.path == "/":
+            self._send_no_body(302, {"Location": "/pcb_temperature_app.html"})
+            return
+
+        if parsed.path == "/api/simulate/status":
+            query = parse_qs(parsed.query)
+            job_id = query.get("job_id", [""])[0]
+            snapshot = _job_snapshot(job_id)
+            status = 404 if snapshot.get("status") == "missing" else 200
+            self._send_no_body(status)
+            return
+
+        super().do_HEAD()
 
     def do_POST(self) -> None:
         if self.path not in {"/api/simulate", "/api/simulate/start", "/api/components/import"}:
