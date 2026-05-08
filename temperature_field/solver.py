@@ -10,7 +10,7 @@ from scipy.sparse import linalg as sparse_linalg
 from .models import Board, Component, Layer, SimulationConfig, ThermalVia
 
 SIGMA_W_M2K4 = 5.670374419e-8
-DIRECT_SOLVE_CELL_LIMIT = int(os.environ.get("SOLVER_DIRECT_SOLVE_CELL_LIMIT", "200000"))
+DIRECT_SOLVE_CELL_LIMIT = int(os.environ.get("SOLVER_DIRECT_SOLVE_CELL_LIMIT", "30000"))
 DISABLE_ILU = os.environ.get("SOLVER_DISABLE_ILU", "0").strip().lower() in {"1", "true", "yes", "on"}
 EPS_M = 1e-12
 
@@ -518,16 +518,18 @@ def _solve_sparse_system(
         nonlocal iterations
         iterations += 1
 
-    # Use a lightweight ILU: low fill_factor and aggressive drop_tol so the
-    # preconditioner build stays fast and fits in memory on constrained servers.
+    # ILU preconditioner: fill_factor=10 gives strong preconditioning with fast CG convergence.
+    # Uses ~50-100MB for 73k cells — safe on 512MB containers (direct solve needs ~500MB).
     # Fall back to diagonal (Jacobi) if ILU fails for any reason.
-    fill = 3 if n > 50_000 else 6
-    drop = 1e-2 if n > 50_000 else 1e-3
+    fill = 10
+    drop = 1e-4
     try:
         if DISABLE_ILU:
             raise RuntimeError("ILU disabled via SOLVER_DISABLE_ILU")
+        print(f"[SOLVER] building ILU preconditioner fill={fill} drop={drop}", flush=True)
         ilu = sparse_linalg.spilu(matrix.tocsc(), drop_tol=drop, fill_factor=fill)
         preconditioner = sparse_linalg.LinearOperator(matrix.shape, ilu.solve)
+        print("[SOLVER] ILU done", flush=True)
     except Exception:
         diagonal = matrix.diagonal()
         inverse_diagonal = np.divide(
