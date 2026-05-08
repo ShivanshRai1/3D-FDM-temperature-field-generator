@@ -10,7 +10,7 @@ from scipy.sparse import linalg as sparse_linalg
 from .models import Board, Component, Layer, SimulationConfig, ThermalVia
 
 SIGMA_W_M2K4 = 5.670374419e-8
-DIRECT_SOLVE_CELL_LIMIT = int(os.environ.get("SOLVER_DIRECT_SOLVE_CELL_LIMIT", "30000"))
+DIRECT_SOLVE_CELL_LIMIT = int(os.environ.get("SOLVER_DIRECT_SOLVE_CELL_LIMIT", "80000"))
 DISABLE_ILU = os.environ.get("SOLVER_DISABLE_ILU", "0").strip().lower() in {"1", "true", "yes", "on"}
 EPS_M = 1e-12
 

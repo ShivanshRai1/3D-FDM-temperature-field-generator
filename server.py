@@ -511,6 +511,15 @@ def _set_job(job_id: str, **updates: Any) -> None:
             JOBS[job_id].update(updates)
 
 
+def _has_active_job() -> bool:
+    with JOBS_LOCK:
+        for job in JOBS.values():
+            status = str(job.get("status", "")).lower()
+            if status in {"queued", "running"}:
+                return True
+    return False
+
+
 def _run_solver_job(job_id: str, request: dict[str, Any]) -> None:
     try:
         _set_job(job_id, status="running", message="Building solver configuration.")
@@ -677,6 +686,17 @@ class Handler(SimpleHTTPRequestHandler):
                 return
 
             if self.path == "/api/simulate/start":
+                if _has_active_job():
+                    self._send_json(
+                        {
+                            "error": (
+                                "A simulation is already running on this server. "
+                                "Please wait for it to finish before starting another run."
+                            )
+                        },
+                        429,
+                    )
+                    return
                 job_id = uuid.uuid4().hex
                 with JOBS_LOCK:
                     JOBS[job_id] = {
@@ -696,6 +716,17 @@ class Handler(SimpleHTTPRequestHandler):
             omega = float(request.get("solver", {}).get("omega", 1.2))
             if omega <= 0.0 or omega >= 2.0:
                 raise ValueError("Legacy SOR omega must be in the open interval (0, 2).")
+            if _has_active_job():
+                self._send_json(
+                    {
+                        "error": (
+                            "A simulation is already running on this server. "
+                            "Please wait for it to finish before starting another run."
+                        )
+                    },
+                    429,
+                )
+                return
             source_config = request["config"]
             config = _build_config(source_config, omega)
             _check_grid_size(config)
