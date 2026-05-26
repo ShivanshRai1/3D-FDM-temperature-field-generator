@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thermal Simulator — Feedback & Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    color-scheme: light;
+    --bg:        #f5f4f0;
+    --surface:   #ffffff;
+    --surface2:  #f0ede8;
+    --border:    rgba(0,0,0,0.10);
+    --border-md: rgba(0,0,0,0.18);
+    --text:      #1a1a18;
+    --text-2:    #5a5a54;
+    --text-3:    #9a9a90;
+    --amber:     #BA7517;
+    --amber-bg:  #FAEEDA;
+    --amber-bdr: #EF9F27;
+    --green-bg:  #EAF3DE;
+    --green-bdr: #639922;
+    --green-txt: #3B6D11;
+    --red-bg:    #FCEBEB;
+    --red-bdr:   #E24B4A;
+    --red-txt:   #A32D2D;
+    --radius:    10px;
+    --radius-lg: 14px;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'Sora', sans-serif;
+  }
+
+
+
+  html, body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 0.5px solid var(--border);
+    padding: 2.5rem 1.75rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2.5rem;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--text);
+    color: var(--surface);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .logo-name { font-size: 14px; font-weight: 600; line-height: 1.2; color: var(--text); }
+  .logo-sub  { font-size: 11px; color: var(--text-3); font-family: var(--mono); }
+
+  .sidebar-steps { list-style: none; flex: 1; }
+  .sidebar-steps li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0; position: relative;
+  }
+  .sidebar-steps li:not(:last-child)::after {
+    content: ''; position: absolute;
+    left: 12px; top: 36px; bottom: -6px;
+    width: 1px; background: var(--border);
+  }
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 1.5px solid var(--border-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; font-family: var(--mono);
+    flex-shrink: 0; color: var(--text-3); background: var(--surface);
+    transition: all 0.2s;
+  }
+  .sidebar-steps li.s-active .step-num { background: var(--text); color: var(--surface); border-color: var(--text); }
+  .sidebar-steps li.s-done  .step-num  { background: var(--surface2); border-color: var(--border-md); }
+  .sidebar-steps li.s-done  .step-num::before { content: '✓'; color: var(--text-2); }
+  .sidebar-steps li.s-done  .step-num span { display: none; }
+  .step-info { padding-top: 3px; }
+  .step-info strong { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); transition: color 0.2s; }
+  .sidebar-steps li.s-active .step-info strong { color: var(--text); }
+  .step-info span { font-size: 11px; color: var(--text-3); font-family: var(--mono); }
+
+  .sidebar-footer {
+    margin-top: auto; padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+    font-size: 12px; color: var(--text-3); line-height: 1.7;
+  }
+  .sidebar-footer a { color: var(--text-2); text-decoration: none; }
+  .sidebar-footer a:hover { color: var(--text); }
+
+  /* ── Main ── */
+  .main { padding: 3rem 3.5rem 4rem; max-width: 720px; }
+  .step-page { display: none; }
+  .step-page.active { display: block; }
+  .page-header { margin-bottom: 2rem; }
+  .page-header h1 { font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .page-header p  { font-size: 14px; color: var(--text-2); }
+
+  /* ── Fields ── */
+  .field { margin-bottom: 1.4rem; }
+  .field > label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 7px; }
+  .req { color: var(--red-txt); margin-left: 2px; }
+  .opt { font-weight: 400; color: var(--text-3); font-size: 11px; margin-left: 5px; font-family: var(--mono); }
+
+  input[type=text], input[type=email], textarea, select {
+    width: 100%; font-family: var(--sans); font-size: 14px;
+    color: var(--text); background: var(--surface);
+    border: 0.5px solid var(--border-md); border-radius: var(--radius);
+    padding: 10px 14px; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none;
+  }
+  input[type=text]:focus, input[type=email]:focus, textarea:focus {
+    border-color: var(--text-2);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+  }
+  textarea { resize: vertical; min-height: 90px; }
+  .char-count { font-size: 11px; color: var(--text-3); text-align: right; margin-top: 4px; font-family: var(--mono); }
+  .hint { font-size: 12px; color: var(--text-3); margin-top: 5px; }
+
+  /* ── Inline validation error ── */
+  .field-error { display: none; font-size: 12px; color: var(--red-txt); margin-top: 5px; font-family: var(--mono); }
+  .field.has-error input, .field.has-error textarea { border-color: var(--red-bdr); }
+  .field.has-error .field-error { display: block; }
+
+  /* ── Chips ── */
+  .chip-hint { font-size: 11px; color: var(--text-3); font-family: var(--mono); margin-bottom: 8px; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 999px;
+    border: 0.5px solid var(--border-md);
+    font-size: 13px; font-family: var(--sans);
+    color: var(--text-2); cursor: pointer; user-select: none;
+    transition: all 0.15s; background: var(--surface);
+  }
+  .chip:hover { border-color: var(--text-3); color: var(--text); }
+  .chip.selected { background: var(--text); border-color: var(--text); color: var(--surface); }
+  .chip i { font-size: 14px; line-height: 1; }
+
+  /* ── Auto-capture panel ── */
+  .auto-panel {
+    background: var(--surface2); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px; margin-top: 1rem;
+  }
+  .auto-panel-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-3); font-family: var(--mono); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .auto-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .auto-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 6px; font-size: 12px;
+    font-family: var(--mono); background: var(--surface);
+    border: 0.5px solid var(--border); color: var(--text-2);
+  }
+
+  /* ── Conditional sections ── */
+  .cond-section { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 0.5px solid var(--border); }
+  .cond-section.visible { display: block; }
+  .cond-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-3); font-family: var(--mono); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── Severity ── */
+  .sev-row { display: flex; gap: 8px; }
+  .sev-btn {
+    flex: 1; padding: 9px 8px; border-radius: var(--radius);
+    border: 0.5px solid var(--border-md); background: var(--surface);
+    font-size: 12px; font-weight: 500; font-family: var(--sans);
+    cursor: pointer; text-align: center; color: var(--text-2); transition: all 0.15s;
+  }
+  .sev-btn:hover { border-color: var(--text-3); }
+  .sev-low  { background: var(--green-bg) !important; border-color: var(--green-bdr) !important; color: var(--green-txt) !important; }
+  .sev-med  { background: var(--amber-bg) !important; border-color: var(--amber-bdr) !important; color: var(--amber)     !important; }
+  .sev-high { background: var(--red-bg)   !important; border-color: var(--red-bdr)   !important; color: var(--red-txt)   !important; }
+
+  /* ── Ratings ── */
+  .rating-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .rating-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .rating-card label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 10px; }
+  .stars { display: flex; gap: 4px; }
+  .star {
+    width: 28px; height: 28px; cursor: pointer;
+    border: none; background: none; padding: 0;
+    font-size: 20px; line-height: 28px; text-align: center;
+    color: var(--border-md); transition: color 0.1s;
+    border-radius: 4px;
+  }
+  .star.lit { color: var(--amber); }
+  .stars:hover .star { color: var(--amber); }
+  .stars .star:hover ~ .star { color: var(--border-md); }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 2rem; padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+  }
+  .btn {
+    padding: 10px 22px; border-radius: var(--radius);
+    font-size: 14px; font-weight: 500; font-family: var(--sans);
+    cursor: pointer; border: 0.5px solid var(--border-md);
+    background: var(--surface); color: var(--text); transition: all 0.15s;
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary { background: var(--text); color: var(--surface); border-color: var(--text); }
+  .btn.primary:hover { opacity: 0.82; }
+  .btn.ghost  { border-color: transparent; color: var(--text-2); background: transparent; }
+  .btn.ghost:hover { color: var(--text); background: var(--surface2); }
+
+  /* ── Success ── */
+  .success-wrap { display: flex; flex-direction: column; align-items: flex-start; padding-top: 1rem; }
+  .success-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--surface2); border: 0.5px solid var(--border-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: var(--text); margin-bottom: 1.5rem;
+  }
+  .success-title { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .success-body  { font-size: 14px; color: var(--text-2); max-width: 420px; line-height: 1.7; margin-bottom: 1.5rem; }
+  .session-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: var(--radius);
+    background: var(--surface2); border: 0.5px solid var(--border);
+    font-size: 12px; font-family: var(--mono); color: var(--text-2);
+  }
+
+  /* ── Evidence panel (xval) ── */
+  .evidence-panel { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .evidence-row {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-md);
+    background: var(--surface2);
+    animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .evidence-source-name {
+    font-size: 12px; font-weight: 600; font-family: var(--mono);
+    color: var(--text-2); white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .evidence-inputs { display: flex; flex-direction: column; gap: 6px; }
+  .evidence-inputs input[type=text] { font-size: 13px; padding: 7px 10px; }
+  .evidence-file-label {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-2); cursor: pointer;
+    padding: 6px 10px; border-radius: 6px;
+    border: 0.5px dashed var(--border-md);
+    background: var(--surface); transition: border-color 0.15s;
+    font-family: var(--mono);
+  }
+  .evidence-file-label:hover { border-color: var(--text-3); color: var(--text); }
+  .evidence-file-label i { font-size: 14px; }
+  .evidence-file-input { display: none; }
+  .evidence-file-name { font-size: 11px; color: var(--text-3); margin-top: 2px; font-family: var(--mono); }
+  .evidence-remove {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 0.5px solid var(--border-md); background: var(--surface);
+    color: var(--text-3); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s; align-self: flex-start;
+    font-family: var(--sans);
+  }
+  .evidence-remove:hover { border-color: var(--red-bdr); color: var(--red-txt); background: var(--red-bg); }
+
+  /* ── Per-category issue cards ── */
+  .issue-card {
+    border: 0.5px solid var(--border-md);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 1rem;
+    background: var(--surface);
+  }
+  .issue-card + .issue-card { margin-top: 0; }
+  .issue-card-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--text-2);
+    font-family: var(--mono); margin-bottom: 1rem;
+  }
+  .issue-card-label i { font-size: 14px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .page { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 2rem 1.25rem 3rem; }
+    .sev-row { flex-direction: column; }
+    .rating-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ti ti-cpu" aria-hidden="true"></i></div>
+      <div>
+        <div class="logo-name">Thermal Simulator</div>
+        <div class="logo-sub">Feedback &amp; Support</div>
+      </div>
+    </div>
+    <ul class="sidebar-steps" id="sidebar-steps">
+      <li class="s-active" data-step="0">
+        <div class="step-num"><span>1</span></div>
+        <div class="step-info"><strong>Tool selection</strong><span>Which simulator?</span></div>
+      </li>
+      <li data-step="1">
+        <div class="step-num"><span>2</span></div>
+        <div class="step-info"><strong>Category</strong><span>Nature of feedback</span></div>
+      </li>
+      <li data-step="2">
+        <div class="step-num"><span>3</span></div>
+        <div class="step-info"><strong>Details</strong><span>Issue or feature</span></div>
+      </li>
+      <li data-step="3">
+        <div class="step-num"><span>4</span></div>
+        <div class="step-info"><strong>Rating</strong><span>Experience scores</span></div>
+      </li>
+      <li data-step="4">
+        <div class="step-num"><span>5</span></div>
+        <div class="step-info"><strong>Submit</strong><span>Contact &amp; confirm</span></div>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      Need immediate help?<br>
+      <a href="mailto:support@yourdomain.com">support@yourdomain.com</a><br><br>
+      <a href="#">Documentation</a> &nbsp;·&nbsp; <a href="#">Changelog</a>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main" role="main">
+
+    <!-- Step 0: Tool -->
+    <section class="step-page active" id="step-0" aria-label="Step 1: Tool selection">
+      <div class="page-header">
+        <h1>Which tool are you using?</h1>
+        <p>We'll auto-capture relevant simulation context for your session.</p>
+      </div>
+      <div class="field" id="field-tool">
+        <label>Select simulator <span class="req">*</span></label>
+        <div class="chip-hint">Pick one</div>
+        <div class="chip-group" id="tool-chips">
+          <div class="chip" data-val="board" onclick="selectChip(this,'tool-chips',false)">
+            <i class="ti ti-circuit-board" aria-hidden="true"></i>Board-level transient
+          </div>
+          <div class="chip" data-val="device" onclick="selectChip(this,'tool-chips',false)">
+            <i class="ti ti-cpu" aria-hidden="true"></i>Device transient
+          </div>
+          <div class="chip" data-val="fdm" onclick="selectChip(this,'tool-chips',false)">
+            <i class="ti ti-box" aria-hidden="true"></i>3D FDM steady-state
+          </div>
+        </div>
+        <div class="field-error">Please select a tool to continue.</div>
+      </div>
+      <div class="auto-panel" id="auto-context" style="display:none;" aria-live="polite">
+        <div class="auto-panel-label"><i class="ti ti-bolt" aria-hidden="true"></i>Auto-captured context</div>
+        <div class="auto-tags" id="auto-tags-list"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="nextStep(0)">Continue &rarr;</button>
+      </div>
+    </section>
+
+    <!-- Step 1: Category -->
+    <section class="step-page" id="step-1" aria-label="Step 2: Category">
+      <div class="page-header">
+        <h1>What's the nature of your feedback?</h1>
+        <p>Select all that apply — relevant fields appear on the next step.</p>
+      </div>
+      <div class="field" id="field-category">
+        <div class="chip-hint">Select one or more</div>
+        <div class="chip-group" id="category-chips">
+          <div class="chip" data-val="accuracy" onclick="selectChip(this,'category-chips',true)">
+            <i class="ti ti-chart-dots" aria-hidden="true"></i>Numerical accuracy
+          </div>
+          <div class="chip" data-val="stability" onclick="selectChip(this,'category-chips',true)">
+            <i class="ti ti-alert-triangle" aria-hidden="true"></i>Stability / crash
+          </div>
+          <div class="chip" data-val="setup" onclick="selectChip(this,'category-chips',true)">
+            <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>Model setup confusion
+          </div>
+          <div class="chip" data-val="ui" onclick="selectChip(this,'category-chips',true)">
+            <i class="ti ti-layout-2" aria-hidden="true"></i>UI / UX issue
+          </div>
+          <div class="chip" data-val="speed" onclick="selectChip(this,'category-chips',true)">
+            <i class="ti ti-gauge" aria-hidden="true"></i>Performance / speed
+          </div>
+          <div class="chip" data-val="docs" onclick="selectChip(this,'category-chips',true)">
+            <i class="ti ti-file-text" aria-hidden="true"></i>Documentation gap
+          </div>
+          <div class="chip" data-val="feature" onclick="selectChip(this,'category-chips',true)">
+            <i class="ti ti-bulb" aria-hidden="true"></i>Feature request
+          </div>
+          <div class="chip" data-val="other" onclick="selectChip(this,'category-chips',true)">
+            <i class="ti ti-message" aria-hidden="true"></i>Other / general
+          </div>
+        </div>
+        <div class="field-error">Please select at least one category.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="prevStep(1)">&larr; Back</button>
+        <button class="btn primary" onclick="nextStep(1)">Continue &rarr;</button>
+      </div>
+    </section>
+
+    <!-- Step 2: Details -->
+    <section class="step-page" id="step-2" aria-label="Step 3: Details">
+      <div class="page-header">
+        <h1>Describe the issue or request</h1>
+        <p>Only sections matching your selections are shown.</p>
+      </div>
+
+      <!-- Issue cards: rendered dynamically per selected category -->
+      <div id="issue-cards-container"></div>
+
+      <!-- Feature request -->
+      <div id="feature-section" class="cond-section">
+        <div class="cond-label"><i class="ti ti-bulb" aria-hidden="true"></i>Feature request</div>
+        <div class="field" id="field-feat-name">
+          <label>Feature name <span class="req">*</span></label>
+          <input type="text" id="feat-name" placeholder="e.g. Transient-to-steady-state coupling mode">
+          <div class="field-error">Please name the feature.</div>
+        </div>
+        <div class="field">
+          <label>Use case <span class="opt">optional</span></label>
+          <textarea id="feat-usecase" placeholder="Describe the scenario where this feature would be used and why it matters..."></textarea>
+        </div>
+        <div class="field">
+          <label>Impact if implemented</label>
+          <div class="chip-hint">Pick one</div>
+          <div class="chip-group" id="impact-chips">
+            <div class="chip" data-val="minor"    onclick="selectChip(this,'impact-chips',false)">Minor improvement</div>
+            <div class="chip" data-val="accel"    onclick="selectChip(this,'impact-chips',false)">Workflow acceleration</div>
+            <div class="chip" data-val="critical" onclick="selectChip(this,'impact-chips',false)">Critical for adoption</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Target application <span class="opt">optional</span></label>
+          <div class="chip-hint">Select all that apply</div>
+          <div class="chip-group" id="app-chips">
+            <div class="chip" data-val="power"       onclick="selectChip(this,'app-chips',true)">Power electronics</div>
+            <div class="chip" data-val="automotive"  onclick="selectChip(this,'app-chips',true)">Automotive</div>
+            <div class="chip" data-val="pcb"         onclick="selectChip(this,'app-chips',true)">PCB design</div>
+            <div class="chip" data-val="reliability" onclick="selectChip(this,'app-chips',true)">Reliability study</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Reference or source <span class="opt">optional</span></label>
+          <input type="text" id="feat-ref" placeholder="Paper DOI, standard name, or link">
+        </div>
+      </div>
+
+      <!-- Other / general -->
+      <div id="other-section" class="cond-section">
+        <div class="cond-label"><i class="ti ti-message" aria-hidden="true"></i>Additional comments</div>
+        <div class="field" id="field-other-text">
+          <label>Comments <span class="req" id="other-req" style="display:none;">*</span></label>
+          <textarea id="other-text" placeholder="Anything else you'd like us to know..."></textarea>
+          <div class="field-error">Please add at least a brief comment.</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn ghost" onclick="prevStep(2)">&larr; Back</button>
+        <button class="btn primary" onclick="nextStep(2)">Continue &rarr;</button>
+      </div>
+    </section>
+
+    <!-- Step 3: Rating -->
+    <section class="step-page" id="step-3" aria-label="Step 4: Rating">
+      <div class="page-header">
+        <h1>Rate your experience</h1>
+        <p>Skip any dimension that doesn't apply — all ratings are optional.</p>
+      </div>
+      <div class="rating-grid" id="rating-grid"></div>
+      <div class="field">
+        <label>How can we improve? <span class="opt">optional</span></label>
+        <textarea id="improvement-text" placeholder="Your suggestions help us prioritize..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="prevStep(3)">&larr; Back</button>
+        <button class="btn primary" onclick="nextStep(3)">Continue &rarr;</button>
+      </div>
+    </section>
+
+    <!-- Step 4: Submit -->
+    <section class="step-page" id="step-4" aria-label="Step 5: Submit">
+      <div class="page-header">
+        <h1>Almost done</h1>
+        <p>Leave your email if you'd like a follow-up — completely optional.</p>
+      </div>
+      <div class="field">
+        <label>Email <span class="opt">optional</span></label>
+        <input type="email" id="contact-email" placeholder="you@org.com">
+        <div class="hint">Only used to respond to your report. Never shared externally.</div>
+      </div>
+      <div class="field">
+        <label>Follow-up consent</label>
+        <div class="chip-hint">Pick one</div>
+        <div class="chip-group" id="consent-chips">
+          <div class="chip selected" data-val="yes" onclick="selectChip(this,'consent-chips',false)">Yes, please reach out</div>
+          <div class="chip"          data-val="no"  onclick="selectChip(this,'consent-chips',false)">Keep anonymous</div>
+        </div>
+      </div>
+      <div class="auto-panel" style="margin-top:1.25rem;">
+        <div class="auto-panel-label"><i class="ti ti-lock" aria-hidden="true"></i>Auto-captured with this submission</div>
+        <div class="auto-tags">
+          <div class="auto-tag"><i class="ti ti-clock" aria-hidden="true"></i>Timestamp</div>
+          <div class="auto-tag"><i class="ti ti-hash" aria-hidden="true"></i>Session ID</div>
+          <div class="auto-tag"><i class="ti ti-tool" aria-hidden="true"></i>Tool used</div>
+          <div class="auto-tag"><i class="ti ti-device-desktop" aria-hidden="true"></i>Browser / OS</div>
+          <div class="auto-tag"><i class="ti ti-adjustments" aria-hidden="true"></i>Sim parameters</div>
+          <div class="auto-tag"><i class="ti ti-photo" aria-hidden="true"></i>Screen resolution</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="prevStep(4)">&larr; Back</button>
+        <button class="btn primary" onclick="submitForm()">Submit feedback</button>
+      </div>
+    </section>
+
+    <!-- Done -->
+    <section class="step-page" id="step-done" aria-label="Submission complete">
+      <div class="success-wrap">
+        <div class="success-icon"><i class="ti ti-check" aria-hidden="true"></i></div>
+        <div class="success-title">Feedback received</div>
+        <p class="success-body">
+          Your report has been logged and timestamped. High-severity issues are reviewed within 48 hours. Feature requests are batched into the monthly planning cycle.
+        </p>
+        <div class="session-pill" id="session-display">
+          <i class="ti ti-hash" aria-hidden="true"></i>
+          <span>Generating session ID...</span>
+        </div>
+        <div class="btn-row" style="border-top:none; padding-top:1.5rem; margin-top:1.5rem;">
+          <button class="btn" onclick="resetForm()">Submit another</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  let currentStep = 0;
+  const ratings = {};
+
+  /* ── Category metadata ── */
+  const categoryMeta = {
+    accuracy:  { label: 'Numerical Accuracy',    icon: 'ti-chart-dots',             placeholder: 'e.g. Junction temperature 6.8% higher than ICEPAK at VDC=12V, element U1' },
+    stability: { label: 'Stability / Crash',      icon: 'ti-alert-triangle',         placeholder: 'e.g. Solver diverges after ~200 iterations at high mesh density' },
+    setup:     { label: 'Model Setup Confusion',  icon: 'ti-adjustments-horizontal', placeholder: 'e.g. Unclear how to define copper layer thickness for 3Oz PCB' },
+    ui:        { label: 'UI / UX Issue',           icon: 'ti-layout-2',               placeholder: 'e.g. Temperature colormap scale resets on every redraw' },
+    speed:     { label: 'Performance / Speed',    icon: 'ti-gauge',                  placeholder: 'e.g. 652800 grid points takes 10 min vs expected ~3 min' },
+    docs:      { label: 'Documentation Gap',      icon: 'ti-file-text',              placeholder: 'e.g. No explanation of how convection coefficient h affects convergence' },
+    other:     { label: 'Other / General',        icon: 'ti-message',                placeholder: 'Describe your feedback...' }
+  };
+
+  const toolContextMap = {
+    board:  ['Cauer ladder model', 'Board-level sim', 'Part info captured', 'Sim params'],
+    device: ['Foster / Cauer RC', 'Model order', 'Power profile type', 'Graph digitizer'],
+    fdm:    ['3D FDM steady-state', 'Grid resolution', 'Thermal conductivity map', 'Component power']
+  };
+
+  const ratingDimensions = {
+    board:  ['Numerical accuracy', 'Simulation speed', 'UI & ease of setup', 'Visualization clarity', 'Documentation quality'],
+    device: ['RC model accuracy', 'Convergence speed', 'Graph digitizer UX', 'Result visualization', 'Documentation quality'],
+    fdm:    ['Temperature accuracy', 'Mesh / grid setup', 'Computation speed', '3D visualization', 'Documentation quality']
+  };
+
+  /* ── Chip selection ── */
+  function selectChip(el, groupId, multi) {
+    const group = document.getElementById(groupId);
+    if (!multi) group.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    el.classList.toggle('selected');
+    if (groupId === 'tool-chips')     updateAutoContext();
+    if (groupId === 'category-chips') renderIssueCards();
+  }
+
+  /* ── Auto-context ── */
+  function updateAutoContext() {
+    const sel  = document.querySelector('#tool-chips .chip.selected');
+    const ctx  = document.getElementById('auto-context');
+    const tags = document.getElementById('auto-tags-list');
+    if (!sel) { ctx.style.display = 'none'; return; }
+    const items = toolContextMap[sel.dataset.val] || [];
+    tags.innerHTML = items.map(t =>
+      `<div class="auto-tag"><i class="ti ti-check" aria-hidden="true"></i>${t}</div>`
+    ).join('');
+    ctx.style.display = 'block';
+  }
+
+  /* ── Render one card per selected issue/other category ── */
+  function renderIssueCards() {
+    const sel        = [...document.querySelectorAll('#category-chips .chip.selected')].map(c => c.dataset.val);
+    const issueKeys  = ['accuracy','stability','setup','ui','speed','docs','other'];
+    const selected   = issueKeys.filter(k => sel.includes(k));
+    const hasFeature = sel.includes('feature');
+
+    const container = document.getElementById('issue-cards-container');
+
+    /* Preserve existing input values before re-render */
+    const saved = {};
+    container.querySelectorAll('.issue-card').forEach(card => {
+      const key = card.dataset.cat;
+      saved[key] = {
+        desc:  (card.querySelector('.issue-desc')  || {}).value || '',
+        steps: (card.querySelector('.issue-steps') || {}).value || '',
+        sev:   card.querySelector('.sev-btn.sev-low,  .sev-btn.sev-med, .sev-btn.sev-high')
+               ? card.querySelector('.sev-btn.sev-low,.sev-btn.sev-med,.sev-btn.sev-high').dataset.sev
+               : null,
+        xval:  [...(card.querySelectorAll('.xval-chip.selected') || [])].map(c => c.dataset.val),
+        evidence: [...(card.querySelectorAll('.evidence-row') || [])].map(row => ({
+          src:      row.dataset.src,
+          url:      (row.querySelector('.ev-url') || {}).value || '',
+          fileNames:[...((row.querySelector('.evidence-file-input') || {}).files || [])].map(f => f.name)
+        })),
+        dev:   (card.querySelector('.issue-dev') || {}).value || ''
+      };
+    });
+
+    if (selected.length === 0) { container.innerHTML = ''; updateFeatureOtherVisibility(hasFeature, false); return; }
+
+    container.innerHTML = selected.map(key => {
+      const meta = categoryMeta[key];
+      const isAccuracy = key === 'accuracy';
+      const s = saved[key] || {};
+      return `
+      <div class="issue-card" data-cat="${key}">
+        <div class="issue-card-label"><i class="ti ${meta.icon}" aria-hidden="true"></i>${meta.label}</div>
+        <div class="field issue-field-desc" id="field-desc-${key}">
+          <label>Short description <span class="req">*</span></label>
+          <input type="text" class="issue-desc" data-cat="${key}"
+            placeholder="${meta.placeholder}" maxlength="120"
+            value="${escHtml(s.desc || '')}"
+            oninput="updateCharCount(this)">
+          <div class="char-count"><span class="cc-num">${(s.desc||'').length}</span> / 120</div>
+          <div class="field-error">Please add a short description.</div>
+        </div>
+        <div class="field">
+          <label>Steps to reproduce <span class="opt">optional</span></label>
+          <textarea class="issue-steps" data-cat="${key}"
+            placeholder="1. …&#10;2. …&#10;3. Observed result vs expected">${escHtml(s.steps || '')}</textarea>
+        </div>
+        <div class="field">
+          <label>Severity</label>
+          <div class="sev-row" role="group">
+            <button class="sev-btn${s.sev==='low'  ? ' sev-low'  : ''}" data-sev="low"  onclick="setSevCard(this)">Low — cosmetic</button>
+            <button class="sev-btn${s.sev==='med'  ? ' sev-med'  : ''}" data-sev="med"  onclick="setSevCard(this)">Medium — workaround exists</button>
+            <button class="sev-btn${s.sev==='high' ? ' sev-high' : ''}" data-sev="high" onclick="setSevCard(this)">High — blocks workflow</button>
+          </div>
+        </div>
+        ${isAccuracy ? `
+        <div class="field">
+          <label>Cross-validation source <span class="opt">optional</span></label>
+          <div class="chip-hint">Select all that apply — evidence fields appear for each selection</div>
+          <div class="chip-group xval-chip-group">
+            ${['Datasheet Zth curve','FEM simulation','Experimental measurement','Analytical RC solution','ANSYS ICEPAK']
+              .map((lbl,i) => {
+                const v = ['datasheet','fem','experiment','analytical','icepak'][i];
+                const picked = (s.xval||[]).includes(v);
+                return `<div class="chip xval-chip${picked?' selected':''}" data-val="${v}" data-label="${lbl}" onclick="toggleXval(this)">${lbl}</div>`;
+              }).join('')}
+          </div>
+          <div class="evidence-panel" id="evidence-panel-${key}"></div>
+        </div>
+        <div class="field">
+          <label>Observed deviation <span class="opt">optional</span></label>
+          <input type="text" class="issue-dev" data-cat="${key}"
+            placeholder="e.g. ~6.8% higher than ICEPAK at VDC=12V, element U1"
+            value="${escHtml(s.dev || '')}">
+        </div>` : ''}
+      </div>`;
+    }).join('');
+
+    updateFeatureOtherVisibility(hasFeature, selected.length > 0);
+
+    /* Restore evidence rows for pre-selected xval chips */
+    selected.forEach(key => {
+      const s = saved[key] || {};
+      if (!s.evidence || !s.evidence.length) return;
+      const card = container.querySelector(`.issue-card[data-cat="${key}"]`);
+      if (!card) return;
+      s.evidence.forEach(ev => {
+        const chip = card.querySelector(`.xval-chip[data-val="${ev.src}"]`);
+        if (chip && chip.classList.contains('selected')) {
+          /* chip already selected from HTML render; just populate URL */
+          const panel = document.getElementById('evidence-panel-' + key);
+          if (!panel) return;
+          toggleXval(chip); /* creates the row */
+          const row = panel.querySelector(`[data-src="${ev.src}"]`);
+          if (row && ev.url) {
+            const urlInput = row.querySelector('.ev-url');
+            if (urlInput) urlInput.value = ev.url;
+          }
+        }
+      });
+    });
+  }
+
+  function updateFeatureOtherVisibility(hasFeature, hasIssues) {
+    const feat  = document.getElementById('feature-section');
+    const other = document.getElementById('other-section');
+    if (feat)  feat.classList.toggle('visible', hasFeature);
+    /* Other section textarea is redundant now — "other" gets its own card above */
+    if (other) other.classList.remove('visible');
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function updateCharCount(input) {
+    const cc = input.closest('.field').querySelector('.cc-num');
+    if (cc) cc.textContent = input.value.length;
+  }
+
+  /* ── Severity per card (scoped to its card) ── */
+  function setSevCard(btn) {
+    const card = btn.closest('.issue-card');
+    card.querySelectorAll('.sev-btn').forEach(b => b.classList.remove('sev-low','sev-med','sev-high'));
+    btn.classList.add('sev-' + btn.dataset.sev);
+  }
+
+  /* ── Cross-validation chip toggle + evidence panel ── */
+  function toggleXval(chip) {
+    chip.classList.toggle('selected');
+    const card       = chip.closest('.issue-card');
+    const catKey     = card.dataset.cat;
+    const panelId    = 'evidence-panel-' + catKey;
+    const panel      = document.getElementById(panelId);
+    const srcVal     = chip.dataset.val;
+    const srcLabel   = chip.dataset.label;
+    const existingRow = panel.querySelector(`[data-src="${srcVal}"]`);
+
+    if (chip.classList.contains('selected')) {
+      /* Add a row if not already present */
+      if (!existingRow) {
+        const rowId = `ev-${catKey}-${srcVal}`;
+        const row   = document.createElement('div');
+        row.className = 'evidence-row';
+        row.dataset.src = srcVal;
+        row.innerHTML = `
+          <div class="evidence-source-name"><i class="ti ti-link" aria-hidden="true"></i> ${escHtml(srcLabel)}</div>
+          <div class="evidence-inputs">
+            <input type="text" class="ev-url" placeholder="Paste link (datasheet, repo, Drive, etc.)"
+              aria-label="Evidence URL for ${escHtml(srcLabel)}">
+            <label class="evidence-file-label" for="${rowId}-file">
+              <i class="ti ti-upload" aria-hidden="true"></i>
+              <span class="ev-file-btn-text">Attach file (image, CSV, PDF…)</span>
+            </label>
+            <input type="file" id="${rowId}-file" class="evidence-file-input"
+              accept="image/*,.pdf,.csv,.xlsx,.txt,.png,.jpg,.jpeg"
+              multiple onchange="onEvidenceFileChange(this)">
+            <div class="evidence-file-name ev-file-names"></div>
+          </div>
+          <button class="evidence-remove" title="Remove" onclick="removeEvidence(this,'${srcVal}','${catKey}')">&times;</button>`;
+        panel.appendChild(row);
+      }
+    } else {
+      /* Remove the row if chip is deselected */
+      if (existingRow) existingRow.remove();
+    }
+  }
+
+  function removeEvidence(btn, srcVal, catKey) {
+    /* Deselect the chip */
+    const card = document.querySelector(`.issue-card[data-cat="${catKey}"]`);
+    if (card) {
+      const chip = card.querySelector(`.xval-chip[data-val="${srcVal}"]`);
+      if (chip) chip.classList.remove('selected');
+    }
+    btn.closest('.evidence-row').remove();
+  }
+
+  function onEvidenceFileChange(input) {
+    const names = [...input.files].map(f => f.name).join(', ');
+    const display = input.closest('.evidence-inputs').querySelector('.ev-file-names');
+    if (display) display.textContent = names || '';
+    const btnText = input.closest('.evidence-inputs').querySelector('.ev-file-btn-text');
+    if (btnText) btnText.textContent = input.files.length > 1 ? `${input.files.length} files attached` : (input.files[0]?.name || 'Attach file');
+  }
+
+  /* ── Build rating grid ── */
+  function buildRatingGrid() {
+    const toolSel = document.querySelector('#tool-chips .chip.selected');
+    const tool    = toolSel ? toolSel.dataset.val : null;
+    const dims    = (tool && ratingDimensions[tool]) || ['Accuracy','Speed','UI / experience','Ease of setup','Visualization clarity','Documentation quality'];
+    const grid    = document.getElementById('rating-grid');
+    grid.innerHTML = dims.map((dim, i) => `
+      <div class="rating-card">
+        <label>${dim}</label>
+        <div class="stars" id="stars-${i}" onmouseleave="refreshStars(${i})">
+          ${[1,2,3,4,5].map(n =>
+            `<button class="star" aria-label="${n} star for ${dim}" data-val="${n}" onclick="setRating(${i},'${dim}',${n})">&#9733;</button>`
+          ).join('')}
+        </div>
+      </div>`).join('');
+    dims.forEach((_, i) => refreshStars(i));
+  }
+
+  function setRating(idx, dim, val) {
+    ratings[dim] = val;
+    document.querySelectorAll(`#stars-${idx} .star`).forEach(s => {
+      s.classList.toggle('lit', parseInt(s.dataset.val) <= val);
+    });
+  }
+
+  function refreshStars(idx) {
+    const container = document.getElementById('stars-' + idx);
+    if (!container) return;
+    const dim = container.closest('.rating-card').querySelector('label').textContent;
+    const val = ratings[dim] || 0;
+    container.querySelectorAll('.star').forEach(s => {
+      s.classList.toggle('lit', parseInt(s.dataset.val) <= val);
+    });
+  }
+
+  /* ── Validation ── */
+  function clearError(fieldId) {
+    const f = document.getElementById(fieldId);
+    if (f) f.classList.remove('has-error');
+  }
+  function showError(fieldId) {
+    const f = document.getElementById(fieldId);
+    if (f) f.classList.add('has-error');
+  }
+
+  function validateStep(step) {
+    let valid = true;
+
+    if (step === 0) {
+      if (!document.querySelector('#tool-chips .chip.selected')) {
+        showError('field-tool'); valid = false;
+      } else clearError('field-tool');
+    }
+
+    if (step === 1) {
+      if (!document.querySelectorAll('#category-chips .chip.selected').length) {
+        showError('field-category'); valid = false;
+      } else clearError('field-category');
+    }
+
+    if (step === 2) {
+      const sel        = [...document.querySelectorAll('#category-chips .chip.selected')].map(c => c.dataset.val);
+      const hasFeature = sel.includes('feature');
+
+      /* Validate each issue card's required description */
+      document.querySelectorAll('.issue-card').forEach(card => {
+        const fieldId = 'field-desc-' + card.dataset.cat;
+        const descEl  = card.querySelector('.issue-desc');
+        if (descEl && !descEl.value.trim()) {
+          showError(fieldId); valid = false;
+        } else clearError(fieldId);
+      });
+
+      /* Validate feature name */
+      if (hasFeature) {
+        const featName = document.getElementById('feat-name').value.trim();
+        if (!featName) { showError('field-feat-name'); valid = false; }
+        else clearError('field-feat-name');
+      }
+
+      /* At least one section must have content */
+      const hasCards   = document.querySelectorAll('.issue-card').length > 0;
+      const hasFeatVal = hasFeature && document.getElementById('feat-name').value.trim();
+      if (!hasCards && !hasFeatVal) { valid = false; }
+    }
+
+    return valid;
+  }
+
+  /* ── Navigation ── */
+  function nextStep(from) {
+    if (!validateStep(from)) return;
+    if (from === 2) buildRatingGrid();
+    goTo(from + 1);
+  }
+
+  function prevStep(from) { goTo(from - 1); }
+
+  function goTo(n) {
+    document.querySelectorAll('.step-page').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('step-' + n);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('#sidebar-steps li').forEach((li, i) => {
+      li.classList.remove('s-active','s-done');
+      if (i < n)  li.classList.add('s-done');
+      if (i === n) li.classList.add('s-active');
+    });
+    currentStep = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Submit ── */
+  function submitForm() {
+    const sessionId = 'TSS-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
+    const ts = new Date().toUTCString();
+
+    /*
+      Wire your backend here:
+      const payload = collectPayload(sessionId, ts);
+      fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    */
+
+    document.getElementById('session-display').innerHTML =
+      `<i class="ti ti-hash" aria-hidden="true"></i><span>${sessionId} &nbsp;·&nbsp; ${ts}</span>`;
+    document.querySelectorAll('#sidebar-steps li').forEach(li => { li.classList.remove('s-active'); li.classList.add('s-done'); });
+    document.querySelectorAll('.step-page').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-done').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Collect payload ── */
+  function collectPayload(sessionId, ts) {
+    const toolSel   = document.querySelector('#tool-chips .chip.selected');
+    const cats      = [...document.querySelectorAll('#category-chips .chip.selected')].map(c => c.dataset.val);
+    const impactSel = document.querySelector('#impact-chips .chip.selected');
+    const appSel    = [...document.querySelectorAll('#app-chips .chip.selected')].map(c => c.dataset.val);
+    const consent   = document.querySelector('#consent-chips .chip.selected');
+    const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+
+    /* Collect per-category issue data */
+    const issues = [];
+    document.querySelectorAll('.issue-card').forEach(card => {
+      const key    = card.dataset.cat;
+      const sevBtn = card.querySelector('.sev-btn.sev-low,.sev-btn.sev-med,.sev-btn.sev-high');
+      const evidence = [...card.querySelectorAll('.evidence-row')].map(row => ({
+        source:   row.dataset.src,
+        url:      (row.querySelector('.ev-url') || {}).value || '',
+        fileNames:[...((row.querySelector('.evidence-file-input') || {}).files || [])].map(f => f.name)
+      }));
+      issues.push({
+        category:    key,
+        description: (card.querySelector('.issue-desc')  || {}).value || '',
+        stepsToRepro:(card.querySelector('.issue-steps') || {}).value || '',
+        severity:    sevBtn ? sevBtn.dataset.sev : null,
+        evidence,
+        deviation:   (card.querySelector('.issue-dev')   || {}).value || ''
+      });
+    });
+
+    return {
+      meta:        { sessionId, timestamp: ts, userAgent: navigator.userAgent, resolution: `${screen.width}x${screen.height}`, url: window.location.href },
+      tool:        toolSel ? toolSel.dataset.val : null,
+      categories:  cats,
+      issues,
+      feature:     { name: g('feat-name'), useCase: g('feat-usecase'), impact: impactSel ? impactSel.dataset.val : null, apps: appSel, reference: g('feat-ref') },
+      ratings,
+      improvement: g('improvement-text'),
+      contact:     { email: g('contact-email'), consent: consent ? consent.dataset.val : 'no' }
+    };
+  }
+
+  /* ── Reset ── */
+  function resetForm() {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    document.querySelector('#consent-chips .chip[data-val="yes"]').classList.add('selected');
+    document.querySelectorAll('input[type=text], input[type=email], textarea').forEach(el => el.value = '');
+    document.querySelectorAll('.field').forEach(f => f.classList.remove('has-error'));
+    document.getElementById('auto-context').style.display = 'none';
+    document.getElementById('issue-cards-container').innerHTML = '';
+    document.getElementById('feature-section').classList.remove('visible');
+    document.getElementById('other-section').classList.remove('visible');
+    Object.keys(ratings).forEach(k => delete ratings[k]);
+    document.querySelectorAll('#sidebar-steps li').forEach((li, i) => {
+      li.classList.remove('s-active','s-done');
+      if (i === 0) li.classList.add('s-active');
+    });
+    goTo(0);
+  }
+</script>
+</body>
+</html>
