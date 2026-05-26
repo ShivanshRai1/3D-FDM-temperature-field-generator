@@ -2339,6 +2339,10 @@
           }
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve(data);
+          } else if (xhr.status === 0) {
+            reject(new Error(
+              "Lost connection to the solver while checking job status. The server may have crashed or run out of memory during the solve. Try coarser dx/dy/dz values, then restart the server."
+            ));
           } else {
             reject(new Error(data.error || `Solver status failed with HTTP ${xhr.status}.`));
           }

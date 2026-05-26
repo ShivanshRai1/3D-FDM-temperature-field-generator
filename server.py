@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeou
 from dataclasses import asdict
 from datetime import datetime, timezone
 import json
+import multiprocessing as mp
 import os
 import threading
 import time
@@ -57,6 +58,72 @@ MANIFEST_GITHUB_PATH = (
     os.environ.get("MANIFEST_GITHUB_PATH", "temp/simulation_runs").strip().strip("/")
 )
 MANIFEST_GITHUB_TOKEN = os.environ.get("MANIFEST_GITHUB_TOKEN", "").strip()
+
+
+def _solver_subprocess_entry(config: SimulationConfig, conn: Any) -> None:
+    """Run the solver in a child process so OOM kills the worker, not the HTTP server."""
+    try:
+        result = solve_steady_state(config)
+        conn.send(("ok", result))
+    except Exception as exc:
+        conn.send(("error", exc))
+    finally:
+        conn.close()
+
+
+def _read_subprocess_solver_result(
+    proc: mp.Process, parent_conn: Any, timeout_s: int
+) -> Any:
+    timed_out = False
+    if timeout_s > 0:
+        if not parent_conn.poll(timeout_s):
+            timed_out = True
+            proc.terminate()
+            proc.join(timeout=5)
+    else:
+        proc.join()
+
+    if timed_out:
+        raise ValueError(
+            f"Solver exceeded the {timeout_s}s time limit. "
+            f"Try a coarser grid (increase dx/dy/dz)."
+        )
+
+    if parent_conn.poll():
+        status, payload = parent_conn.recv()
+        if status == "ok":
+            return payload
+        if isinstance(payload, Exception):
+            raise payload
+        raise RuntimeError(str(payload))
+
+    if proc.exitcode not in (0, None):
+        if proc.exitcode == -9:
+            raise ValueError(
+                "Solver process was killed, usually from out-of-memory pressure. "
+                "Try coarser dx/dy/dz, fewer radiation iterations, or a larger server."
+            )
+        raise RuntimeError(
+            f"Solver process exited with code {proc.exitcode} without returning a result."
+        )
+
+    raise RuntimeError("Solver process ended without returning a result.")
+
+
+def _solve_in_subprocess(config: SimulationConfig) -> Any:
+    """Isolate async browser jobs from the HTTP server process."""
+    ctx = mp.get_context("spawn" if os.name == "nt" else "fork")
+    parent_conn, child_conn = ctx.Pipe(duplex=False)
+    proc = ctx.Process(target=_solver_subprocess_entry, args=(config, child_conn))
+    proc.start()
+    child_conn.close()
+    try:
+        return _read_subprocess_solver_result(proc, parent_conn, SOLVER_TIMEOUT_S)
+    finally:
+        parent_conn.close()
+        if proc.is_alive():
+            proc.terminate()
+            proc.join(timeout=5)
 
 
 def _solve_with_hard_timeout(config: SimulationConfig) -> Any:
@@ -536,7 +603,7 @@ def _run_solver_job(job_id: str, request: dict[str, Any]) -> None:
         _set_job(job_id, message="Solving sparse thermal system.")
         solve_started_at = time.perf_counter()
         solve_started_iso = _utc_now_iso()
-        result = _solve_with_hard_timeout(config)
+        result = _solve_in_subprocess(config)
         solve_finished_at = time.perf_counter()
         solve_finished_iso = _utc_now_iso()
         _set_job(job_id, message="Preparing temperature views.")
