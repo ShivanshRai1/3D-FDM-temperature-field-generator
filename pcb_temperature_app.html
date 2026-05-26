@@ -1892,6 +1892,7 @@
         <div><strong>Residual:</strong> ${solver.max_delta_k ?? "n/a"}</div>
         <div><strong>Energy balance error:</strong> ${formatMetric(diagnostics.energy_balance_error_w, "W")}</div>
         <div><strong>Exact radiation balance error:</strong> ${formatMetric(diagnostics.exact_radiation_balance_error_w, "W")}</div>
+        ${log.jobId ? `<div><strong>Run manifest:</strong> <a href="/api/manifests/${encodeURIComponent(log.jobId)}" target="_blank" rel="noopener">${log.jobId}</a> · <a href="/api/manifests" target="_blank" rel="noopener">all runs</a></div>` : ""}
       `;
     }
 

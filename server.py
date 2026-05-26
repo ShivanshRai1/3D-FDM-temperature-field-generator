@@ -40,7 +40,14 @@ from temperature_field.solver import solve_steady_state
 
 
 ROOT = Path(__file__).resolve().parent
-RUN_MANIFEST_DIR = ROOT / "temp" / "simulation_runs"
+_manifest_dir_env = os.environ.get("MANIFEST_DIR", "").strip()
+RUN_MANIFEST_DIR = (
+    Path(_manifest_dir_env).expanduser()
+    if _manifest_dir_env
+    else ROOT / "temp" / "simulation_runs"
+)
+if not RUN_MANIFEST_DIR.is_absolute():
+    RUN_MANIFEST_DIR = (ROOT / RUN_MANIFEST_DIR).resolve()
 JOBS: dict[str, dict[str, Any]] = {}
 JOBS_LOCK = threading.Lock()
 MAX_CELLS = int(os.environ.get("SOLVER_MAX_CELLS", "250000"))
@@ -287,6 +294,63 @@ def _utc_now_iso() -> str:
 
 def _manifest_path(job_id: str) -> Path:
     return RUN_MANIFEST_DIR / f"{job_id}.json"
+
+
+def _load_manifest(job_id: str) -> dict[str, Any]:
+    path = _manifest_path(job_id)
+    if not path.is_file():
+        raise FileNotFoundError(f"No manifest found for job '{job_id}'.")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _manifest_list_item(path: Path) -> dict[str, Any]:
+    job_id = path.stem
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        return {
+            "job_id": job_id,
+            "status": "corrupt",
+            "error": str(exc),
+            "path": str(path),
+            "download_url": f"/api/manifests/{job_id}",
+        }
+
+    summary = data.get("result_summary") or {}
+    solver = summary.get("solver") or {}
+    normalized = data.get("normalized_config") or {}
+    board = normalized.get("board") or {}
+    return {
+        "job_id": data.get("job_id", job_id),
+        "status": data.get("status"),
+        "mode": data.get("mode"),
+        "created_at": data.get("created_at"),
+        "updated_at": data.get("updated_at"),
+        "finished_at": data.get("finished_at"),
+        "error": data.get("error"),
+        "component_count": len(normalized.get("components") or []),
+        "board_length_mm": board.get("length_mm"),
+        "board_width_mm": board.get("width_mm"),
+        "converged": solver.get("converged"),
+        "min_temperature_k": summary.get("min_temperature_k"),
+        "max_temperature_k": summary.get("max_temperature_k"),
+        "download_url": f"/api/manifests/{data.get('job_id', job_id)}",
+    }
+
+
+def _list_manifests(limit: int = 200) -> dict[str, Any]:
+    RUN_MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
+    paths = sorted(
+        RUN_MANIFEST_DIR.glob("*.json"),
+        key=lambda item: item.stat().st_mtime,
+        reverse=True,
+    )
+    return {
+        "schema": "pcb_thermal_simulation_manifest_index_v1",
+        "manifest_dir": str(RUN_MANIFEST_DIR),
+        "count": min(len(paths), limit),
+        "manifests": [_manifest_list_item(path) for path in paths[:limit]],
+    }
 
 
 def _manifest_repo_path(job_id: str) -> str:
@@ -716,6 +780,25 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_json(snapshot, status)
             return
 
+        if parsed.path == "/api/manifests":
+            query = parse_qs(parsed.query)
+            limit = max(1, min(1000, int(query.get("limit", ["200"])[0])))
+            self._send_json(_list_manifests(limit=limit))
+            return
+
+        if parsed.path.startswith("/api/manifests/"):
+            job_id = parsed.path.removeprefix("/api/manifests/").strip("/")
+            if not job_id or "/" in job_id:
+                self._send_json({"error": "Invalid manifest job id."}, 400)
+                return
+            try:
+                self._send_json(_load_manifest(job_id))
+            except FileNotFoundError as exc:
+                self._send_json({"error": str(exc)}, 404)
+            except json.JSONDecodeError as exc:
+                self._send_json({"error": f"Manifest JSON is invalid: {exc}"}, 500)
+            return
+
         # Serve static files
         super().do_GET()
 
@@ -735,6 +818,19 @@ class Handler(SimpleHTTPRequestHandler):
             job_id = query.get("job_id", [""])[0]
             snapshot = _job_snapshot(job_id)
             status = 404 if snapshot.get("status") == "missing" else 200
+            self._send_no_body(status)
+            return
+
+        if parsed.path == "/api/manifests":
+            self._send_no_body(200)
+            return
+
+        if parsed.path.startswith("/api/manifests/"):
+            job_id = parsed.path.removeprefix("/api/manifests/").strip("/")
+            if not job_id or "/" in job_id:
+                self._send_no_body(400)
+                return
+            status = 200 if _manifest_path(job_id).is_file() else 404
             self._send_no_body(status)
             return
 
@@ -857,6 +953,8 @@ def main() -> None:
         raise
 
     print(f"Serving Version4 at http://0.0.0.0:{args.port}/pcb_temperature_app.html")
+    print(f"Simulation manifests: {RUN_MANIFEST_DIR}")
+    print(f"Manifest index API: http://0.0.0.0:{args.port}/api/manifests")
     print(
         "BLAS thread env: "
         f"OMP_NUM_THREADS={os.environ.get('OMP_NUM_THREADS')} "
