@@ -353,6 +353,14 @@ def _list_manifests(limit: int = 200) -> dict[str, Any]:
     }
 
 
+def _manifest_job_id_from_path(path: str) -> str | None:
+    prefix = "/api/manifests/"
+    if not path.startswith(prefix):
+        return None
+    job_id = path[len(prefix) :].strip("/")
+    return job_id or None
+
+
 def _manifest_repo_path(job_id: str) -> str:
     base = MANIFEST_GITHUB_PATH or "temp/simulation_runs"
     return f"{base}/{job_id}.json"
@@ -780,15 +788,15 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_json(snapshot, status)
             return
 
-        if parsed.path == "/api/manifests":
+        if parsed.path in {"/api/manifests", "/api/manifests/"}:
             query = parse_qs(parsed.query)
             limit = max(1, min(1000, int(query.get("limit", ["200"])[0])))
             self._send_json(_list_manifests(limit=limit))
             return
 
-        if parsed.path.startswith("/api/manifests/"):
-            job_id = parsed.path.removeprefix("/api/manifests/").strip("/")
-            if not job_id or "/" in job_id:
+        job_id = _manifest_job_id_from_path(parsed.path)
+        if job_id is not None:
+            if "/" in job_id:
                 self._send_json({"error": "Invalid manifest job id."}, 400)
                 return
             try:
@@ -797,6 +805,8 @@ class Handler(SimpleHTTPRequestHandler):
                 self._send_json({"error": str(exc)}, 404)
             except json.JSONDecodeError as exc:
                 self._send_json({"error": f"Manifest JSON is invalid: {exc}"}, 500)
+            except Exception as exc:
+                self._send_json({"error": f"Could not load manifest: {exc}"}, 500)
             return
 
         # Serve static files
@@ -821,13 +831,13 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_no_body(status)
             return
 
-        if parsed.path == "/api/manifests":
+        if parsed.path in {"/api/manifests", "/api/manifests/"}:
             self._send_no_body(200)
             return
 
-        if parsed.path.startswith("/api/manifests/"):
-            job_id = parsed.path.removeprefix("/api/manifests/").strip("/")
-            if not job_id or "/" in job_id:
+        job_id = _manifest_job_id_from_path(parsed.path)
+        if job_id is not None:
+            if "/" in job_id:
                 self._send_no_body(400)
                 return
             status = 200 if _manifest_path(job_id).is_file() else 404
