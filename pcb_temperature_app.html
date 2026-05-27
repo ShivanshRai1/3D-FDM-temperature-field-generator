@@ -947,6 +947,7 @@
     </div>
   </div>
 
+  <script src="url_import.js"></script>
   <script>
     const state = {
       marginMm: 8,
@@ -3056,11 +3057,47 @@
       requestAnimationFrame(animate);
     }
 
+    function maybeLoadFromUrl() {
+      if (!window.UrlImport || !window.UrlImport.hasUrlImportParams()) {
+        return;
+      }
+      const result = window.UrlImport.loadIntoState(state);
+      if (result.skipped) {
+        return;
+      }
+      if (!result.ok) {
+        refs.status.textContent = "URL import failed.";
+        window.alert(
+          "Could not load simulation setup from URL.\n\n" +
+          (result.errors || []).join("\n")
+        );
+        return;
+      }
+      window.UrlImport.syncDomFromState(state);
+      refresh();
+      fitCamera("iso");
+      let statusText = `Loaded ${result.componentCount} component(s) from URL. Review setup, then click Run Simulation.`;
+      if (result.warnings && result.warnings.length) {
+        statusText += ` ${result.warnings.length} warning(s) — check status and component Rth values.`;
+        console.warn("URL import warnings:", result.warnings);
+      }
+      refs.status.textContent = statusText;
+      if (result.warnings && result.warnings.length) {
+        window.setTimeout(() => {
+          window.alert(
+            "URL import loaded with warnings:\n\n" +
+            result.warnings.join("\n")
+          );
+        }, 300);
+      }
+    }
+
     bindEvents();
     refresh();
     resize();
     fitCamera("iso");
-    if (!window.localStorage.getItem("pcbThermalGuideSkipped")) {
+    maybeLoadFromUrl();
+    if (!window.localStorage.getItem("pcbThermalGuideSkipped") && !state.urlImportActive) {
       window.setTimeout(() => startGuide(0), 500);
     }
     animate();
