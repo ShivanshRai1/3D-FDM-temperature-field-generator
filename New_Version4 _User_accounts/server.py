@@ -925,17 +925,22 @@ def main() -> None:
     parser.add_argument(
         "--port",
         type=int,
-        default=int(os.environ.get("PORT", "1085")),
-        help="Port to bind on 127.0.0.1. Default: 1085, or PORT from the environment.",
+        default=int(os.environ.get("PORT", "8000")),
+        help="Port to bind. Default: 8000, or PORT from the environment.",
+    )
+    parser.add_argument(
+        "--host",
+        default=os.environ.get("HOST", "0.0.0.0"),
+        help="Host to bind. Default: 0.0.0.0, or HOST from the environment.",
     )
     args = parser.parse_args()
 
     try:
-        server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
+        server = ThreadingHTTPServer((args.host, args.port), Handler)
     except OSError as exc:
-        if exc.errno == 48:
+        if exc.errno in {48, 98, 10048}:
             raise SystemExit(
-                f"Port {args.port} is already in use on 127.0.0.1.\n"
+                f"Port {args.port} is already in use on {args.host}.\n"
                 f"If that is your running Version4 server, open "
                 f"http://127.0.0.1:{args.port}/pcb_temperature_app.html instead.\n"
                 f"Otherwise stop the other process or run: python3 server.py --port {args.port + 1}"
@@ -944,6 +949,7 @@ def main() -> None:
 
     print(f"Serving Version4 User Accounts from {ROOT}")
     print(f"Open http://127.0.0.1:{args.port}/pcb_temperature_app.html")
+    print(f"Listening on http://{args.host}:{args.port}/")
     print("Press Ctrl+C to stop.")
     server.serve_forever()
 

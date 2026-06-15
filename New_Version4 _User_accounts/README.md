@@ -60,14 +60,14 @@ cd "New_Version4 _User_accounts"
 python3 server.py
 ```
 
-Then open `http://127.0.0.1:1085/pcb_temperature_app.html`.
+Then open `http://127.0.0.1:8000/pcb_temperature_app.html`.
 
 The HTML app lets users place components, copper layers, and thermal vias, auto-generates PCB size from component extents plus margin, exports the solver handoff JSON, calls the backend solver from `Run Simulation`, and saves selected completed runs under local user IDs.
 
 If the page appears stale after a code update, restart `server.py` and open:
 
 ```text
-http://127.0.0.1:1085/pcb_temperature_app.html?v=user-accounts
+http://127.0.0.1:8000/pcb_temperature_app.html?v=user-accounts
 ```
 
 From the `New_Version4 _User_accounts` directory:
