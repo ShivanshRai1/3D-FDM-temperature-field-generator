@@ -4,6 +4,7 @@ __pycache__/
 
 # Local runtime caches and artifacts
 temp/pycache/
+New_Version4 _User_accounts/temp/
 *.log
 
 # Optional local virtualenvs

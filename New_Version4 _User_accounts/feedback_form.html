@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thermal Simulation Feedback</title>
+  <style>
+    :root {
+      --bg: #f3f6f8;
+      --panel: #ffffff;
+      --panel-soft: #eef5f4;
+      --line: #cbd5d9;
+      --line-strong: #93a4aa;
+      --text: #172033;
+      --muted: #5b6670;
+      --accent: #0f766e;
+      --accent-dark: #115e59;
+      --danger: #b42318;
+      --warning: #9a6700;
+      --field: #ffffff;
+      --focus: rgba(15, 118, 110, 0.2);
+      --shadow: 0 18px 46px rgba(22, 34, 42, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      min-height: 40px;
+      padding: 9px 14px;
+      color: #ffffff;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+
+    button.secondary {
+      color: var(--text);
+      background: #ffffff;
+      border-color: var(--line);
+    }
+
+    button.secondary:hover {
+      background: #edf2f4;
+      border-color: var(--line-strong);
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 1px;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .title-block {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 820px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .status-pill {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 6px 10px;
+      color: var(--accent-dark);
+      background: var(--panel-soft);
+      border: 1px solid #b6d9d3;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+      margin-top: 18px;
+      align-items: start;
+    }
+
+    .main,
+    .side {
+      display: grid;
+      gap: 18px;
+    }
+
+    section {
+      padding: 22px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 28px rgba(22, 34, 42, 0.06);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 16px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 18px 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      min-width: 0;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label,
+    .field-label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .hint {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 10px;
+      color: var(--text);
+      background: var(--field);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    input[type="file"] {
+      padding: 7px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .choice {
+      position: relative;
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      min-height: 48px;
+      padding: 10px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .choice:hover {
+      border-color: var(--line-strong);
+    }
+
+    .choice input {
+      width: auto;
+      min-height: auto;
+      margin: 2px 0 0;
+      accent-color: var(--accent);
+    }
+
+    .choice span {
+      min-width: 0;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .choice small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .rating-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .rating-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e3eaed;
+    }
+
+    .rating-row:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .rating-name {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .rating-options {
+      display: grid;
+      grid-template-columns: repeat(5, 34px);
+      gap: 5px;
+    }
+
+    .rating-options input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .rating-options label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      margin: 0;
+      color: var(--muted);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .rating-options input:checked + label {
+      color: #ffffff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .notice {
+      padding: 12px;
+      color: var(--muted);
+      background: #f7fafb;
+      border: 1px solid #dce5e8;
+      border-radius: 7px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .notice.warning {
+      color: #5f4300;
+      background: #fff8e5;
+      border-color: #f0d88a;
+    }
+
+    .side {
+      position: sticky;
+      top: 18px;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .summary-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e3eaed;
+      font-size: 12px;
+    }
+
+    .summary-list li:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-list span:first-child {
+      color: var(--muted);
+    }
+
+    .summary-list span:last-child {
+      max-width: 170px;
+      overflow: hidden;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 650;
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .actions .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .submit-status {
+      min-height: 20px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .submit-status.error {
+      color: var(--danger);
+    }
+
+    .submit-status.ok {
+      color: var(--accent-dark);
+    }
+
+    .required {
+      color: var(--danger);
+    }
+
+    @media (max-width: 940px) {
+      .page {
+        padding: 16px;
+      }
+
+      .topbar {
+        display: grid;
+      }
+
+      form {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        position: static;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .grid,
+      .choice-grid {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .rating-row {
+        grid-template-columns: 1fr;
+      }
+
+      .rating-options {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .rating-options label {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="shell">
+      <header class="topbar">
+        <div class="title-block">
+          <h1>Thermal Simulation Feedback</h1>
+          <p class="subtitle">Submit issues, feature requests, support questions, or general feedback for the board-level, device-level, and 3D FDM thermal simulation tools.</p>
+        </div>
+        <div class="status-pill">Standalone form</div>
+      </header>
+
+      <form id="feedbackForm">
+        <div class="main">
+          <section aria-labelledby="submission-heading">
+            <h2 id="submission-heading">Submission Type</h2>
+            <div class="grid">
+              <div class="field">
+                <label for="submissionType">What do you want to submit? <span class="required">*</span></label>
+                <select id="submissionType" name="submissionType" required>
+                  <option value="issue">Report an issue</option>
+                  <option value="feature">Request a feature</option>
+                  <option value="feedback">General feedback</option>
+                  <option value="support">Ask for support</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="toolUsed">Which tool were you using? <span class="required">*</span></label>
+                <select id="toolUsed" name="toolUsed" required>
+                  <option value="Board-Level Transient Thermal Simulator">Board-Level Transient Thermal Simulator</option>
+                  <option value="Device-Level Transient Thermal Simulator">Device-Level Transient Thermal Simulator</option>
+                  <option value="3D FDM Steady-State Temperature Field Generator">3D FDM Steady-State Temperature Field Generator</option>
+                  <option value="General / Not sure">General / Not sure</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="severity">Priority</label>
+                <select id="severity" name="severity">
+                  <option value="Normal">Normal</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="environment">Use environment</label>
+                <select id="environment" name="environment">
+                  <option value="Production server">Production server</option>
+                  <option value="Local build">Local build</option>
+                  <option value="Shared test link">Shared test link</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section id="toolDetailsSection" aria-labelledby="tool-details-heading">
+            <h2 id="tool-details-heading">Simulation Context</h2>
+            <div class="notice">These fields are optional if your product can auto-attach simulation settings. They are useful when this standalone page is opened separately.</div>
+
+            <div id="boardFields" class="tool-fields">
+              <h3>Board-Level Simulator</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="boardParts">Part/package information</label>
+                  <input id="boardParts" name="boardParts" placeholder="Package names, count, or IDs">
+                </div>
+                <div class="field">
+                  <label for="boardPower">Power profile</label>
+                  <input id="boardPower" name="boardPower" placeholder="Step, pulse, imported points, etc.">
+                </div>
+                <div class="field">
+                  <label for="boardMesh">Mesh/grid settings</label>
+                  <input id="boardMesh" name="boardMesh" placeholder="dx, dy, dz, grid count">
+                </div>
+                <div class="field">
+                  <label for="boardBoundary">Boundary conditions</label>
+                  <input id="boardBoundary" name="boardBoundary" placeholder="Convection, fixed temp, clamp, etc.">
+                </div>
+              </div>
+            </div>
+
+            <div id="deviceFields" class="tool-fields hidden">
+              <h3>Device-Level Simulator</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="deviceModel">Thermal model</label>
+                  <select id="deviceModel" name="deviceModel">
+                    <option value="">Select if relevant</option>
+                    <option value="Foster">Foster</option>
+                    <option value="Cauer">Cauer</option>
+                    <option value="Both / Conversion">Both / Conversion</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="deviceOrder">Model order</label>
+                  <select id="deviceOrder" name="deviceOrder">
+                    <option value="">Select if relevant</option>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                    <option>9</option>
+                    <option>10</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="devicePowerProfile">Power profile</label>
+                  <select id="devicePowerProfile" name="devicePowerProfile">
+                    <option value="">Select if relevant</option>
+                    <option value="Step">Step</option>
+                    <option value="Pulse">Pulse</option>
+                    <option value="Power points">Power points</option>
+                    <option value="Topology loss simulation">Topology loss simulation</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="devicePart">Manufacturer part/topology</label>
+                  <input id="devicePart" name="devicePart" placeholder="Part number, topology, or vendor">
+                </div>
+              </div>
+            </div>
+
+            <div id="fdmFields" class="tool-fields hidden">
+              <h3>3D FDM Steady-State Generator</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="fdmGeometry">Geometry/domain</label>
+                  <input id="fdmGeometry" name="fdmGeometry" placeholder="Board/domain dimensions">
+                </div>
+                <div class="field">
+                  <label for="fdmHeatSources">Heat sources</label>
+                  <input id="fdmHeatSources" name="fdmHeatSources" placeholder="Locations and watts">
+                </div>
+                <div class="field">
+                  <label for="fdmMaterials">Material properties</label>
+                  <input id="fdmMaterials" name="fdmMaterials" placeholder="k values, layers, regions">
+                </div>
+                <div class="field">
+                  <label for="fdmConvergence">Solver status</label>
+                  <input id="fdmConvergence" name="fdmConvergence" placeholder="Tolerance, iterations, convergence">
+                </div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="field full">
+                <label for="autoCaptured">Auto-captured tool data</label>
+                <textarea id="autoCaptured" name="autoCaptured" placeholder='Optional JSON from the product, for example {"mesh":[80,60,8],"maxTemperature":91.4}'></textarea>
+                <p class="hint">Products can prefill this field using the URL parameter <strong>autoCaptured</strong> or by setting <strong>window.feedbackAutoCapture</strong> before loading this page.</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="issueSection" aria-labelledby="issue-heading">
+            <h2 id="issue-heading">Issue Report</h2>
+            <div class="grid">
+              <div class="field full">
+                <span class="field-label">Problem category <span class="required">*</span></span>
+                <div class="choice-grid" id="problemCategories">
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="Numerical accuracy concern"><span>Numerical accuracy concern</span></label>
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="Model setup confusion"><span>Model setup confusion</span></label>
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="Solver stability/convergence issue"><span>Solver stability/convergence issue</span></label>
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="UI/UX issue"><span>UI/UX issue</span></label>
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="Performance/speed issue"><span>Performance/speed issue</span></label>
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="Visualization issue"><span>Visualization issue</span></label>
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="Documentation gap"><span>Documentation gap</span></label>
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="Crash/error"><span>Crash/error</span></label>
+                  <label class="choice"><input type="checkbox" name="problemCategory" value="Other"><span>Other</span></label>
+                </div>
+              </div>
+
+              <div class="field full">
+                <label for="issueSummary">Short summary <span class="required">*</span></label>
+                <input id="issueSummary" name="issueSummary" maxlength="140" placeholder="Example: Board heatmap is 18% higher than datasheet validation case">
+              </div>
+
+              <div class="field">
+                <label for="expectedResult">Expected result</label>
+                <textarea id="expectedResult" name="expectedResult" placeholder="What did you expect to happen?"></textarea>
+              </div>
+
+              <div class="field">
+                <label for="actualResult">Actual result</label>
+                <textarea id="actualResult" name="actualResult" placeholder="What actually happened?"></textarea>
+              </div>
+
+              <div class="field full">
+                <label for="reproductionSteps">Steps to reproduce</label>
+                <textarea id="reproductionSteps" name="reproductionSteps" placeholder="List the setup or actions needed to reproduce the problem."></textarea>
+              </div>
+
+              <div class="field">
+                <label for="impactLevel">Severity</label>
+                <select id="impactLevel" name="impactLevel">
+                  <option value="Blocking: cannot use the tool">Blocking: cannot use the tool</option>
+                  <option value="High: result may be wrong or misleading">High: result may be wrong or misleading</option>
+                  <option value="Medium: workflow is affected" selected>Medium: workflow is affected</option>
+                  <option value="Low: minor inconvenience">Low: minor inconvenience</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="deviation">Approximate deviation observed</label>
+                <input id="deviation" name="deviation" placeholder="Example: 12%, +8.4 C, or 0.3 K/W">
+              </div>
+
+              <div class="field full">
+                <span class="field-label">Cross-validation source</span>
+                <div class="choice-grid">
+                  <label class="choice"><input type="checkbox" name="validationSource" value="Datasheet Zth curve"><span>Datasheet Zth curve</span></label>
+                  <label class="choice"><input type="checkbox" name="validationSource" value="FEM simulation"><span>FEM simulation</span></label>
+                  <label class="choice"><input type="checkbox" name="validationSource" value="Experimental measurement"><span>Experimental measurement</span></label>
+                  <label class="choice"><input type="checkbox" name="validationSource" value="Analytical RC solution"><span>Analytical RC solution</span></label>
+                  <label class="choice"><input type="checkbox" name="validationSource" value="Published paper/reference"><span>Published paper/reference</span></label>
+                  <label class="choice"><input type="checkbox" name="validationSource" value="Internal benchmark"><span>Internal benchmark</span></label>
+                </div>
+              </div>
+
+              <div class="field full">
+                <label for="referenceDetails">Reference link, file name, or notes</label>
+                <textarea id="referenceDetails" name="referenceDetails" placeholder="Paste datasheet links, FEM setup notes, measurement references, or paper details."></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section id="featureSection" class="hidden" aria-labelledby="feature-heading">
+            <h2 id="feature-heading">Feature Request</h2>
+            <div class="grid">
+              <div class="field full">
+                <label for="featureTitle">Feature title <span class="required">*</span></label>
+                <input id="featureTitle" name="featureTitle" maxlength="140" placeholder="Example: Import datasheet Zth CSV directly into Cauer extraction">
+              </div>
+
+              <div class="field full">
+                <label for="featureProblem">What problem are you trying to solve?</label>
+                <textarea id="featureProblem" name="featureProblem" placeholder="Describe the workflow gap or technical limitation."></textarea>
+              </div>
+
+              <div class="field full">
+                <label for="featureDescription">Desired behavior</label>
+                <textarea id="featureDescription" name="featureDescription" placeholder="Describe how the feature should work."></textarea>
+              </div>
+
+              <div class="field full">
+                <span class="field-label">Target application</span>
+                <div class="choice-grid">
+                  <label class="choice"><input type="checkbox" name="targetApplication" value="Power electronics"><span>Power electronics</span></label>
+                  <label class="choice"><input type="checkbox" name="targetApplication" value="Automotive"><span>Automotive</span></label>
+                  <label class="choice"><input type="checkbox" name="targetApplication" value="PCB design"><span>PCB design</span></label>
+                  <label class="choice"><input type="checkbox" name="targetApplication" value="Reliability study"><span>Reliability study</span></label>
+                  <label class="choice"><input type="checkbox" name="targetApplication" value="Academic/research"><span>Academic/research</span></label>
+                  <label class="choice"><input type="checkbox" name="targetApplication" value="Semiconductor/package design"><span>Semiconductor/package design</span></label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="featureImpact">Impact if implemented</label>
+                <select id="featureImpact" name="featureImpact">
+                  <option value="Nice to have">Nice to have</option>
+                  <option value="Saves time">Saves time</option>
+                  <option value="Improves confidence in results">Improves confidence in results</option>
+                  <option value="Required for my workflow">Required for my workflow</option>
+                  <option value="Critical for adoption">Critical for adoption</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="featureFrequency">How often would you use it?</label>
+                <select id="featureFrequency" name="featureFrequency">
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Occasionally">Occasionally</option>
+                  <option value="One-time need">One-time need</option>
+                </select>
+              </div>
+
+              <div class="field full">
+                <label for="featureReference">Source/reference</label>
+                <textarea id="featureReference" name="featureReference" placeholder="Add links, examples, product references, or standards that motivated this request."></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section id="generalSection" aria-labelledby="general-heading">
+            <h2 id="general-heading">Feedback Details</h2>
+            <div class="grid">
+              <div class="field full">
+                <label for="message">Message <span class="required">*</span></label>
+                <textarea id="message" name="message" required placeholder="Tell us what happened, what you need, or what should be improved."></textarea>
+              </div>
+
+              <div class="field">
+                <label for="attachment">Attach screenshot/data file</label>
+                <input id="attachment" name="attachment" type="file" multiple>
+                <p class="hint">The standalone JSON export stores file names and sizes only. A connected backend can process actual file uploads.</p>
+              </div>
+
+              <div class="field">
+                <label for="currentUrl">Page or run URL</label>
+                <input id="currentUrl" name="currentUrl" placeholder="URL of the product page or simulation run">
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="rating-heading">
+            <h2 id="rating-heading">Ratings</h2>
+            <div class="rating-list" id="ratingList"></div>
+            <div class="field full" style="margin-top: 16px;">
+              <label for="improvement">Most important improvement</label>
+              <textarea id="improvement" name="improvement" placeholder="What is the single most important thing we should improve?"></textarea>
+            </div>
+          </section>
+
+          <section aria-labelledby="contact-heading">
+            <h2 id="contact-heading">Contact</h2>
+            <div class="grid">
+              <div class="field">
+                <label for="name">Name</label>
+                <input id="name" name="name" autocomplete="name">
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email">
+              </div>
+              <div class="field">
+                <label for="organization">Company/organization</label>
+                <input id="organization" name="organization" autocomplete="organization">
+              </div>
+              <div class="field">
+                <label for="followUp">May we contact you?</label>
+                <select id="followUp" name="followUp">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label class="choice">
+                  <input id="dataConsent" name="dataConsent" type="checkbox" value="Yes">
+                  <span>I agree to share simulation settings and uploaded files for debugging.</span>
+                </label>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="side">
+          <section aria-labelledby="summary-heading">
+            <h2 id="summary-heading">Submission Summary</h2>
+            <ul class="summary-list">
+              <li><span>Type</span><span id="summaryType">Report an issue</span></li>
+              <li><span>Tool</span><span id="summaryTool">Board-Level</span></li>
+              <li><span>Priority</span><span id="summaryPriority">Normal</span></li>
+              <li><span>Browser</span><span id="summaryBrowser">Detected</span></li>
+              <li><span>Files</span><span id="summaryFiles">None</span></li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="submit-heading">
+            <h2 id="submit-heading">Submit</h2>
+            <div class="notice warning">Set <strong>FEEDBACK_ENDPOINT</strong> in this file to post submissions to your server. Without an endpoint, the form downloads a JSON payload that can be attached to support tickets.</div>
+            <div class="actions" style="margin-top: 12px;">
+              <button type="submit">Submit feedback</button>
+              <div class="row">
+                <button class="secondary" type="button" id="downloadDraft">Download JSON</button>
+                <button class="secondary" type="reset">Reset</button>
+              </div>
+              <p class="submit-status" id="submitStatus" role="status"></p>
+            </div>
+          </section>
+        </aside>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const FEEDBACK_ENDPOINT = "";
+
+    const ratings = [
+      "Numerical accuracy",
+      "Speed/responsiveness",
+      "Ease of setup",
+      "UI/UX",
+      "Visualization clarity",
+      "Documentation quality",
+      "Trust/confidence in results",
+      "Overall satisfaction"
+    ];
+
+    const form = document.getElementById("feedbackForm");
+    const submissionType = document.getElementById("submissionType");
+    const toolUsed = document.getElementById("toolUsed");
+    const attachment = document.getElementById("attachment");
+    const submitStatus = document.getElementById("submitStatus");
+
+    function getQueryValue(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function selectedValues(name) {
+      return Array.from(form.querySelectorAll(`[name="${name}"]:checked`)).map((input) => input.value);
+    }
+
+    function setRequired(inputId, required) {
+      const input = document.getElementById(inputId);
+      if (input) {
+        input.required = required;
+      }
+    }
+
+    function updateConditionalSections() {
+      const type = submissionType.value;
+      const tool = toolUsed.value;
+
+      document.getElementById("issueSection").classList.toggle("hidden", type !== "issue");
+      document.getElementById("featureSection").classList.toggle("hidden", type !== "feature");
+
+      setRequired("issueSummary", type === "issue");
+      setRequired("featureTitle", type === "feature");
+
+      document.getElementById("boardFields").classList.toggle("hidden", !tool.startsWith("Board-Level"));
+      document.getElementById("deviceFields").classList.toggle("hidden", !tool.startsWith("Device-Level"));
+      document.getElementById("fdmFields").classList.toggle("hidden", !tool.startsWith("3D FDM"));
+
+      document.getElementById("summaryType").textContent = submissionType.options[submissionType.selectedIndex].text;
+      document.getElementById("summaryTool").textContent = tool.replace(" Thermal Simulator", "").replace(" Temperature Field Generator", "");
+      document.getElementById("summaryPriority").textContent = document.getElementById("severity").value;
+    }
+
+    function renderRatings() {
+      const ratingList = document.getElementById("ratingList");
+      ratingList.innerHTML = ratings.map((name) => {
+        const key = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+        const options = [1, 2, 3, 4, 5].map((value) => {
+          const id = `${key}_${value}`;
+          return `<input id="${id}" type="radio" name="rating_${key}" value="${value}"><label for="${id}">${value}</label>`;
+        }).join("");
+        return `<div class="rating-row"><div class="rating-name">${name}</div><div class="rating-options" aria-label="${name} rating">${options}</div></div>`;
+      }).join("");
+    }
+
+    function collectPayload() {
+      const data = new FormData(form);
+      const payload = {
+        submittedAt: new Date().toISOString(),
+        submissionType: data.get("submissionType"),
+        toolUsed: data.get("toolUsed"),
+        priority: data.get("severity"),
+        environment: data.get("environment"),
+        issue: {
+          categories: selectedValues("problemCategory"),
+          summary: data.get("issueSummary"),
+          expectedResult: data.get("expectedResult"),
+          actualResult: data.get("actualResult"),
+          reproductionSteps: data.get("reproductionSteps"),
+          severity: data.get("impactLevel"),
+          deviation: data.get("deviation"),
+          validationSources: selectedValues("validationSource"),
+          referenceDetails: data.get("referenceDetails")
+        },
+        featureRequest: {
+          title: data.get("featureTitle"),
+          problem: data.get("featureProblem"),
+          description: data.get("featureDescription"),
+          targetApplications: selectedValues("targetApplication"),
+          impact: data.get("featureImpact"),
+          frequency: data.get("featureFrequency"),
+          reference: data.get("featureReference")
+        },
+        message: data.get("message"),
+        improvement: data.get("improvement"),
+        contact: {
+          name: data.get("name"),
+          email: data.get("email"),
+          organization: data.get("organization"),
+          followUpAllowed: data.get("followUp"),
+          dataConsent: data.get("dataConsent") === "Yes"
+        },
+        simulationContext: {
+          board: {
+            parts: data.get("boardParts"),
+            powerProfile: data.get("boardPower"),
+            mesh: data.get("boardMesh"),
+            boundaryConditions: data.get("boardBoundary")
+          },
+          device: {
+            model: data.get("deviceModel"),
+            order: data.get("deviceOrder"),
+            powerProfile: data.get("devicePowerProfile"),
+            partOrTopology: data.get("devicePart")
+          },
+          fdm: {
+            geometry: data.get("fdmGeometry"),
+            heatSources: data.get("fdmHeatSources"),
+            materials: data.get("fdmMaterials"),
+            convergence: data.get("fdmConvergence")
+          },
+          autoCaptured: data.get("autoCaptured")
+        },
+        ratings: {},
+        page: {
+          currentUrl: data.get("currentUrl") || window.location.href,
+          referrer: document.referrer || "",
+          userAgent: navigator.userAgent,
+          language: navigator.language,
+          viewport: `${window.innerWidth}x${window.innerHeight}`
+        },
+        attachments: Array.from(attachment.files || []).map((file) => ({
+          name: file.name,
+          sizeBytes: file.size,
+          type: file.type || "unknown"
+        }))
+      };
+
+      ratings.forEach((name) => {
+        const key = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+        payload.ratings[key] = data.get(`rating_${key}`) || "";
+      });
+
+      return payload;
+    }
+
+    function downloadPayload(payload) {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+      link.href = url;
+      link.download = `thermal-feedback-${stamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function submitPayload(payload) {
+      if (!FEEDBACK_ENDPOINT) {
+        downloadPayload(payload);
+        submitStatus.textContent = "No endpoint is configured. A JSON payload was downloaded instead.";
+        submitStatus.className = "submit-status ok";
+        return;
+      }
+
+      const response = await fetch(FEEDBACK_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+      }
+
+      submitStatus.textContent = "Feedback submitted.";
+      submitStatus.className = "submit-status ok";
+      form.reset();
+      updateConditionalSections();
+    }
+
+    function prefillFromUrl() {
+      const tool = getQueryValue("tool");
+      const type = getQueryValue("type");
+      const runUrl = getQueryValue("url");
+      const autoCaptured = getQueryValue("autoCaptured");
+
+      if (type && ["issue", "feature", "feedback", "support"].includes(type)) {
+        submissionType.value = type;
+      }
+
+      if (tool) {
+        const normalized = tool.toLowerCase();
+        const match = Array.from(toolUsed.options).find((option) => option.value.toLowerCase().includes(normalized));
+        if (match) {
+          toolUsed.value = match.value;
+        }
+      }
+
+      if (runUrl) {
+        document.getElementById("currentUrl").value = runUrl;
+      }
+
+      if (autoCaptured) {
+        document.getElementById("autoCaptured").value = autoCaptured;
+      } else if (window.feedbackAutoCapture) {
+        document.getElementById("autoCaptured").value = JSON.stringify(window.feedbackAutoCapture, null, 2);
+      }
+    }
+
+    function updateFileSummary() {
+      const count = attachment.files ? attachment.files.length : 0;
+      document.getElementById("summaryFiles").textContent = count ? `${count} selected` : "None";
+    }
+
+    renderRatings();
+    prefillFromUrl();
+    updateConditionalSections();
+    updateFileSummary();
+    document.getElementById("summaryBrowser").textContent = navigator.userAgent.includes("Chrome") ? "Chrome" : "Detected";
+
+    submissionType.addEventListener("change", updateConditionalSections);
+    toolUsed.addEventListener("change", updateConditionalSections);
+    document.getElementById("severity").addEventListener("change", updateConditionalSections);
+    attachment.addEventListener("change", updateFileSummary);
+
+    document.getElementById("downloadDraft").addEventListener("click", () => {
+      downloadPayload(collectPayload());
+      submitStatus.textContent = "Draft JSON downloaded.";
+      submitStatus.className = "submit-status ok";
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      submitStatus.textContent = "";
+      submitStatus.className = "submit-status";
+
+      const type = submissionType.value;
+      if (type === "issue" && selectedValues("problemCategory").length === 0) {
+        submitStatus.textContent = "Select at least one problem category.";
+        submitStatus.className = "submit-status error";
+        document.getElementById("problemCategories").scrollIntoView({ block: "center" });
+        return;
+      }
+
+      try {
+        await submitPayload(collectPayload());
+      } catch (error) {
+        submitStatus.textContent = `Submission failed: ${error.message}. Download the JSON draft and send it manually.`;
+        submitStatus.className = "submit-status error";
+      }
+    });
+  </script>
+</body>
+</html>
