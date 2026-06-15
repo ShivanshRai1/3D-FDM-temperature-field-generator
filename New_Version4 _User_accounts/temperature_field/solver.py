@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+import inspect
+from typing import Any
 
 import numpy as np
 from scipy import sparse
@@ -584,16 +586,18 @@ def _solve_sparse_system(
         initial = np.asarray(initial_guess, dtype=float)
     else:
         initial = np.full_like(rhs, config.solver.initial_temperature_k, dtype=float)
-    solution, info = sparse_linalg.cg(
-        matrix,
-        rhs,
-        x0=initial,
-        rtol=max(1e-10, min(1e-4, config.solver.tolerance_k)),
-        atol=config.solver.tolerance_k,
-        maxiter=config.solver.max_iterations,
-        M=preconditioner,
-        callback=count_iteration,
-    )
+    cg_kwargs: dict[str, Any] = {
+        "x0": initial,
+        "maxiter": config.solver.max_iterations,
+        "M": preconditioner,
+        "callback": count_iteration,
+    }
+    if "rtol" in inspect.signature(sparse_linalg.cg).parameters:
+        cg_kwargs["rtol"] = max(1e-10, min(1e-4, config.solver.tolerance_k))
+        cg_kwargs["atol"] = config.solver.tolerance_k
+    else:
+        cg_kwargs["tol"] = config.solver.tolerance_k
+    solution, info = sparse_linalg.cg(matrix, rhs, **cg_kwargs)
     residual = matrix @ solution - rhs
     max_residual = float(np.max(np.abs(residual)))
     converged = bool(info == 0 and np.all(np.isfinite(solution)))
