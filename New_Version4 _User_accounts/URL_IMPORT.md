@@ -29,8 +29,9 @@ Param names are matched **case-insensitively** (`PLoss_Q1` and `Ploss_Q1` both w
 | URL keys | Version4 mode |
 |----------|----------------|
 | `RthJA_*` | `junction_to_ambient` (Rth_ja) |
-| `RthJC_*` + `RthCA_*` | `junction_to_case_to_ambient` (Rth_jc + Rth_ca) |
-| `-` or missing | `rthMissing` — complete values in UI before running |
+| `RthJC_*` + `RthCA_*` (both present and valid) | `junction_to_case_to_ambient` (Rth_jc + Rth_ca) |
+| `RthCA_*` or `RthJC_*` alone | `junction_to_ambient` (Version3 / PHP compat — first valid key wins) |
+| `-` or invalid | `rthMissing` — complete values in UI before running |
 
 See `README.md` for all six supported Rth paths in manual entry.
 

@@ -240,12 +240,15 @@
 
     const jcPresent = spec.rthJcKey && hasParam(params, spec.rthJcKey);
     const caPresent = spec.rthCaKey && hasParam(params, spec.rthCaKey);
-    if (jcPresent || caPresent) {
-      const jcRaw = jcPresent ? getParam(params, spec.rthJcKey) : undefined;
-      const caRaw = caPresent ? getParam(params, spec.rthCaKey) : undefined;
-      const jc = parseNumber(jcRaw);
-      const ca = parseNumber(caRaw);
-      if ((jcRaw === "-" || caRaw === "-") || jc === null || ca === null || jc <= 0 || ca <= 0) {
+    const jcRaw = jcPresent ? getParam(params, spec.rthJcKey) : undefined;
+    const caRaw = caPresent ? getParam(params, spec.rthCaKey) : undefined;
+    const jc = jcPresent ? parseNumber(jcRaw) : null;
+    const ca = caPresent ? parseNumber(caRaw) : null;
+    const jcInvalid = jcPresent && (jcRaw === "-" || jcRaw === "" || jc === null || jc <= 0);
+    const caInvalid = caPresent && (caRaw === "-" || caRaw === "" || ca === null || ca <= 0);
+
+    if (jcPresent && caPresent) {
+      if (jcInvalid || caInvalid) {
         return missingThermal("junction_to_case_to_ambient", jc || 1, ca || 1, null);
       }
       return {
@@ -256,6 +259,33 @@
         rthCaseTemperatureC: null,
         rthMissing: false
       };
+    }
+
+    // Version3 / PHP compat: a lone RthCA or RthJC value is treated as Rth_ja.
+    if (caPresent && !caInvalid) {
+      return {
+        rthMode: "junction_to_ambient",
+        rth: ca,
+        rthSecondary: null,
+        rthCaseToAmbient: null,
+        rthCaseTemperatureC: null,
+        rthMissing: false
+      };
+    }
+
+    if (jcPresent && !jcInvalid) {
+      return {
+        rthMode: "junction_to_ambient",
+        rth: jc,
+        rthSecondary: null,
+        rthCaseToAmbient: null,
+        rthCaseTemperatureC: null,
+        rthMissing: false
+      };
+    }
+
+    if (caPresent || jcPresent) {
+      return missingThermal("junction_to_case_to_ambient", jc || 1, ca || 1, null);
     }
 
     return missingThermal("junction_to_ambient", 25, null, null);
