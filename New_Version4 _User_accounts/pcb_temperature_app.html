@@ -4161,24 +4161,34 @@
 
     function applyUsernameFromUrl() {
       if (!window.UrlImport) {
-        return;
+        return false;
       }
       const params = window.UrlImport.readUrlParams();
       const raw = params.username;
-      if (!raw || !String(raw).trim()) {
-        return;
+      if (raw && String(raw).trim()) {
+        const displayName = formatDisplayName(String(raw).trim());
+        const userId = displayName.toLowerCase().replace(/[^a-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 48) || "user_alpha";
+        accountState.currentUserId = userId;
+        const existing = accountState.accounts.find(account => account.user_id === userId);
+        if (existing) {
+          existing.display_name = displayName;
+        } else {
+          accountState.accounts.push({ user_id: userId, display_name: displayName });
+        }
+        window.localStorage.setItem("pcbThermalActiveUserId", accountState.currentUserId);
+        renderAccountSelect();
+        return true;
       }
-      const displayName = formatDisplayName(String(raw).trim());
-      const userId = displayName.toLowerCase().replace(/[^a-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 48) || "user_alpha";
-      accountState.currentUserId = userId;
-      const existing = accountState.accounts.find(account => account.user_id === userId);
-      if (existing) {
-        existing.display_name = displayName;
-      } else {
-        accountState.accounts.push({ user_id: userId, display_name: displayName });
+      if (!window.UrlImport.hasUrlImportParams()) {
+        return false;
+      }
+      accountState.currentUserId = "user_alpha";
+      if (!accountState.accounts.some(account => account.user_id === "user_alpha")) {
+        accountState.accounts.unshift({ user_id: "user_alpha", display_name: "User Alpha" });
       }
       window.localStorage.setItem("pcbThermalActiveUserId", accountState.currentUserId);
       renderAccountSelect();
+      return true;
     }
 
     async function maybeLoadFromUrl() {
@@ -4234,7 +4244,11 @@
         renderSavedRuns();
       })
       .finally(async () => {
+        const previousUserId = accountState.currentUserId;
         applyUsernameFromUrl();
+        if (accountState.currentUserId !== previousUserId) {
+          await loadSavedRuns(false);
+        }
         await maybeLoadFromUrl();
       });
     refresh();
