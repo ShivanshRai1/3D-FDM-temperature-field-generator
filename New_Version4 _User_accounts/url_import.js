@@ -141,11 +141,14 @@
   }
 
   function hasUrlImportParams() {
-    const params = new URLSearchParams(global.location.search);
-    if (params.get(IMPORT_GATE_KEY) === "1") {
+    const params = readUrlParams();
+    if (params[IMPORT_GATE_KEY] === "1") {
       return true;
     }
-    for (const [key] of params.entries()) {
+    if (global.TopologyImport && global.TopologyImport.hasTopologyTitle(params)) {
+      return true;
+    }
+    for (const key of Object.keys(params)) {
       if (paramKeyMatchesTrigger(key)) {
         return true;
       }
@@ -173,15 +176,25 @@
     return getParam(params, key) !== undefined;
   }
 
+  function isMissingValue(raw) {
+    if (raw === undefined || raw === null) return true;
+    const text = String(raw).trim();
+    return text === "" || text === "-" || /^open$/i.test(text);
+  }
+
   function parseNumber(raw) {
-    if (raw === undefined || raw === null || raw === "") {
-      return null;
-    }
-    if (String(raw).trim() === "-") {
+    if (isMissingValue(raw)) {
       return null;
     }
     const value = Number(raw);
     return Number.isFinite(value) ? value : null;
+  }
+
+  function parsePower(raw) {
+    const value = parseNumber(raw);
+    if (value === null || value < 0) return null;
+    if (value > 5000) return null;
+    return value;
   }
 
   function specTriggered(spec, params) {
@@ -330,7 +343,7 @@
         l: Math.max(0.5, resolveDimension(params, spec.widthKey, layout.l)),
         w: Math.max(0.5, resolveDimension(params, spec.lengthKey, layout.w)),
         h: Math.max(0.1, resolveDimension(params, spec.heightKey, layout.h)),
-        power: Math.max(0, parseNumber(getParam(params, spec.powerKey)) ?? 0),
+        power: Math.max(0, parsePower(getParam(params, spec.powerKey)) ?? 0),
         rotation: 0,
         urlImportKey: spec.layoutKey,
         ...thermal
@@ -374,12 +387,17 @@
         if (!key || !hasParam(parsed.params, key)) {
           return;
         }
-        if (parseNumber(getParam(parsed.params, key)) === null) {
+        const raw = getParam(parsed.params, key);
+        if (isMissingValue(raw)) {
+          return;
+        }
+        if (parseNumber(raw) === null) {
           errors.push(`${name}: invalid numeric value for ${key}.`);
         }
       });
       if (spec.powerKey && hasParam(parsed.params, spec.powerKey)) {
-        if (parseNumber(getParam(parsed.params, spec.powerKey)) === null) {
+        const raw = getParam(parsed.params, spec.powerKey);
+        if (!isMissingValue(raw) && parsePower(raw) === null) {
           errors.push(`${name}: invalid numeric value for ${spec.powerKey}.`);
         }
       }
@@ -448,13 +466,29 @@
     }
   }
 
-  function loadIntoState(state) {
+  async function loadIntoState(state) {
     if (!hasUrlImportParams()) {
       return { ok: false, skipped: true };
     }
     const params = readUrlParams();
-    const parsed = parseUrlImport(params);
-    const validation = validateUrlImport(parsed);
+    let parsed;
+    let validation;
+    if (global.TopologyImport && global.TopologyImport.hasTopologyTitle(params)) {
+      try {
+        parsed = await global.TopologyImport.parseTopologyImport(params, state.marginMm);
+        validation = global.TopologyImport.validateTopologyImport(parsed);
+      } catch (error) {
+        return {
+          ok: false,
+          skipped: false,
+          errors: [error.message],
+          warnings: []
+        };
+      }
+    } else {
+      parsed = parseUrlImport(params);
+      validation = validateUrlImport(parsed);
+    }
     if (!validation.ok) {
       return {
         ok: false,

@@ -1227,6 +1227,7 @@
   </div>
 
   <script src="url_import.js"></script>
+  <script src="topology_import.js"></script>
   <script>
     const state = {
       marginMm: 8,
@@ -4152,12 +4153,34 @@
       requestAnimationFrame(animate);
     }
 
-    function maybeLoadFromUrl() {
+    function applyUsernameFromUrl() {
+      if (!window.UrlImport) {
+        return;
+      }
+      const params = window.UrlImport.readUrlParams();
+      const raw = params.username;
+      if (!raw || !String(raw).trim()) {
+        return;
+      }
+      const displayName = String(raw).trim();
+      const userId = displayName.toLowerCase().replace(/[^a-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 48) || "user_alpha";
+      accountState.currentUserId = userId;
+      const existing = accountState.accounts.find(account => account.user_id === userId);
+      if (existing) {
+        existing.display_name = displayName;
+      } else {
+        accountState.accounts.push({ user_id: userId, display_name: displayName });
+      }
+      window.localStorage.setItem("pcbThermalActiveUserId", accountState.currentUserId);
+      renderAccountSelect();
+    }
+
+    async function maybeLoadFromUrl() {
       if (!window.UrlImport || !window.UrlImport.hasUrlImportParams()) {
         return;
       }
       try {
-        const result = window.UrlImport.loadIntoState(state);
+        const result = await window.UrlImport.loadIntoState(state);
         if (result.skipped) {
           return;
         }
@@ -4197,17 +4220,21 @@
     bindEvents();
     syncRthFields();
     renderAccountSelect();
-    loadAccounts().catch(error => {
-      refs.status.textContent = `Account features unavailable: ${error.message}`;
-      accountState.accounts = [{ user_id: accountState.currentUserId, display_name: accountState.currentUserId }];
-      renderAccountSelect();
-      renderSavedRuns();
-    });
+    loadAccounts()
+      .catch(error => {
+        refs.status.textContent = `Account features unavailable: ${error.message}`;
+        accountState.accounts = [{ user_id: accountState.currentUserId, display_name: accountState.currentUserId }];
+        renderAccountSelect();
+        renderSavedRuns();
+      })
+      .finally(async () => {
+        applyUsernameFromUrl();
+        await maybeLoadFromUrl();
+      });
     refresh();
     resize();
     fitCamera("iso");
-    maybeLoadFromUrl();
-    if (!window.localStorage.getItem("pcbThermalGuideSkipped") && !state.urlImportActive) {
+    if (!window.localStorage.getItem("pcbThermalGuideSkipped") && !(window.UrlImport && window.UrlImport.hasUrlImportParams())) {
       window.setTimeout(() => startGuide(0), 500);
     }
     animate();

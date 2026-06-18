@@ -1,0 +1,3058 @@
+{
+  "Diode bridge rectifier": {
+    "title": "Diode bridge rectifier",
+    "htmlFile": "ACDC_Converter-20260617T063426Z-3-001\\ACDC_Converter\\Diode_bridge_rectifier.html",
+    "components": [
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -2.7,
+        "z": -12.04
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 8.17,
+        "z": 13.9
+      },
+      {
+        "label": "D3",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 8.17,
+        "z": -12.04
+      },
+      {
+        "label": "D4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -2.7,
+        "z": 13.9
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 24.23,
+        "z": 0.39
+      }
+    ]
+  },
+  "Diode_bridge_rectifier": {
+    "title": "Diode bridge rectifier",
+    "htmlFile": "ACDC_Converter-20260617T063426Z-3-001\\ACDC_Converter\\Diode_bridge_rectifier.html",
+    "components": [
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -2.7,
+        "z": -12.04
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 8.17,
+        "z": 13.9
+      },
+      {
+        "label": "D3",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 8.17,
+        "z": -12.04
+      },
+      {
+        "label": "D4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -2.7,
+        "z": 13.9
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 24.23,
+        "z": 0.39
+      }
+    ]
+  },
+  "Totempole PFC Boost converter": {
+    "title": "Totempole PFC Boost converter",
+    "htmlFile": "ACDC_Converter-20260617T063426Z-3-001\\ACDC_Converter\\Totempole_PFC_Boost_converter.html",
+    "components": [
+      {
+        "label": "Lin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -22.6,
+        "z": -8.17
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -6.81,
+        "z": -13.8
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -6.81,
+        "z": 11.8
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 15.52,
+        "z": -13.8
+      },
+      {
+        "label": "Q4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15.52,
+        "z": 11.8
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 37.31,
+        "z": -1.45
+      }
+    ]
+  },
+  "Totempole_PFC_Boost_converter": {
+    "title": "Totempole PFC Boost converter",
+    "htmlFile": "ACDC_Converter-20260617T063426Z-3-001\\ACDC_Converter\\Totempole_PFC_Boost_converter.html",
+    "components": [
+      {
+        "label": "Lin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -22.6,
+        "z": -8.17
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -6.81,
+        "z": -13.8
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -6.81,
+        "z": 11.8
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 15.52,
+        "z": -13.8
+      },
+      {
+        "label": "Q4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15.52,
+        "z": 11.8
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 37.31,
+        "z": -1.45
+      }
+    ]
+  },
+  "Cascaded HBridge MultiLevel Inverter": {
+    "title": "Cascaded HBridge MultiLevel Inverter",
+    "htmlFile": "DCAC Converter-20260617T063855Z-3-001\\DCAC Converter\\Cascaded_HBridge_MultiLevel_Inverter.html",
+    "components": [
+      {
+        "label": "Cin1",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -12,
+        "z": -12.7
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -3.59,
+        "z": -17.55
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": 7.14,
+        "z": -5.6
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 7.14,
+        "z": -17.55
+      },
+      {
+        "label": "Q4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -3.59,
+        "z": -5.6
+      },
+      {
+        "label": "Cin2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -12,
+        "z": 13.63
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -3.59,
+        "z": 8.78
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 7.14,
+        "z": 20.92
+      },
+      {
+        "label": "Q7",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 7.14,
+        "z": 8.78
+      },
+      {
+        "label": "Q8",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -3.59,
+        "z": 20.92
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 17.69,
+        "z": 3.08
+      }
+    ]
+  },
+  "Cascaded_HBridge_MultiLevel_Inverter": {
+    "title": "Cascaded HBridge MultiLevel Inverter",
+    "htmlFile": "DCAC Converter-20260617T063855Z-3-001\\DCAC Converter\\Cascaded_HBridge_MultiLevel_Inverter.html",
+    "components": [
+      {
+        "label": "Cin1",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -12,
+        "z": -12.7
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -3.59,
+        "z": -17.55
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": 7.14,
+        "z": -5.6
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 7.14,
+        "z": -17.55
+      },
+      {
+        "label": "Q4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -3.59,
+        "z": -5.6
+      },
+      {
+        "label": "Cin2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -12,
+        "z": 13.63
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -3.59,
+        "z": 8.78
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 7.14,
+        "z": 20.92
+      },
+      {
+        "label": "Q7",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 7.14,
+        "z": 8.78
+      },
+      {
+        "label": "Q8",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -3.59,
+        "z": 20.92
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 17.69,
+        "z": 3.08
+      }
+    ]
+  },
+  "HBridge Inverter": {
+    "title": "HBridge Inverter",
+    "htmlFile": "DCAC Converter-20260617T063855Z-3-001\\DCAC Converter\\HBridge_Inverter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -29.79,
+        "z": 0
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -11.23,
+        "z": -11.3
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": 12.35,
+        "z": 15.77
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 12.35,
+        "z": -11.3
+      },
+      {
+        "label": "Q4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -11.23,
+        "z": 15.77
+      },
+      {
+        "label": "R",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 26.58,
+        "z": -2.09
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 37.19,
+        "z": -5.16
+      }
+    ]
+  },
+  "HBridge_Inverter": {
+    "title": "HBridge Inverter",
+    "htmlFile": "DCAC Converter-20260617T063855Z-3-001\\DCAC Converter\\HBridge_Inverter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -29.79,
+        "z": 0
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -11.23,
+        "z": -11.3
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": 12.35,
+        "z": 15.77
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 12.35,
+        "z": -11.3
+      },
+      {
+        "label": "Q4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -11.23,
+        "z": 15.77
+      },
+      {
+        "label": "R",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 26.58,
+        "z": -2.09
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 37.19,
+        "z": -5.16
+      }
+    ]
+  },
+  "Boost Converter": {
+    "title": "Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Boost_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 7,
+        "x": -49.81,
+        "z": 3.76
+      },
+      {
+        "label": "Lin",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -24.26,
+        "z": -16.04
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -9.41,
+        "z": 6.93
+      },
+      {
+        "label": "D1",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 11.59,
+        "z": -12.68
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 33.77,
+        "z": 5.55
+      }
+    ]
+  },
+  "Boost_Converter": {
+    "title": "Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Boost_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 7,
+        "x": -49.81,
+        "z": 3.76
+      },
+      {
+        "label": "Lin",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -24.26,
+        "z": -16.04
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -9.41,
+        "z": 6.93
+      },
+      {
+        "label": "D1",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 11.59,
+        "z": -12.68
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 33.77,
+        "z": 5.55
+      }
+    ]
+  },
+  "Buck Boost Converter": {
+    "title": "Buck Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Buck_Boost_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -54,
+        "z": 6
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -25,
+        "z": -15
+      },
+      {
+        "label": "Lout",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -7,
+        "z": 9
+      },
+      {
+        "label": "D1",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 14,
+        "z": -13
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 38,
+        "z": 6
+      }
+    ]
+  },
+  "Buck_Boost_Converter": {
+    "title": "Buck Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Buck_Boost_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -54,
+        "z": 6
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -25,
+        "z": -15
+      },
+      {
+        "label": "Lout",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -7,
+        "z": 9
+      },
+      {
+        "label": "D1",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 14,
+        "z": -13
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 38,
+        "z": 6
+      }
+    ]
+  },
+  "Buck Converter": {
+    "title": "Buck Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Buck_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 7,
+        "x": -45.57,
+        "z": 6.14
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -23.04,
+        "z": -11.27
+      },
+      {
+        "label": "D1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -5.84,
+        "z": 5.12
+      },
+      {
+        "label": "Lout",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 14.65,
+        "z": -13.11
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 31.65,
+        "z": 6.14
+      }
+    ]
+  },
+  "Buck_Converter": {
+    "title": "Buck Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Buck_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 7,
+        "x": -45.57,
+        "z": 6.14
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -23.04,
+        "z": -11.27
+      },
+      {
+        "label": "D1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -5.84,
+        "z": 5.12
+      },
+      {
+        "label": "Lout",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 14.65,
+        "z": -13.11
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 31.65,
+        "z": 6.14
+      }
+    ]
+  },
+  "Synchronous Boost Converter": {
+    "title": "Synchronous Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Synchronous Boost Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 7,
+        "x": -44,
+        "z": 2
+      },
+      {
+        "label": "Lin",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -22,
+        "z": -15
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -10,
+        "z": 6
+      },
+      {
+        "label": "Q2",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 10,
+        "z": -11
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 31,
+        "z": 4
+      }
+    ]
+  },
+  "Synchronous Buck Boost Converter": {
+    "title": "Synchronous Buck Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Synchronous Buck Boost Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 7,
+        "x": -40,
+        "z": 4
+      },
+      {
+        "label": "Lout",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -4,
+        "z": 7
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -17,
+        "z": -11
+      },
+      {
+        "label": "Q2",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 13,
+        "z": -12
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 29,
+        "z": 7
+      }
+    ]
+  },
+  "Sync Buck Converter": {
+    "title": "Sync Buck Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Sync_Buck_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 7,
+        "x": -45.71,
+        "z": 6.06
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -21.25,
+        "z": -10.23
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -5.46,
+        "z": 7.83
+      },
+      {
+        "label": "Lout",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 14.83,
+        "z": -12.52
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 31.53,
+        "z": 6.28
+      }
+    ]
+  },
+  "Sync_Buck_Converter": {
+    "title": "Sync Buck Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Sync_Buck_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 7,
+        "x": -45.71,
+        "z": 6.06
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -21.25,
+        "z": -10.23
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -5.46,
+        "z": 7.83
+      },
+      {
+        "label": "Lout",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 14.83,
+        "z": -12.52
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 31.53,
+        "z": 6.28
+      }
+    ]
+  },
+  "Two Switch Boost Converter": {
+    "title": "Two Switch Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Two_Switch_Boost_Converter.html",
+    "components": [
+      {
+        "label": "D1",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -31.6,
+        "z": -4.22
+      },
+      {
+        "label": "D2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -20.83,
+        "z": 10.2
+      },
+      {
+        "label": "D3",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -20.83,
+        "z": -4.22
+      },
+      {
+        "label": "D4",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -31.6,
+        "z": 10.2
+      },
+      {
+        "label": "D5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 25.86,
+        "z": -11.72
+      },
+      {
+        "label": "Lin",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 4.3,
+        "z": -14.46
+      },
+      {
+        "label": "Q1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 14.76,
+        "z": 3.38
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 37.45,
+        "z": 0.78
+      }
+    ]
+  },
+  "Two_Switch_Boost_Converter": {
+    "title": "Two Switch Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Two_Switch_Boost_Converter.html",
+    "components": [
+      {
+        "label": "D1",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -31.6,
+        "z": -4.22
+      },
+      {
+        "label": "D2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -20.83,
+        "z": 10.2
+      },
+      {
+        "label": "D3",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -20.83,
+        "z": -4.22
+      },
+      {
+        "label": "D4",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -31.6,
+        "z": 10.2
+      },
+      {
+        "label": "D5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 25.86,
+        "z": -11.72
+      },
+      {
+        "label": "Lin",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 4.3,
+        "z": -14.46
+      },
+      {
+        "label": "Q1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 14.76,
+        "z": 3.38
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 37.45,
+        "z": 0.78
+      }
+    ]
+  },
+  "Two Switch Buck Boost Converter": {
+    "title": "Two Switch Buck Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Two_Switch_Buck_Boost_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -52,
+        "z": 5
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -21,
+        "z": -15
+      },
+      {
+        "label": "Lout",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -4,
+        "z": 9
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 18,
+        "z": -13
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 38,
+        "z": 9
+      }
+    ]
+  },
+  "Two_Switch_Buck_Boost_Converter": {
+    "title": "Two Switch Buck Boost Converter",
+    "htmlFile": "DCDC Converter-20260617T063920Z-3-001\\DCDC Converter\\Two_Switch_Buck_Boost_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -52,
+        "z": 5
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -21,
+        "z": -15
+      },
+      {
+        "label": "Lout",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -4,
+        "z": 9
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 18,
+        "z": -13
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 38,
+        "z": 9
+      }
+    ]
+  },
+  "Dual Active Bridge": {
+    "title": "Dual Active Bridge",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\Dual_Active_Bridge.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -74,
+        "z": -3
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -56,
+        "z": -12
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -56,
+        "z": 10
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -36,
+        "z": -12
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -36,
+        "z": 11
+      },
+      {
+        "label": "L",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -18,
+        "z": -7
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 24,
+        "z": -12
+      },
+      {
+        "label": "Q8",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 23,
+        "z": 11
+      },
+      {
+        "label": "Q7",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 44,
+        "z": -12
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 44,
+        "z": 11
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 64,
+        "z": -3
+      }
+    ]
+  },
+  "Dual_Active_Bridge": {
+    "title": "Dual Active Bridge",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\Dual_Active_Bridge.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -74,
+        "z": -3
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -56,
+        "z": -12
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -56,
+        "z": 10
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -36,
+        "z": -12
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -36,
+        "z": 11
+      },
+      {
+        "label": "L",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -18,
+        "z": -7
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 24,
+        "z": -12
+      },
+      {
+        "label": "Q8",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 23,
+        "z": 11
+      },
+      {
+        "label": "Q7",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 44,
+        "z": -12
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 44,
+        "z": 11
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 64,
+        "z": -3
+      }
+    ]
+  },
+  "Flyback Converter": {
+    "title": "Flyback Converter",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\Flyback_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -55,
+        "z": 2
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -24,
+        "z": 15
+      },
+      {
+        "label": "D1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": 23,
+        "z": -19
+      },
+      {
+        "label": "Cout",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 43,
+        "z": 1
+      }
+    ]
+  },
+  "Flyback_Converter": {
+    "title": "Flyback Converter",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\Flyback_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -55,
+        "z": 2
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -24,
+        "z": 15
+      },
+      {
+        "label": "D1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": 23,
+        "z": -19
+      },
+      {
+        "label": "Cout",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 43,
+        "z": 1
+      }
+    ]
+  },
+  "Forward Converter": {
+    "title": "Forward Converter",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\Forward_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -63,
+        "z": 8
+      },
+      {
+        "label": "D3",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -35,
+        "z": -17
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -32,
+        "z": 18
+      },
+      {
+        "label": "D1",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 12,
+        "z": -17
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 20,
+        "z": -1
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 38,
+        "z": -20
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 55,
+        "z": -4
+      }
+    ]
+  },
+  "Forward_Converter": {
+    "title": "Forward Converter",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\Forward_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -63,
+        "z": 8
+      },
+      {
+        "label": "D3",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -35,
+        "z": -17
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -32,
+        "z": 18
+      },
+      {
+        "label": "D1",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 12,
+        "z": -17
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 20,
+        "z": -1
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 38,
+        "z": -20
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 55,
+        "z": -4
+      }
+    ]
+  },
+  "FullBridge Converter with Diodes": {
+    "title": "FullBridge Converter with Diodes",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\FullBridge_Converter_with_Diodes.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -75,
+        "z": 2
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -49,
+        "z": -12
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -50,
+        "z": 16
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -18,
+        "z": -11
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -22,
+        "z": 15
+      },
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 28,
+        "z": -16
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 27,
+        "z": 17
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 53,
+        "z": -20
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 65,
+        "z": -1
+      }
+    ]
+  },
+  "FullBridge_Converter_with_Diodes": {
+    "title": "FullBridge Converter with Diodes",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\FullBridge_Converter_with_Diodes.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -75,
+        "z": 2
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -49,
+        "z": -12
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -50,
+        "z": 16
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -18,
+        "z": -11
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -22,
+        "z": 15
+      },
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 28,
+        "z": -16
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 27,
+        "z": 17
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 53,
+        "z": -20
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 65,
+        "z": -1
+      }
+    ]
+  },
+  "FullBridge Converter with FETs": {
+    "title": "FullBridge Converter with FETs",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\FullBridge_Converter_with_FETs.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -66,
+        "z": 4
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -43,
+        "z": -8
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -44,
+        "z": 17
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -18,
+        "z": -7
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -21,
+        "z": 16
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 22,
+        "z": -11
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 22,
+        "z": 17
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 45,
+        "z": -12
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 56,
+        "z": 3
+      }
+    ]
+  },
+  "FullBridge_Converter_with_FETs": {
+    "title": "FullBridge Converter with FETs",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\FullBridge_Converter_with_FETs.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -66,
+        "z": 4
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -43,
+        "z": -8
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -44,
+        "z": 17
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -18,
+        "z": -7
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -21,
+        "z": 16
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 22,
+        "z": -11
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 22,
+        "z": 17
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 45,
+        "z": -12
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 56,
+        "z": 3
+      }
+    ]
+  },
+  "FullBridge Converter with FETs Scheme2": {
+    "title": "FullBridge Converter with FETs Scheme2",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\FullBridge_Converter_with_FETs_Scheme2.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -66,
+        "z": 4
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -43,
+        "z": -8
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -44,
+        "z": 17
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -18,
+        "z": -7
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -21,
+        "z": 16
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 22,
+        "z": -11
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 22,
+        "z": 17
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 45,
+        "z": -12
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 56,
+        "z": 3
+      }
+    ]
+  },
+  "FullBridge_Converter_with_FETs_Scheme2": {
+    "title": "FullBridge Converter with FETs Scheme2",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\FullBridge_Converter_with_FETs_Scheme2.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -66,
+        "z": 4
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -43,
+        "z": -8
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -44,
+        "z": 17
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -18,
+        "z": -7
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -21,
+        "z": 16
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 22,
+        "z": -11
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 22,
+        "z": 17
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 45,
+        "z": -12
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 56,
+        "z": 3
+      }
+    ]
+  },
+  "HalfBridge Converter with Diodes": {
+    "title": "HalfBridge Converter with Diodes",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\HalfBridge_Converter_with_Diodes.html",
+    "components": [
+      {
+        "label": "Cin1",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -58,
+        "z": -12
+      },
+      {
+        "label": "Cin2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -60,
+        "z": 13
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -33,
+        "z": -13
+      },
+      {
+        "label": "Q2",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -32,
+        "z": 15
+      },
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 16,
+        "z": -16
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 16,
+        "z": 16
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 40,
+        "z": -18
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 53,
+        "z": 0
+      }
+    ]
+  },
+  "HalfBridge_Converter_with_Diodes": {
+    "title": "HalfBridge Converter with Diodes",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\HalfBridge_Converter_with_Diodes.html",
+    "components": [
+      {
+        "label": "Cin1",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -58,
+        "z": -12
+      },
+      {
+        "label": "Cin2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -60,
+        "z": 13
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -33,
+        "z": -13
+      },
+      {
+        "label": "Q2",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -32,
+        "z": 15
+      },
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 16,
+        "z": -16
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 16,
+        "z": 16
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 40,
+        "z": -18
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 53,
+        "z": 0
+      }
+    ]
+  },
+  "HalfBridge Converter with FETs": {
+    "title": "HalfBridge Converter with FETs",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\HalfBridge_Converter_with_FETs.html",
+    "components": [
+      {
+        "label": "Cin1",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -56,
+        "z": -8
+      },
+      {
+        "label": "Cin2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -56,
+        "z": 14
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -33,
+        "z": -9
+      },
+      {
+        "label": "Q2",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -30,
+        "z": 16
+      },
+      {
+        "label": "Q3",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 16,
+        "z": -10
+      },
+      {
+        "label": "Q4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 16,
+        "z": 17
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 41,
+        "z": -13
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 51,
+        "z": 2
+      }
+    ]
+  },
+  "HalfBridge_Converter_with_FETs": {
+    "title": "HalfBridge Converter with FETs",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\HalfBridge_Converter_with_FETs.html",
+    "components": [
+      {
+        "label": "Cin1",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -56,
+        "z": -8
+      },
+      {
+        "label": "Cin2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -56,
+        "z": 14
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -33,
+        "z": -9
+      },
+      {
+        "label": "Q2",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -30,
+        "z": 16
+      },
+      {
+        "label": "Q3",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 16,
+        "z": -10
+      },
+      {
+        "label": "Q4",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 16,
+        "z": 17
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 41,
+        "z": -13
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 51,
+        "z": 2
+      }
+    ]
+  },
+  "LLC FullBridge Converter (Beta)": {
+    "title": "LLC FullBridge Converter (Beta)",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\LLC_FullBridge_Converter_(Beta).html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -75,
+        "z": -3
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -52,
+        "z": -12
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -52,
+        "z": 15
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -29,
+        "z": -11
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -31,
+        "z": 15
+      },
+      {
+        "label": "Cr",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -13,
+        "z": -2
+      },
+      {
+        "label": "Lr",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -3,
+        "z": -3
+      },
+      {
+        "label": "Lm",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 8,
+        "z": 7
+      },
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 46,
+        "z": -2
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 46,
+        "z": 18
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 71,
+        "z": 5
+      }
+    ]
+  },
+  "LLC_FullBridge_Converter_(Beta)": {
+    "title": "LLC FullBridge Converter (Beta)",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\LLC_FullBridge_Converter_(Beta).html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -75,
+        "z": -3
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -52,
+        "z": -12
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -52,
+        "z": 15
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -29,
+        "z": -11
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -31,
+        "z": 15
+      },
+      {
+        "label": "Cr",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -13,
+        "z": -2
+      },
+      {
+        "label": "Lr",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -3,
+        "z": -3
+      },
+      {
+        "label": "Lm",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 8,
+        "z": 7
+      },
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 46,
+        "z": -2
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 46,
+        "z": 18
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 71,
+        "z": 5
+      }
+    ]
+  },
+  "LLC HalfBridge Converter (Beta)": {
+    "title": "LLC HalfBridge Converter (Beta)",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\LLC_HalfBridge_Converter_(Beta).html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -72,
+        "z": -6
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -45,
+        "z": -13
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -46,
+        "z": 12
+      },
+      {
+        "label": "Cr",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -26,
+        "z": -1
+      },
+      {
+        "label": "Lr",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -14,
+        "z": -3
+      },
+      {
+        "label": "Lm",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -4,
+        "z": 9
+      },
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 40,
+        "z": -2
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 40,
+        "z": 21
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 67,
+        "z": 6
+      }
+    ]
+  },
+  "LLC_HalfBridge_Converter_(Beta)": {
+    "title": "LLC HalfBridge Converter (Beta)",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\LLC_HalfBridge_Converter_(Beta).html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -72,
+        "z": -6
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -45,
+        "z": -13
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -46,
+        "z": 12
+      },
+      {
+        "label": "Cr",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -26,
+        "z": -1
+      },
+      {
+        "label": "Lr",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -14,
+        "z": -3
+      },
+      {
+        "label": "Lm",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -4,
+        "z": 9
+      },
+      {
+        "label": "D1",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 40,
+        "z": -2
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 40,
+        "z": 21
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 67,
+        "z": 6
+      }
+    ]
+  },
+  "Pushpull Converter": {
+    "title": "Pushpull Converter",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\Pushpull_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -72,
+        "z": 8
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -47,
+        "z": 18
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -21,
+        "z": 18
+      },
+      {
+        "label": "D1",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 21,
+        "z": -18
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 21,
+        "z": 6
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 46,
+        "z": -19
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 63,
+        "z": -4
+      }
+    ]
+  },
+  "Pushpull_Converter": {
+    "title": "Pushpull Converter",
+    "htmlFile": "DCDC Insolated-20260617T064018Z-3-001\\DCDC Insolated\\Pushpull_Converter.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -72,
+        "z": 8
+      },
+      {
+        "label": "Q2",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -47,
+        "z": 18
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -21,
+        "z": 18
+      },
+      {
+        "label": "D1",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": 21,
+        "z": -18
+      },
+      {
+        "label": "D2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 21,
+        "z": 6
+      },
+      {
+        "label": "Lout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 46,
+        "z": -19
+      },
+      {
+        "label": "Cout",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 63,
+        "z": -4
+      }
+    ]
+  },
+  "Motor Drive 3Phase 120 DC": {
+    "title": "Motor Drive 3Phase 120 DC",
+    "htmlFile": "Motor Control-20260617T064048Z-3-001\\Motor Control\\Motor_Drive_3Phase_120_DC.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -47,
+        "z": -4
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -27,
+        "z": -17
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -27,
+        "z": 10.002
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -5,
+        "z": -16
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -6,
+        "z": 10
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15,
+        "z": -17
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15,
+        "z": 11
+      }
+    ]
+  },
+  "Motor_Drive_3Phase_120_DC": {
+    "title": "Motor Drive 3Phase 120 DC",
+    "htmlFile": "Motor Control-20260617T064048Z-3-001\\Motor Control\\Motor_Drive_3Phase_120_DC.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -47,
+        "z": -4
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -27,
+        "z": -17
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -27,
+        "z": 10.002
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -5,
+        "z": -16
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -6,
+        "z": 10
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15,
+        "z": -17
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15,
+        "z": 11
+      }
+    ]
+  },
+  "Motor Drive 3Phase 180 DC": {
+    "title": "Motor Drive 3Phase 180 DC",
+    "htmlFile": "Motor Control-20260617T064048Z-3-001\\Motor Control\\Motor_Drive_3Phase_180_DC.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -47,
+        "z": -4
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -27,
+        "z": -17
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -27,
+        "z": 10.002
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -5,
+        "z": -16
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -6,
+        "z": 10
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15,
+        "z": -17
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15,
+        "z": 11
+      }
+    ]
+  },
+  "Motor_Drive_3Phase_180_DC": {
+    "title": "Motor Drive 3Phase 180 DC",
+    "htmlFile": "Motor Control-20260617T064048Z-3-001\\Motor Control\\Motor_Drive_3Phase_180_DC.html",
+    "components": [
+      {
+        "label": "Cin",
+        "l": 5.5,
+        "w": 5.5,
+        "h": 4.065,
+        "x": -47,
+        "z": -4
+      },
+      {
+        "label": "Q1",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -27,
+        "z": -17
+      },
+      {
+        "label": "Q4",
+        "l": 7.5,
+        "w": 7.5,
+        "h": 7.5,
+        "x": -27,
+        "z": 10.002
+      },
+      {
+        "label": "Q3",
+        "l": 10,
+        "w": 10,
+        "h": 5,
+        "x": -5,
+        "z": -16
+      },
+      {
+        "label": "Q6",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": -6,
+        "z": 10
+      },
+      {
+        "label": "Q5",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15,
+        "z": -17
+      },
+      {
+        "label": "Q2",
+        "l": 5,
+        "w": 5,
+        "h": 5,
+        "x": 15,
+        "z": 11
+      }
+    ]
+  }
+}
