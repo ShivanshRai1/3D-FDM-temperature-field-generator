@@ -256,8 +256,18 @@
     return layoutsCache;
   }
 
+  const TOPOLOGY_ALIASES = {
+    // DiscoverEE short title for the multi-diode boost layout (id=31 style URLs).
+    "pfc boost converter": "Two Switch Boost Converter",
+    "totempole pfc boost converter": "Totempole PFC Boost converter"
+  };
+
   function findLayout(title, layouts) {
     const normalized = normalizeTopologyTitle(title);
+    const aliasTarget = TOPOLOGY_ALIASES[normalized.toLowerCase()];
+    if (aliasTarget && layouts[aliasTarget]) {
+      return layouts[aliasTarget];
+    }
     if (layouts[normalized]) return layouts[normalized];
     const underscored = normalized.replace(/ /g, "_");
     if (layouts[underscored]) return layouts[underscored];
