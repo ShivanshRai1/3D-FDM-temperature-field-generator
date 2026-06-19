@@ -114,6 +114,9 @@
       background: var(--panel);
       border-color: var(--line);
       box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .account-menu-button:hover {
@@ -2793,9 +2796,21 @@
       return JSON.parse(JSON.stringify(value));
     }
 
+    function friendlyNameFromUsername(raw) {
+      const text = String(raw || "").trim();
+      if (!text) return text;
+      const local = text.includes("@") ? text.split("@")[0] : text;
+      const parts = local.split(/[._-]+/).filter(Boolean);
+      if (!parts.length) return local;
+      return parts.map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(" ");
+    }
+
     function formatDisplayName(name) {
       const text = String(name || "").trim();
       if (!text) return text;
+      if (text.includes("@") || (!/\s/.test(text) && /[._-]/.test(text))) {
+        return friendlyNameFromUsername(text);
+      }
       return text.charAt(0).toUpperCase() + text.slice(1);
     }
 
@@ -2910,6 +2925,7 @@
         refs.accountSelect.appendChild(option);
       });
       refs.accountMenuButton.textContent = formatDisplayName(activeAccount().display_name);
+      refs.accountMenuButton.title = activeAccount().display_name || activeAccount().user_id;
     }
 
     function setAccountMenuOpen(open) {
@@ -4166,8 +4182,9 @@
       const params = window.UrlImport.readUrlParams();
       const raw = params.username;
       if (raw && String(raw).trim()) {
-        const displayName = formatDisplayName(String(raw).trim());
-        const userId = displayName.toLowerCase().replace(/[^a-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 48) || "user_alpha";
+        const rawTrimmed = String(raw).trim();
+        const displayName = formatDisplayName(rawTrimmed);
+        const userId = rawTrimmed.toLowerCase().replace(/[^a-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 48) || "user_alpha";
         accountState.currentUserId = userId;
         const existing = accountState.accounts.find(account => account.user_id === userId);
         if (existing) {
