@@ -41,52 +41,52 @@
       heightKey: "H_Q1",
       powerKey: "PLoss_Q1",
       rthJaKeys: ["RthJA_Q1"],
-      rthJcKey: "RthJC_Q1",
-      rthCaKey: "RthCA_Q1"
+      rthJcKeys: ["RthJC_Q1"],
+      rthCaKeys: ["RthCA_Q1"]
     },
     {
       layoutKey: "D1",
-      triggerKeys: ["W_D1_D2_D3_D4", "L_D1_D2_D3_D4", "H_D1_D2_D3_D4", "PLoss_D1", "RthJC_D1_D2_D3_D4", "RthJA_D1_D2_D3_D4"],
+      triggerKeys: ["W_D1_D2_D3_D4", "L_D1_D2_D3_D4", "H_D1_D2_D3_D4", "PLoss_D1", "RthJC_D1", "RthJA_D1", "RthJC_D1_D2_D3_D4", "RthJA_D1_D2_D3_D4"],
       widthKey: "W_D1_D2_D3_D4",
       lengthKey: "L_D1_D2_D3_D4",
       heightKey: "H_D1_D2_D3_D4",
       powerKey: "PLoss_D1",
-      rthJaKeys: ["RthJA_D1_D2_D3_D4"],
-      rthJcKey: "RthJC_D1_D2_D3_D4",
-      rthCaKey: "RthCA_D1_D2_D3_D4"
+      rthJaKeys: ["RthJA_D1", "RthJA_D1_D2_D3_D4"],
+      rthJcKeys: ["RthJC_D1", "RthJC_D1_D2_D3_D4"],
+      rthCaKeys: ["RthCA_D1", "RthCA_D1_D2_D3_D4"]
     },
     {
       layoutKey: "D2",
-      triggerKeys: ["W_D1_D2_D3_D4", "L_D1_D2_D3_D4", "H_D1_D2_D3_D4", "PLoss_D2"],
+      triggerKeys: ["W_D1_D2_D3_D4", "L_D1_D2_D3_D4", "H_D1_D2_D3_D4", "PLoss_D2", "RthJC_D2", "RthJA_D2"],
       widthKey: "W_D1_D2_D3_D4",
       lengthKey: "L_D1_D2_D3_D4",
       heightKey: "H_D1_D2_D3_D4",
       powerKey: "PLoss_D2",
-      rthJaKeys: ["RthJA_D1_D2_D3_D4"],
-      rthJcKey: "RthJC_D1_D2_D3_D4",
-      rthCaKey: "RthCA_D1_D2_D3_D4"
+      rthJaKeys: ["RthJA_D2", "RthJA_D1_D2_D3_D4"],
+      rthJcKeys: ["RthJC_D2", "RthJC_D1_D2_D3_D4"],
+      rthCaKeys: ["RthCA_D2", "RthCA_D1_D2_D3_D4"]
     },
     {
       layoutKey: "D3",
-      triggerKeys: ["W_D1_D2_D3_D4", "L_D1_D2_D3_D4", "H_D1_D2_D3_D4", "PLoss_D3"],
+      triggerKeys: ["W_D1_D2_D3_D4", "L_D1_D2_D3_D4", "H_D1_D2_D3_D4", "PLoss_D3", "RthJC_D3", "RthJA_D3"],
       widthKey: "W_D1_D2_D3_D4",
       lengthKey: "L_D1_D2_D3_D4",
       heightKey: "H_D1_D2_D3_D4",
       powerKey: "PLoss_D3",
-      rthJaKeys: ["RthJA_D1_D2_D3_D4"],
-      rthJcKey: "RthJC_D1_D2_D3_D4",
-      rthCaKey: "RthCA_D1_D2_D3_D4"
+      rthJaKeys: ["RthJA_D3", "RthJA_D1_D2_D3_D4"],
+      rthJcKeys: ["RthJC_D3", "RthJC_D1_D2_D3_D4"],
+      rthCaKeys: ["RthCA_D3", "RthCA_D1_D2_D3_D4"]
     },
     {
       layoutKey: "D4",
-      triggerKeys: ["W_D1_D2_D3_D4", "L_D1_D2_D3_D4", "H_D1_D2_D3_D4", "PLoss_D4"],
+      triggerKeys: ["W_D1_D2_D3_D4", "L_D1_D2_D3_D4", "H_D1_D2_D3_D4", "PLoss_D4", "RthJC_D4", "RthJA_D4"],
       widthKey: "W_D1_D2_D3_D4",
       lengthKey: "L_D1_D2_D3_D4",
       heightKey: "H_D1_D2_D3_D4",
       powerKey: "PLoss_D4",
-      rthJaKeys: ["RthJA_D1_D2_D3_D4"],
-      rthJcKey: "RthJC_D1_D2_D3_D4",
-      rthCaKey: "RthCA_D1_D2_D3_D4"
+      rthJaKeys: ["RthJA_D4", "RthJA_D1_D2_D3_D4"],
+      rthJcKeys: ["RthJC_D4", "RthJC_D1_D2_D3_D4"],
+      rthCaKeys: ["RthCA_D4", "RthCA_D1_D2_D3_D4"]
     },
     {
       layoutKey: "D5",
@@ -96,8 +96,8 @@
       heightKey: "H_D5",
       powerKey: "PLoss_D5",
       rthJaKeys: ["RthJA_D5"],
-      rthJcKey: "RthJC_D5",
-      rthCaKey: "RthCA_D5"
+      rthJcKeys: ["RthJC_D5"],
+      rthCaKeys: ["RthCA_D5"]
     },
     {
       layoutKey: "inductor",
@@ -123,13 +123,47 @@
     }
   ];
 
+  function repairSearchString(search) {
+    if (!search || search.length < 2) {
+      return search;
+    }
+    let repaired = search;
+    // Common DiscoverEE typo: missing & after email domain before topology_title.
+    repaired = repaired.replace(/(\.(?:in|com|io|net|org))topology_title=/gi, "$1&topology_title=");
+    const gluedParams = ["topology_title", "username", "import"];
+    for (let i = 0; i < gluedParams.length; i += 1) {
+      const name = gluedParams[i];
+      const re = new RegExp(`([^&?])(${name}=)`, "gi");
+      repaired = repaired.replace(re, "$1&$2");
+    }
+    return repaired;
+  }
+
+  function normalizeParsedParams(out) {
+    const username = out.username;
+    if (username && /topology_title=/i.test(username)) {
+      const splitMatch = String(username).match(/^([\s\S]*?)[.&]?topology_title=(.*)$/i);
+      if (splitMatch) {
+        const cleanUser = splitMatch[1].replace(/[.&]+$/, "").trim();
+        if (cleanUser) {
+          out.username = cleanUser;
+        }
+        if (!out.topology_title && splitMatch[2]) {
+          out.topology_title = splitMatch[2].split("&")[0];
+        }
+      }
+    }
+    return out;
+  }
+
   function readUrlParams() {
-    const params = new URLSearchParams(global.location.search);
+    const search = repairSearchString(global.location.search);
+    const params = new URLSearchParams(search);
     const out = {};
     params.forEach((value, key) => {
       out[key] = value;
     });
-    return out;
+    return normalizeParsedParams(out);
   }
 
   function paramKeyMatchesTrigger(key) {
@@ -227,15 +261,31 @@
     };
   }
 
+  function firstParamRaw(params, keys) {
+    if (!keys || !keys.length) {
+      return { key: null, raw: undefined };
+    }
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
+      if (!hasParam(params, key)) {
+        continue;
+      }
+      return { key, raw: getParam(params, key) };
+    }
+    return { key: null, raw: undefined };
+  }
+
   function resolveThermal(params, spec) {
+    const globalCa = parseNumber(getParam(params, "RthCA"));
+
     for (let i = 0; i < (spec.rthJaKeys || []).length; i += 1) {
       const key = spec.rthJaKeys[i];
       if (!hasParam(params, key)) {
         continue;
       }
       const raw = getParam(params, key);
-      if (raw === "-" || raw === "") {
-        return missingThermal("junction_to_ambient", 1, null, null);
+      if (isMissingValue(raw)) {
+        continue;
       }
       const value = parseNumber(raw);
       if (value !== null && value > 0) {
@@ -251,19 +301,18 @@
       return missingThermal("junction_to_ambient", 1, null, null);
     }
 
-    const jcPresent = spec.rthJcKey && hasParam(params, spec.rthJcKey);
-    const caPresent = spec.rthCaKey && hasParam(params, spec.rthCaKey);
-    const jcRaw = jcPresent ? getParam(params, spec.rthJcKey) : undefined;
-    const caRaw = caPresent ? getParam(params, spec.rthCaKey) : undefined;
-    const jc = jcPresent ? parseNumber(jcRaw) : null;
-    const ca = caPresent ? parseNumber(caRaw) : null;
-    const jcInvalid = jcPresent && (jcRaw === "-" || jcRaw === "" || jc === null || jc <= 0);
-    const caInvalid = caPresent && (caRaw === "-" || caRaw === "" || ca === null || ca <= 0);
+    const jcKeys = spec.rthJcKeys || (spec.rthJcKey ? [spec.rthJcKey] : []);
+    const caKeys = spec.rthCaKeys || (spec.rthCaKey ? [spec.rthCaKey] : []);
+    const jcEntry = firstParamRaw(params, jcKeys);
+    const caEntry = firstParamRaw(params, caKeys);
+    const jcPresent = jcEntry.key !== null && !isMissingValue(jcEntry.raw);
+    const caPresent = (caEntry.key !== null && !isMissingValue(caEntry.raw)) || (globalCa !== null && globalCa > 0);
+    const jc = jcPresent ? parseNumber(jcEntry.raw) : null;
+    const ca = caEntry.key !== null && !isMissingValue(caEntry.raw)
+      ? parseNumber(caEntry.raw)
+      : globalCa;
 
-    if (jcPresent && caPresent) {
-      if (jcInvalid || caInvalid) {
-        return missingThermal("junction_to_case_to_ambient", jc || 1, ca || 1, null);
-      }
+    if (jcPresent && caPresent && jc !== null && jc > 0 && ca !== null && ca > 0) {
       return {
         rthMode: "junction_to_case_to_ambient",
         rth: jc,
@@ -275,7 +324,7 @@
     }
 
     // Version3 / PHP compat: a lone RthCA or RthJC value is treated as Rth_ja.
-    if (caPresent && !caInvalid) {
+    if (caPresent && ca !== null && ca > 0) {
       return {
         rthMode: "junction_to_ambient",
         rth: ca,
@@ -286,7 +335,7 @@
       };
     }
 
-    if (jcPresent && !jcInvalid) {
+    if (jcPresent && jc !== null && jc > 0) {
       return {
         rthMode: "junction_to_ambient",
         rth: jc,
@@ -297,8 +346,21 @@
       };
     }
 
-    if (caPresent || jcPresent) {
+    const jcInvalidInUrl = jcEntry.key !== null && !isMissingValue(jcEntry.raw);
+    const caInvalidInUrl = caEntry.key !== null && !isMissingValue(caEntry.raw);
+    if (jcInvalidInUrl || caInvalidInUrl) {
       return missingThermal("junction_to_case_to_ambient", jc || 1, ca || 1, null);
+    }
+
+    if (globalCa !== null && globalCa > 0) {
+      return {
+        rthMode: "junction_to_ambient",
+        rth: globalCa,
+        rthSecondary: null,
+        rthCaseToAmbient: null,
+        rthCaseTemperatureC: null,
+        rthMissing: false
+      };
     }
 
     return missingThermal("junction_to_ambient", 25, null, null);

@@ -81,11 +81,37 @@
     return { w: `W_${label}`, l: `L_${label}`, h: `H_${label}` };
   }
 
+  function rthKeyCandidates(label, suffix) {
+    if (/^[QD]\d+$/.test(label)) {
+      const keys = [`Rth${suffix}_${label}`];
+      if (/^D\d+$/.test(label)) {
+        keys.push(`Rth${suffix}_D1_D2_D3_D4`);
+      }
+      return keys;
+    }
+    return [];
+  }
+
+  function firstParamRaw(params, keys) {
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
+      const raw = getParam(params, key);
+      if (raw !== undefined) {
+        return { key, raw };
+      }
+    }
+    return { key: null, raw: undefined };
+  }
+
   function rthKeysForLabel(label) {
     if (/^[QD]\d+$/.test(label)) {
-      return { ja: `RthJA_${label}`, jc: `RthJC_${label}`, ca: `RthCA_${label}` };
+      return {
+        ja: rthKeyCandidates(label, "JA"),
+        jc: rthKeyCandidates(label, "JC"),
+        ca: rthKeyCandidates(label, "CA")
+      };
     }
-    return { ja: null, jc: null, ca: null };
+    return { ja: [], jc: [], ca: [] };
   }
 
   function missingThermal(mode, primary, secondary) {
@@ -102,10 +128,10 @@
   function resolveThermal(params, label) {
     const keys = rthKeysForLabel(label);
     const globalCa = parseOptionalNumber(getParam(params, "RthCA"));
+    const jaEntry = firstParamRaw(params, keys.ja);
 
-    if (keys.ja && !isMissingValue(getParam(params, keys.ja))) {
-      const raw = getParam(params, keys.ja);
-      const value = parseOptionalNumber(raw);
+    if (jaEntry.key && !isMissingValue(jaEntry.raw)) {
+      const value = parseOptionalNumber(jaEntry.raw);
       if (value !== null && value > 0) {
         return {
           rthMode: "junction_to_ambient",
@@ -116,14 +142,18 @@
           rthMissing: false
         };
       }
-      if (!isMissingValue(raw)) return missingThermal("junction_to_ambient", 25, null);
+      if (!isMissingValue(jaEntry.raw)) {
+        return missingThermal("junction_to_ambient", 25, null);
+      }
     }
 
-    const jcPresent = keys.jc && !isMissingValue(getParam(params, keys.jc));
-    const caPresent = (keys.ca && !isMissingValue(getParam(params, keys.ca))) || globalCa !== null;
-    const jc = jcPresent ? parseOptionalNumber(getParam(params, keys.jc)) : null;
-    const ca = keys.ca && !isMissingValue(getParam(params, keys.ca))
-      ? parseOptionalNumber(getParam(params, keys.ca))
+    const jcEntry = firstParamRaw(params, keys.jc);
+    const caEntry = firstParamRaw(params, keys.ca);
+    const jcPresent = jcEntry.key !== null && !isMissingValue(jcEntry.raw);
+    const caPresent = (caEntry.key !== null && !isMissingValue(caEntry.raw)) || globalCa !== null;
+    const jc = jcPresent ? parseOptionalNumber(jcEntry.raw) : null;
+    const ca = caEntry.key !== null && !isMissingValue(caEntry.raw)
+      ? parseOptionalNumber(caEntry.raw)
       : globalCa;
 
     if (jcPresent && caPresent && jc !== null && jc > 0 && ca !== null && ca > 0) {
@@ -156,8 +186,18 @@
         rthMissing: false
       };
     }
-    if ((jcPresent && !isMissingValue(getParam(params, keys.jc))) || (keys.ca && !isMissingValue(getParam(params, keys.ca)))) {
+    if ((jcEntry.key !== null && !isMissingValue(jcEntry.raw)) || (caEntry.key !== null && !isMissingValue(caEntry.raw))) {
       return missingThermal("junction_to_case_to_ambient", jc || 1, ca || 1);
+    }
+    if (globalCa !== null && globalCa > 0) {
+      return {
+        rthMode: "junction_to_ambient",
+        rth: globalCa,
+        rthSecondary: null,
+        rthCaseToAmbient: null,
+        rthCaseTemperatureC: null,
+        rthMissing: false
+      };
     }
 
     return missingThermal("junction_to_ambient", 25, null);
