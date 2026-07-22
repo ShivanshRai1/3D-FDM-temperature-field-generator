@@ -1196,7 +1196,7 @@
         </div>
         <div>
           <label for="radiationIterationsInput">Radiation iterations</label>
-          <input id="radiationIterationsInput" type="number" step="1" min="1" max="64" value="4">
+          <input id="radiationIterationsInput" type="number" step="1" min="1" max="64" value="8">
         </div>
       </div>
       <div class="grid3" style="margin-top: 8px;">
@@ -2571,7 +2571,7 @@
     function solverCompletionText(payload, durationText) {
       const solver = payload?.solver || {};
       return solver.converged === false
-        ? `Simulation finished after ${durationText}, but sparse residual did not meet tolerance. Residual: ${solver.max_delta_k ?? "n/a"}.`
+        ? `Simulation finished after ${durationText}, but did not fully converge. Residual: ${solver.max_delta_k ?? "n/a"}.`
         : `Simulation complete in ${durationText}. Sparse residual: ${solver.max_delta_k ?? "n/a"}.`;
     }
 
@@ -4208,6 +4208,22 @@
       return true;
     }
 
+    function tuneSolverForImportedSetup() {
+      const recommended = recommendedGridSettings();
+      writeNumber("dxInput", recommended.dx);
+      writeNumber("dyInput", recommended.dy);
+      writeNumber("dzInput", recommended.dz);
+      const totalPower = state.components.reduce(
+        (sum, component) => sum + Math.max(0, Number(component.power) || 0),
+        0
+      );
+      const currentRad = Number(refs.radiationIterationsInput.value);
+      let targetRad = Number.isFinite(currentRad) && currentRad >= 1 ? currentRad : 8;
+      if (totalPower >= 20) targetRad = Math.max(targetRad, 8);
+      if (totalPower >= 50) targetRad = Math.max(targetRad, 12);
+      refs.radiationIterationsInput.value = String(Math.min(64, targetRad));
+    }
+
     async function maybeLoadFromUrl() {
       if (!window.UrlImport || !window.UrlImport.hasUrlImportParams()) {
         return;
@@ -4227,6 +4243,7 @@
         }
         window.UrlImport.syncDomFromState(state);
         syncRthFields();
+        tuneSolverForImportedSetup();
         refresh();
         fitCamera("iso");
         let statusText = `Loaded ${result.componentCount} component(s) from URL. Review setup, then click Run Simulation.`;

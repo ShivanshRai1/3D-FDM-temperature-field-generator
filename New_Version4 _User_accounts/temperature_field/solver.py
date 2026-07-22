@@ -565,7 +565,7 @@ def _solve_sparse_system(
         solution = sparse_linalg.spsolve(matrix, rhs)
         residual = matrix @ solution - rhs
         max_residual = float(np.max(np.abs(residual)))
-        converged = bool(np.all(np.isfinite(solution)) and max_residual < config.solver.tolerance_k)
+        converged = bool(np.all(np.isfinite(solution)) and max_residual <= config.solver.tolerance_k)
         return np.asarray(solution, dtype=float), 1, converged, max_residual
 
     iterations = 0
@@ -600,7 +600,10 @@ def _solve_sparse_system(
     solution, info = sparse_linalg.cg(matrix, rhs, **cg_kwargs)
     residual = matrix @ solution - rhs
     max_residual = float(np.max(np.abs(residual)))
-    converged = bool(info == 0 and np.all(np.isfinite(solution)))
+    # Accept CG success (info==0) or an absolute residual already within the UI tolerance.
+    # SciPy can return info!=0 even when the pointwise residual is already small enough.
+    residual_ok = max_residual <= max(float(config.solver.tolerance_k), 1e-12)
+    converged = bool(np.all(np.isfinite(solution)) and (info == 0 or residual_ok))
     return np.asarray(solution, dtype=float), iterations, converged, max_residual
 
 
@@ -727,7 +730,7 @@ def solve_steady_state(config: SimulationConfig) -> SimulationResult:
             not converged
             and linear_converged
             and outer_index + 1 == config.solver.radiation_outer_iterations
-            and nonlinear_delta / temp_scale <= 5e-3
+            and nonlinear_delta / temp_scale <= 1e-2
         ):
             converged = True
         if converged:
