@@ -6,10 +6,13 @@
   "use strict";
 
   const IMPORT_GATE_KEY = "import";
+  const DEFAULT_RTH_CA = 1;
+  const DEFAULT_AMBIENT_C = 25;
   const TRIGGER_EXACT = new Set(["fs", "fsw"]);
   const TRIGGER_PREFIXES = ["w_", "l_", "h_", "ploss_", "rth", "x_", "y_"];
 
   const OPTIONAL_GLOBAL_KEYS = {
+    t_ambient: "ambientC",
     ambient_c: "ambientC",
     ambient: "ambientC",
     margin_mm: "marginMm",
@@ -275,8 +278,38 @@
     return { key: null, raw: undefined };
   }
 
+  function getGlobalRthCa(params) {
+    for (const key of Object.keys(params)) {
+      if (/^rth_?ca(\[\])?$/i.test(key) || key.toLowerCase() === "rthca") {
+        if (isMissingValue(params[key])) {
+          return DEFAULT_RTH_CA;
+        }
+        const value = parseNumber(params[key]);
+        if (value !== null && value > 0) return value;
+        return DEFAULT_RTH_CA;
+      }
+    }
+    const legacy = parseNumber(getParam(params, "RthCA"));
+    if (legacy !== null && legacy > 0) return legacy;
+    return DEFAULT_RTH_CA;
+  }
+
+  function defaultThermal(mode, primary, secondary, caseTemp) {
+    const rth = Math.max(0.1, primary || DEFAULT_RTH_CA);
+    const useSecondary = mode === "junction_to_case_to_ambient";
+    const rthSecondary = useSecondary ? Math.max(0.1, secondary ?? DEFAULT_RTH_CA) : null;
+    return {
+      rthMode: mode,
+      rth,
+      rthSecondary,
+      rthCaseToAmbient: useSecondary ? rthSecondary : null,
+      rthCaseTemperatureC: caseTemp ?? null,
+      rthMissing: false
+    };
+  }
+
   function resolveThermal(params, spec) {
-    const globalCa = parseNumber(getParam(params, "RthCA"));
+    const globalCa = getGlobalRthCa(params);
 
     for (let i = 0; i < (spec.rthJaKeys || []).length; i += 1) {
       const key = spec.rthJaKeys[i];
@@ -289,16 +322,8 @@
       }
       const value = parseNumber(raw);
       if (value !== null && value > 0) {
-        return {
-          rthMode: "junction_to_ambient",
-          rth: value,
-          rthSecondary: null,
-          rthCaseToAmbient: null,
-          rthCaseTemperatureC: null,
-          rthMissing: false
-        };
+        return defaultThermal("junction_to_ambient", value, null, null);
       }
-      return missingThermal("junction_to_ambient", 1, null, null);
     }
 
     const jcKeys = spec.rthJcKeys || (spec.rthJcKey ? [spec.rthJcKey] : []);
@@ -306,77 +331,50 @@
     const jcEntry = firstParamRaw(params, jcKeys);
     const caEntry = firstParamRaw(params, caKeys);
     const jcPresent = jcEntry.key !== null && !isMissingValue(jcEntry.raw);
-    const caPresent = (caEntry.key !== null && !isMissingValue(caEntry.raw)) || (globalCa !== null && globalCa > 0);
+    const caPresent = caEntry.key !== null && !isMissingValue(caEntry.raw);
     const jc = jcPresent ? parseNumber(jcEntry.raw) : null;
-    const ca = caEntry.key !== null && !isMissingValue(caEntry.raw)
-      ? parseNumber(caEntry.raw)
-      : globalCa;
+    const ca = caPresent ? parseNumber(caEntry.raw) : null;
 
-    if (jcPresent && caPresent && jc !== null && jc > 0 && ca !== null && ca > 0) {
-      return {
-        rthMode: "junction_to_case_to_ambient",
-        rth: jc,
-        rthSecondary: ca,
-        rthCaseToAmbient: ca,
-        rthCaseTemperatureC: null,
-        rthMissing: false
-      };
+    if (jc !== null && jc > 0 && ca !== null && ca > 0) {
+      return defaultThermal("junction_to_case_to_ambient", jc, ca, null);
+    }
+    if (ca !== null && ca > 0) {
+      return defaultThermal("junction_to_ambient", ca, null, null);
+    }
+    if (jc !== null && jc > 0) {
+      return defaultThermal("junction_to_ambient", jc, null, null);
     }
 
-    // Version3 / PHP compat: a lone RthCA or RthJC value is treated as Rth_ja.
-    if (caPresent && ca !== null && ca > 0) {
-      return {
-        rthMode: "junction_to_ambient",
-        rth: ca,
-        rthSecondary: null,
-        rthCaseToAmbient: null,
-        rthCaseTemperatureC: null,
-        rthMissing: false
-      };
-    }
-
-    if (jcPresent && jc !== null && jc > 0) {
-      return {
-        rthMode: "junction_to_ambient",
-        rth: jc,
-        rthSecondary: null,
-        rthCaseToAmbient: null,
-        rthCaseTemperatureC: null,
-        rthMissing: false
-      };
-    }
-
-    const jcInvalidInUrl = jcEntry.key !== null && !isMissingValue(jcEntry.raw);
-    const caInvalidInUrl = caEntry.key !== null && !isMissingValue(caEntry.raw);
-    if (jcInvalidInUrl || caInvalidInUrl) {
-      return missingThermal("junction_to_case_to_ambient", jc || 1, ca || 1, null);
-    }
-
-    if (globalCa !== null && globalCa > 0) {
-      return {
-        rthMode: "junction_to_ambient",
-        rth: globalCa,
-        rthSecondary: null,
-        rthCaseToAmbient: null,
-        rthCaseTemperatureC: null,
-        rthMissing: false
-      };
-    }
-
-    return missingThermal("junction_to_ambient", 25, null, null);
+    return defaultThermal("junction_to_ambient", globalCa, null, null);
   }
 
-  function parseUrlImport(params) {
-    const globals = {};
+  function collectImportGlobals(params) {
+    const globals = { importDefaults: [] };
     Object.entries(OPTIONAL_GLOBAL_KEYS).forEach(([paramKey, stateKey]) => {
       if (!hasParam(params, paramKey)) {
         return;
       }
-      const value = parseNumber(getParam(params, paramKey));
+      const raw = getParam(params, paramKey);
+      if (isMissingValue(raw)) {
+        if (stateKey === "ambientC") {
+          globals.ambientC = DEFAULT_AMBIENT_C;
+          globals.importDefaults.push("T_AMBIENT");
+        }
+        return;
+      }
+      const value = parseNumber(raw);
       if (value !== null) {
         globals[stateKey] = value;
+      } else if (stateKey === "ambientC") {
+        globals.ambientC = DEFAULT_AMBIENT_C;
+        globals.importDefaults.push("T_AMBIENT");
       }
     });
+    return globals;
+  }
+
+  function parseUrlImport(params) {
+    const globals = collectImportGlobals(params);
 
     const metadata = {};
     if (hasParam(params, "fs")) {
@@ -418,25 +416,38 @@
   function validateUrlImport(parsed) {
     const errors = [];
     const warnings = [];
+    const info = [];
 
     if (!parsed.components.length) {
       errors.push(
         "No recognizable component parameters were found in the URL. " +
         "Expected keys such as W_Q1, PLoss_Q1, PLoss_D1, or import=1 with component params."
       );
-      return { ok: false, errors, warnings };
+      return { ok: false, errors, warnings, info };
     }
 
     parsed.components.forEach(component => {
       if (component.rthMissing) {
         warnings.push(
-          `${component.name}: thermal resistance is missing or invalid in the URL. Complete the selected Rth path in the UI before running.`
+          `${component.name}: Rth is missing or empty in the URL. Enter Rth in the form before Run Simulation.`
         );
       }
-      if (component.power <= 0) {
-        warnings.push(`${component.name}: power loss is zero or missing (PLoss_*).`);
-      }
     });
+
+    if (parsed.globals && Array.isArray(parsed.globals.importDefaults)) {
+      if (parsed.globals.importDefaults.includes("T_AMBIENT")) {
+        info.push("T_AMBIENT was empty — using 25°C.");
+      }
+    }
+    const hasGlobalRthKey = Object.keys(parsed.params || {}).some(key => /^rth_?ca(\[\])?$/i.test(key) || key.toLowerCase() === "rthca");
+    const globalRthRaw = hasGlobalRthKey
+      ? Object.entries(parsed.params).find(([key]) => /^rth_?ca(\[\])?$/i.test(key) || key.toLowerCase() === "rthca")?.[1]
+      : undefined;
+    if (!hasGlobalRthKey) {
+      info.push("No Rth in URL — using default 1.");
+    } else if (isMissingValue(globalRthRaw)) {
+      info.push("RthCA was empty — using default 1.");
+    }
 
     COMPONENT_SPECS.forEach(spec => {
       if (!specTriggered(spec, parsed.params)) {
@@ -469,7 +480,7 @@
       warnings.push("ambient_c looks unusual; verify the ambient temperature value.");
     }
 
-    return { ok: errors.length === 0, errors, warnings };
+    return { ok: errors.length === 0, errors, warnings, info };
   }
 
   function applyUrlImport(state, parsed) {
@@ -544,7 +555,8 @@
           ok: false,
           skipped: false,
           errors: [error.message],
-          warnings: []
+          warnings: [],
+          info: []
         };
       }
     } else {
@@ -565,6 +577,7 @@
       skipped: false,
       errors: [],
       warnings: validation.warnings,
+      info: validation.info || [],
       componentCount: parsed.components.length,
       metadata: parsed.metadata
     };

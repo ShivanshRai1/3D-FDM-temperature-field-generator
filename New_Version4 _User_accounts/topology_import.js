@@ -6,6 +6,8 @@
   "use strict";
 
   const MAX_REASONABLE_POWER_W = 5000;
+  const DEFAULT_RTH_CA = 1;
+  const DEFAULT_AMBIENT_C = 25;
   const DISPLAY_NAMES = {
     Cin: "Input capacitor",
     Cout: "Output capacitor",
@@ -114,93 +116,66 @@
     return { ja: [], jc: [], ca: [] };
   }
 
-  function missingThermal(mode, primary, secondary) {
+  function getGlobalRthCa(params) {
+    for (const key of Object.keys(params)) {
+      if (/^rth_?ca(\[\])?$/i.test(key) || key.toLowerCase() === "rthca") {
+        if (isMissingValue(params[key])) {
+          return DEFAULT_RTH_CA;
+        }
+        const value = parseOptionalNumber(params[key]);
+        if (value !== null && value > 0) return value;
+        return DEFAULT_RTH_CA;
+      }
+    }
+    const legacy = parseOptionalNumber(getParam(params, "RthCA"));
+    if (legacy !== null && legacy > 0) return legacy;
+    return DEFAULT_RTH_CA;
+  }
+
+  function defaultThermal(mode, primary, secondary) {
+    const rth = Math.max(0.1, primary || DEFAULT_RTH_CA);
+    const useSecondary = mode === "junction_to_case_to_ambient";
+    const rthSecondary = useSecondary ? Math.max(0.1, secondary ?? DEFAULT_RTH_CA) : null;
     return {
       rthMode: mode,
-      rth: Math.max(0.1, primary || 25),
-      rthSecondary: secondary ?? null,
-      rthCaseToAmbient: mode === "junction_to_case_to_ambient" ? secondary ?? null : null,
+      rth,
+      rthSecondary,
+      rthCaseToAmbient: useSecondary ? rthSecondary : null,
       rthCaseTemperatureC: null,
-      rthMissing: true
+      rthMissing: false
     };
   }
 
   function resolveThermal(params, label) {
     const keys = rthKeysForLabel(label);
-    const globalCa = parseOptionalNumber(getParam(params, "RthCA"));
+    const globalCa = getGlobalRthCa(params);
     const jaEntry = firstParamRaw(params, keys.ja);
 
     if (jaEntry.key && !isMissingValue(jaEntry.raw)) {
       const value = parseOptionalNumber(jaEntry.raw);
       if (value !== null && value > 0) {
-        return {
-          rthMode: "junction_to_ambient",
-          rth: value,
-          rthSecondary: null,
-          rthCaseToAmbient: null,
-          rthCaseTemperatureC: null,
-          rthMissing: false
-        };
-      }
-      if (!isMissingValue(jaEntry.raw)) {
-        return missingThermal("junction_to_ambient", 25, null);
+        return defaultThermal("junction_to_ambient", value);
       }
     }
 
     const jcEntry = firstParamRaw(params, keys.jc);
     const caEntry = firstParamRaw(params, keys.ca);
     const jcPresent = jcEntry.key !== null && !isMissingValue(jcEntry.raw);
-    const caPresent = (caEntry.key !== null && !isMissingValue(caEntry.raw)) || globalCa !== null;
+    const caPresent = caEntry.key !== null && !isMissingValue(caEntry.raw);
     const jc = jcPresent ? parseOptionalNumber(jcEntry.raw) : null;
-    const ca = caEntry.key !== null && !isMissingValue(caEntry.raw)
-      ? parseOptionalNumber(caEntry.raw)
-      : globalCa;
+    const ca = caPresent ? parseOptionalNumber(caEntry.raw) : null;
 
-    if (jcPresent && caPresent && jc !== null && jc > 0 && ca !== null && ca > 0) {
-      return {
-        rthMode: "junction_to_case_to_ambient",
-        rth: jc,
-        rthSecondary: ca,
-        rthCaseToAmbient: ca,
-        rthCaseTemperatureC: null,
-        rthMissing: false
-      };
+    if (jc !== null && jc > 0 && ca !== null && ca > 0) {
+      return defaultThermal("junction_to_case_to_ambient", jc, ca);
     }
-    if (caPresent && ca !== null && ca > 0) {
-      return {
-        rthMode: "junction_to_ambient",
-        rth: ca,
-        rthSecondary: null,
-        rthCaseToAmbient: null,
-        rthCaseTemperatureC: null,
-        rthMissing: false
-      };
+    if (ca !== null && ca > 0) {
+      return defaultThermal("junction_to_ambient", ca);
     }
-    if (jcPresent && jc !== null && jc > 0) {
-      return {
-        rthMode: "junction_to_ambient",
-        rth: jc,
-        rthSecondary: null,
-        rthCaseToAmbient: null,
-        rthCaseTemperatureC: null,
-        rthMissing: false
-      };
-    }
-    if ((jcEntry.key !== null && !isMissingValue(jcEntry.raw)) || (caEntry.key !== null && !isMissingValue(caEntry.raw))) {
-      return missingThermal("junction_to_case_to_ambient", jc || 1, ca || 1);
-    }
-    if (globalCa !== null && globalCa > 0) {
-      return {
-        rthMode: "junction_to_ambient",
-        rth: globalCa,
-        rthSecondary: null,
-        rthCaseToAmbient: null,
-        rthCaseTemperatureC: null,
-        rthMissing: false
-      };
+    if (jc !== null && jc > 0) {
+      return defaultThermal("junction_to_ambient", jc);
     }
 
-    return missingThermal("junction_to_ambient", 25, null);
+    return defaultThermal("junction_to_ambient", globalCa);
   }
 
   function resolveDimension(params, key, fallback) {
@@ -292,6 +267,27 @@
     return metadata;
   }
 
+  function collectGlobals(params) {
+    const globals = { importDefaults: [] };
+    const ambientRaw =
+      getParam(params, "T_AMBIENT") ??
+      getParam(params, "ambient_c") ??
+      getParam(params, "ambient");
+    if (isMissingValue(ambientRaw)) {
+      globals.ambientC = DEFAULT_AMBIENT_C;
+      globals.importDefaults.push("T_AMBIENT");
+    } else {
+      const ambient = parseOptionalNumber(ambientRaw);
+      if (ambient !== null) {
+        globals.ambientC = ambient;
+      } else {
+        globals.ambientC = DEFAULT_AMBIENT_C;
+        globals.importDefaults.push("T_AMBIENT");
+      }
+    }
+    return globals;
+  }
+
   async function parseTopologyImport(params, marginMm) {
     const title = getParam(params, "topology_title");
     if (!title || !String(title).trim()) {
@@ -304,7 +300,7 @@
     }
     const components = topologyToBoardComponents(layout.components, params, marginMm);
     return {
-      globals: {},
+      globals: collectGlobals(params),
       metadata: collectMetadata(params),
       components,
       params,
@@ -313,27 +309,61 @@
     };
   }
 
+  function globalRthCaStatus(params) {
+    let keyFound = false;
+    let empty = false;
+    let valid = false;
+    let emptyKeyName = "RthCA";
+    const source = params || {};
+    for (const key of Object.keys(source)) {
+      if (!/^rth_?ca(\[\])?$/i.test(key) && key.toLowerCase() !== "rthca") {
+        continue;
+      }
+      keyFound = true;
+      emptyKeyName = key;
+      if (isMissingValue(source[key])) {
+        empty = true;
+      } else {
+        const value = parseOptionalNumber(source[key]);
+        if (value !== null && value > 0) {
+          valid = true;
+        } else {
+          empty = true;
+        }
+      }
+    }
+    return { keyFound, empty, valid, emptyKeyName };
+  }
+
   function validateTopologyImport(parsed) {
     const errors = [];
     const warnings = [];
+    const info = [];
 
     if (!parsed.components.length) {
-      errors.push("Topology layout did not produce any components.");
-      return { ok: false, errors, warnings };
+      errors.push("No components were found in the layout.");
+      return { ok: false, errors, warnings, info };
     }
 
     parsed.components.forEach(component => {
       if (component.rthMissing) {
-        warnings.push(
-          `${component.name}: thermal resistance is missing or invalid in the URL. Complete the selected Rth path in the UI before running.`
-        );
-      }
-      if (component.power <= 0) {
-        warnings.push(`${component.name}: power loss is zero or missing in the URL.`);
+        warnings.push(`${component.name}: Rth is missing or invalid. Enter Rth in the form before Run Simulation.`);
       }
     });
 
-    return { ok: errors.length === 0, errors, warnings };
+    const rthStatus = globalRthCaStatus(parsed.params);
+    if (!rthStatus.valid) {
+      if (rthStatus.keyFound && rthStatus.empty) {
+        info.push(`${rthStatus.emptyKeyName} was empty — using default 1.`);
+      } else if (!rthStatus.keyFound) {
+        info.push("No Rth in URL — using default 1.");
+      }
+    }
+    if (parsed.globals && Array.isArray(parsed.globals.importDefaults) && parsed.globals.importDefaults.includes("T_AMBIENT")) {
+      info.push("T_AMBIENT was empty — using 25°C.");
+    }
+
+    return { ok: errors.length === 0, errors, warnings, info };
   }
 
   function hasTopologyTitle(params) {
