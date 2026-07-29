@@ -1296,6 +1296,19 @@
       convectionCoefficientWm2K: state.convectionCoefficientWm2K
     }));
 
+    // Deep-link imports: hide the demo Buck/Power-resistor scene until URL data loads.
+    // Keep defaultSetupSnapshot intact so "New Setup" still restores the demo board.
+    const urlImportPending =
+      typeof savedSnapshot === "undefined" &&
+      window.UrlImport &&
+      typeof window.UrlImport.hasUrlImportParams === "function" &&
+      window.UrlImport.hasUrlImportParams();
+    if (urlImportPending) {
+      state.components = [];
+      state.vias = [];
+      state.selected = null;
+    }
+
     const accountState = {
       accounts: [],
       simulations: [],
@@ -4231,9 +4244,19 @@
       try {
         const result = await window.UrlImport.loadIntoState(state);
         if (result.skipped) {
+          if (urlImportPending && !state.components.length) {
+            applySetupSnapshot(defaultSetupSnapshot);
+            refresh();
+            fitCamera("iso");
+          }
           return;
         }
         if (!result.ok) {
+          if (urlImportPending && !state.components.length) {
+            applySetupSnapshot(defaultSetupSnapshot);
+            refresh();
+            fitCamera("iso");
+          }
           refs.status.textContent = "URL import failed.";
           window.alert(
             "Could not load simulation setup from URL.\n\n" +
@@ -4266,6 +4289,11 @@
         }
       } catch (error) {
         console.error("URL import failed:", error);
+        if (urlImportPending && !state.components.length) {
+          applySetupSnapshot(defaultSetupSnapshot);
+          refresh();
+          fitCamera("iso");
+        }
         refs.status.textContent = "URL import failed.";
         window.alert(`Could not load simulation setup from URL.\n\n${error.message}`);
       }
@@ -4274,6 +4302,9 @@
     bindEvents();
     syncRthFields();
     renderAccountSelect();
+    if (urlImportPending) {
+      refs.status.textContent = "Loading setup from URL...";
+    }
     loadAccounts()
       .catch(error => {
         refs.status.textContent = `Account features unavailable: ${error.message}`;
